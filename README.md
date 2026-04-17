@@ -48,9 +48,8 @@ Runnable examples are under [examples](examples):
 
 Tests are under [tests](tests):
 
-- [tests/test_matching_engine.py](tests/test_matching_engine.py)
-- [tests/test_strategies.py](tests/test_strategies.py)
 - [tests/test_event_flow.py](tests/test_event_flow.py)
+- [tests/test_matching_performance.py](tests/test_matching_performance.py)
 
 ---
 
@@ -170,6 +169,40 @@ Tests are under [tests](tests):
 ---
 
 ## 🔑 Key Concepts
+
+### Performance & Scalability
+
+- Radius filtering now uses a two-step approach: bounding-box prefilter, then exact Haversine.
+- For large expert pools, index-assisted lookup is auto-enabled (sorted-latitude by default, quadtree for production-scale spatial lookup).
+- Complexity shifts from full scan $O(n)$ toward $O(\log n + k)$ candidate lookup (where $k$ is nearby experts returned).
+- Matching responses are cached by normalized query signature (location, skills, radius, experience, top-k) to avoid recomputation for repeated requests.
+- Target path for production: Redis-backed cache + geospatial index (QuadTree) to keep p95 matching latency under 150ms at scale.
+
+Example factory configuration for production:
+
+```python
+from matching_engine import build_default_engine
+
+engine = build_default_engine(
+    enable_result_cache=True,
+    cache_backend="redis",
+    redis_url="redis://localhost:6379/0",
+    spatial_index_backend="quadtree",
+    spatial_index_threshold=2000,
+)
+```
+
+Install Redis Python client when using Redis cache provider:
+
+```bash
+pip install redis
+```
+
+Run synthetic benchmark and report p50/p95/p99 latency:
+
+```bash
+python scripts/benchmark_matching.py --experts 20000 --queries 1000 --warmup 100 --index-backend quadtree
+```
 
 ### Modular Design
 
