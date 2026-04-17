@@ -7,6 +7,7 @@ Professional backend architecture for a scalable expert matching platform.
 This design documents the complete backend system for **UrbanFix** — a platform that matches users with problems to qualified expert service providers.
 
 ### Key Design Principles
+
 - ✅ **Modularity**: Clear separation of concerns
 - ✅ **Testability**: Core logic independently testable
 - ✅ **Extensibility**: Easy to add new features
@@ -17,130 +18,75 @@ This design documents the complete backend system for **UrbanFix** — a platfor
 
 ## 📖 Documentation Files
 
-### 1. **[ARCHITECTURE.md](ARCHITECTURE.md)** ⭐ START HERE
-**Complete system architecture & module breakdown**
+### 1. **[DATA_MODELS.md](DATA_MODELS.md)**
 
-- System overview diagram
-- Detailed folder structure (40+ directories)
-- Module responsibilities (Query Processing, Matching Engine, Ranking, Routing, Feedback)
-- Interface definitions
-- Data models
-- API contracts
-- Architectural decisions
-- Scalability roadmap (monolith → microservices → ML)
-
-**Read this first** to understand the big picture.
-
----
-
-### 2. **[API_CONTRACTS.md](API_CONTRACTS.md)**
-**Detailed API specification**
-
-- Complete endpoint documentation
-- Request/response examples
-- Error handling & status codes
-- Pagination patterns
-- Rate limiting
-- Auth & authorization
-- Versioning strategy
-
-**Use this** when implementing or consuming the API.
-
----
-
-### 3. **[INTERFACES.md](INTERFACES.md)**
-**TypeScript/Python interface definitions**
-
-- Matching engine interfaces
-- Routing engine interfaces
-- Feedback system interfaces
-- Repository interfaces
-- Infrastructure (cache, events) interfaces
-- Service interfaces
-
-**Reference this** when implementing modules or creating mocks.
-
----
-
-### 4. **[DATA_MODELS.md](DATA_MODELS.md)**
 **Database schema & entity definitions**
 
 - Entity definitions (User, Expert, Job, Match, Feedback, etc.)
 - Database tables (SQL)
 - Relationships diagram
-- Value objects (Rating, Skill Level, Cost Category, etc.)
+- Value objects
 - Indexes & optimization
-- Caching strategy
 - Query patterns
 
-**Use this** for database implementation & queries.
+### 2. **Source Code**
 
----
+Core implementation is under [src](src):
 
-### 5. **[DECISION_RECORDS.md](DECISION_RECORDS.md)**
-**Architectural decision records (ADRs)**
+- [src/matching_engine](src/matching_engine): matching pipeline and scoring strategies
+- [src/event_bus](src/event_bus): event bus abstraction with Kafka/in-memory support
+- [src/services](src/services): query publisher, matching consumer, notification consumer
 
-- ADR-001: Microservice-inspired modular architecture
-- ADR-002: Matching engine isolation
-- ADR-003: Cache abstraction layer
-- ADR-004: Event-driven capability
-- ADR-005: Ranking strategy (multi-layer)
-- ADR-006: API response patterns
-- ADR-007: Database choice (PostgreSQL + JSONB)
-- ADR-008: API versioning
-- ADR-009: Secrets management
+### 3. **Examples**
 
-**Read this** to understand the reasoning behind key choices.
+Runnable examples are under [examples](examples):
 
----
+- [examples/matching_example.py](examples/matching_example.py): direct matching pipeline
+- [examples/event_driven_flow_example.py](examples/event_driven_flow_example.py): RequestCreated -> MatchFound -> Notification flow
 
-### 6. **[QUICK_REFERENCE.md](QUICK_REFERENCE.md)**
-**Quick reference guide for developers**
+### 4. **Tests**
 
-- Key concepts & patterns
-- Module responsibilities
-- Folder structure guide
-- Database essentials
-- Cache patterns
-- Event bus topics
-- Testing strategy
-- Development setup
-- Common tasks
-- Performance monitoring
-- Common pitfalls
+Tests are under [tests](tests):
 
-**Use this** as a cheat sheet during development.
+- [tests/test_matching_engine.py](tests/test_matching_engine.py)
+- [tests/test_strategies.py](tests/test_strategies.py)
+- [tests/test_event_flow.py](tests/test_event_flow.py)
 
 ---
 
 ## 🎯 Quick Navigation
 
 ### 💻 For Developers
-1. Read: [ARCHITECTURE.md](ARCHITECTURE.md) → Get the big picture
-2. Reference: [QUICK_REFERENCE.md](QUICK_REFERENCE.md) → While coding
-3. Check: [INTERFACES.md](INTERFACES.md) → When implementing modules
-4. Consult: [DATA_MODELS.md](DATA_MODELS.md) → For database queries
+
+1. Read: [DATA_MODELS.md](DATA_MODELS.md) → Understand entities and schema
+2. Implement in: [src/matching_engine](src/matching_engine) and [src/services](src/services)
+3. Validate with: [tests](tests)
+4. Run examples from: [examples](examples)
 
 ### 🏗️ For Architects
-1. Read: [ARCHITECTURE.md](ARCHITECTURE.md) → Full system design
-2. Study: [DECISION_RECORDS.md](DECISION_RECORDS.md) → Rationale for choices
-3. Review: [DATA_MODELS.md](DATA_MODELS.md) → Schema & relationships
+
+1. Review domain models in [DATA_MODELS.md](DATA_MODELS.md)
+2. Review implementation boundaries in [src](src)
+3. Validate decoupling in [src/event_bus](src/event_bus)
 
 ### 🔧 For DevOps/Deployment
-1. Check: [ARCHITECTURE.md](ARCHITECTURE.md) → Infrastructure layer
-2. Reference: [QUICK_REFERENCE.md](QUICK_REFERENCE.md) → Setup section
-3. Environment: .env configuration details in [API_CONTRACTS.md](API_CONTRACTS.md)
+
+1. Check runtime modules in [src](src)
+2. Use examples in [examples](examples) for smoke testing
+3. Keep environment values in `.env` (not committed)
 
 ### 🧪 For QA/Testing
-1. Read: [API_CONTRACTS.md](API_CONTRACTS.md) → API endpoints
-2. Study: [QUICK_REFERENCE.md](QUICK_REFERENCE.md) → Testing strategy
-3. Reference: [DATA_MODELS.md](DATA_MODELS.md) → Sample data structure
+
+1. Run test suite under [tests](tests)
+2. Validate scoring behavior in [tests/test_strategies.py](tests/test_strategies.py)
+3. Validate event flow in [tests/test_event_flow.py](tests/test_event_flow.py)
 
 ---
 
 ## 🏗️ Architecture at a Glance
 
 ### System Layers
+
 ```
 ┌─────────────────────────────────────────────────────┐
 │  API Layer (Routes, Controllers)                    │
@@ -194,24 +140,28 @@ This design documents the complete backend system for **UrbanFix** — a platfor
 ### Key Modules
 
 #### 🔍 **Matching Engine** (Core)
+
 - Finds semantically similar experts to a job
 - Scores relevance based on skills, experience, ratings
 - Ranks by multi-criteria algorithm
 - **Isolated**: No HTTP/DB, 100% testable
 
 #### 📍 **Routing Engine**
+
 - Verifies expert availability
 - Checks location feasibility
 - Applies load balancing
 - Suggests assignment route
 
 #### ⭐ **Ranking System**
+
 - 3-layer pipeline:
-  1. **Hard Filters**: Eliminate incompatible experts
-  2. **Soft Scoring**: Relevance calculation
-  3. **Business Rules**: Context-specific adjustments
+    1. **Hard Filters**: Eliminate incompatible experts
+    2. **Soft Scoring**: Relevance calculation
+    3. **Business Rules**: Context-specific adjustments
 
 #### 📝 **Feedback System**
+
 - Collects ratings & reviews
 - Aggregates quality metrics
 - Detects anomalies
@@ -222,13 +172,16 @@ This design documents the complete backend system for **UrbanFix** — a platfor
 ## 🔑 Key Concepts
 
 ### Modular Design
+
 Each module has:
+
 - **Interface** (contract)
 - **Implementation** (logic)
 - **Tests** (isolated, no infrastructure)
 - **Dependency Injection** (mockable)
 
 ### Testability
+
 ```
 Unit Tests       (ms)   - Algorithm tests, no DB
 Integration Tests (s)   - Service coordination
@@ -236,12 +189,14 @@ E2E Tests        (10s+) - Full workflows
 ```
 
 ### Extensibility
+
 - Swap matching algorithms without changing API
 - Add new cache/event providers easily
 - Extract services to microservices later
 - ML model replaces entire engine if needed
 
 ### Scalability Path
+
 1. **Phase 1** (Now): Monolith with modular code
 2. **Phase 2**: Async workers + event bus
 3. **Phase 3**: Extract to microservices
@@ -251,26 +206,28 @@ E2E Tests        (10s+) - Full workflows
 
 ## 📊 Core Entities
 
-| Entity | Purpose | Key Fields |
-|--------|---------|------------|
-| **User** | Problem submitter | id, email, location, roles |
-| **Expert** | Service provider | id, skills, categories, rating, availability |
-| **Job** | Problem/request | id, title, category, budget, timeline, status |
-| **Match** | Expert-Job pairing | jobId, expertId, confidenceScore, status |
-| **Feedback** | Rating & review | jobId, expertId, rating, comments |
-| **Skill** | Expertise area | name, category, embedding (for matching) |
+| Entity       | Purpose            | Key Fields                                    |
+| ------------ | ------------------ | --------------------------------------------- |
+| **User**     | Problem submitter  | id, email, location, roles                    |
+| **Expert**   | Service provider   | id, skills, categories, rating, availability  |
+| **Job**      | Problem/request    | id, title, category, budget, timeline, status |
+| **Match**    | Expert-Job pairing | jobId, expertId, confidenceScore, status      |
+| **Feedback** | Rating & review    | jobId, expertId, rating, comments             |
+| **Skill**    | Expertise area     | name, category, embedding (for matching)      |
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Node.js 18+ or Python 3.10+
 - PostgreSQL 14+
 - Redis 7+
 - Docker (recommended)
 
 ### Quick Start
+
 ```bash
 # 1. Clone & install
 git clone <repo>
@@ -299,35 +256,35 @@ Server runs on `http://localhost:3000`
 ## 📋 Implementation Checklist
 
 - [ ] **Phase 1: Core Setup**
-  - [ ] Folder structure created
-  - [ ] Database schema created
-  - [ ] Base interfaces defined
-  - [ ] Dependency injection configured
+    - [ ] Folder structure created
+    - [ ] Database schema created
+    - [ ] Base interfaces defined
+    - [ ] Dependency injection configured
 
 - [ ] **Phase 2: Matching Engine**
-  - [ ] Skill matcher implemented
-  - [ ] Relevance scorer implemented
-  - [ ] Ranking engine implemented
-  - [ ] Filter engine implemented
-  - [ ] Unit tests ≥ 80% coverage
+    - [ ] Skill matcher implemented
+    - [ ] Relevance scorer implemented
+    - [ ] Ranking engine implemented
+    - [ ] Filter engine implemented
+    - [ ] Unit tests ≥ 80% coverage
 
 - [ ] **Phase 3: APIs**
-  - [ ] POST /match endpoint
-  - [ ] GET /match/:id endpoint
-  - [ ] POST /feedback endpoint
-  - [ ] Integration tests
+    - [ ] POST /match endpoint
+    - [ ] GET /match/:id endpoint
+    - [ ] POST /feedback endpoint
+    - [ ] Integration tests
 
 - [ ] **Phase 4: Infrastructure**
-  - [ ] Cache layer working
-  - [ ] Event bus working
-  - [ ] Logging configured
-  - [ ] Error handling
+    - [ ] Cache layer working
+    - [ ] Event bus working
+    - [ ] Logging configured
+    - [ ] Error handling
 
 - [ ] **Phase 5: Polish**
-  - [ ] Performance tuning
-  - [ ] Security audit
-  - [ ] Documentation
-  - [ ] Deployment guides
+    - [ ] Performance tuning
+    - [ ] Security audit
+    - [ ] Documentation
+    - [ ] Deployment guides
 
 ---
 
@@ -341,13 +298,14 @@ Server runs on `http://localhost:3000`
 - Input validation on all endpoints
 - Secrets in environment variables (never committed)
 
-See [DECISION_RECORDS.md](DECISION_RECORDS.md#adr-009-secrets-management) for secrets management.
+Follow standard secret management practices: never commit secrets, use environment variables and secret stores.
 
 ---
 
 ## 📈 Monitoring & Observability
 
 ### Key Metrics
+
 - Matching time (p95, p99)
 - Cache hit rate
 - Database query performance
@@ -356,12 +314,14 @@ See [DECISION_RECORDS.md](DECISION_RECORDS.md#adr-009-secrets-management) for se
 - Service uptime
 
 ### Logging Strategy
+
 ```
 [TIMESTAMP] [COMPONENT] [LEVEL] Message | {Context}
 [2025-04-18 10:30:15] [MatchService] INFO Finding matches | {jobId, categoryCount: 3}
 ```
 
 ### Health Checks
+
 ```
 GET /health
 {
@@ -381,23 +341,22 @@ GET /health
 When adding new features:
 
 1. **Check architecture** - Fits into existing layers?
-2. **Define interface** - Add to INTERFACES.md first
+2. **Define interface** - Add under [src/event_bus](src/event_bus) or module contracts under [src/matching_engine](src/matching_engine)
 3. **Add tests** - Unit test in isolation
-4. **Document** - Update QUICK_REFERENCE.md
+4. **Document** - Update this README or inline module docstrings
 5. **Get review** - Architecture review before implementation
 
 ---
 
 ## 📞 Support
 
-| Question | Reference |
-|----------|-----------|
-| How does X work? | Check ARCHITECTURE.md |
-| What's the API for X? | Check API_CONTRACTS.md |
-| How do I build X? | Check QUICK_REFERENCE.md |
-| Why did we choose X? | Check DECISION_RECORDS.md |
-| What does X entity have? | Check DATA_MODELS.md |
-| What interface does X use? | Check INTERFACES.md |
+| Question                    | Reference                            |
+| --------------------------- | ------------------------------------ |
+| What does X entity have?    | Check DATA_MODELS.md                 |
+| How does matching work?     | Check src/matching_engine            |
+| How does event flow work?   | Check src/event_bus and src/services |
+| How do I run examples?      | Check examples                       |
+| How do I validate behavior? | Check tests                          |
 
 ---
 
@@ -414,9 +373,10 @@ When adding new features:
 ---
 
 ## Quick Links
-- 🏛️ [Architecture Overview](ARCHITECTURE.md)
-- 🔌 [API Specification](API_CONTRACTS.md)
-- 📌 [Interfaces & Contracts](INTERFACES.md)
+
 - 🗄️ [Data Models & Schema](DATA_MODELS.md)
-- 🎯 [Design Decisions](DECISION_RECORDS.md)
-- ⚡ [Quick Reference Guide](QUICK_REFERENCE.md)
+- 🧠 [Matching Engine Source](src/matching_engine)
+- 📨 [Event Bus Source](src/event_bus)
+- ⚙️ [Service Consumers/Publishers](src/services)
+- 🧪 [Tests](tests)
+- ▶️ [Examples](examples)
