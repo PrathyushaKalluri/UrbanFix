@@ -19,7 +19,7 @@ export function AuthScaffold({
   postForm,
 }: AuthScaffoldProps) {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#FCFDFC] text-[#090A0A]">
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-[#FCFDFC] text-[#090A0A]">
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.02]"
         style={{
@@ -30,7 +30,7 @@ export function AuthScaffold({
 
       <Navbar />
 
-      <main className="relative z-10 flex flex-1 items-center justify-center overflow-hidden p-6">
+      <main className="relative z-10 flex flex-1 items-center justify-center p-6">
         <div className="absolute top-1/4 -right-20 h-96 w-96 rounded-full bg-emerald-100 opacity-50 blur-[120px]" />
         <div className="absolute bottom-1/4 -left-20 h-96 w-96 rounded-full bg-cyan-100 opacity-50 blur-[120px]" />
 
@@ -94,7 +94,7 @@ export function AuthScaffold({
         </div>
       </main>
 
-      <footer className="relative z-10 flex w-full flex-col items-center justify-center gap-8 border-t border-zinc-100 bg-transparent px-6 py-12 md:flex-row">
+      <footer className="relative z-10 mt-auto flex w-full flex-col items-center justify-center gap-8 border-t border-zinc-100 bg-transparent px-6 py-12 md:flex-row">
         <span className="font-mono text-[10px] tracking-tight text-zinc-400 uppercase">
           © {new Date().getFullYear()} UrbanFix
         </span>
