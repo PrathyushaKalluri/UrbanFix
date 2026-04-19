@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -204,53 +204,63 @@ function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: strin
   return <span>{count}{suffix}</span>;
 }
 
-// Magical CTA Button with shimmer, glow, and particle effects
-function MagicalCTAButton() {
+// Premium CTA Button with spotlight effect and star particles
+function PremiumCTAButton() {
   const [isHovered, setIsHovered] = useState(false);
-  
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const buttonRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setMousePos({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      });
+    }
+  };
+
   return (
     <Link to="/signup/user" className="relative group">
-      {/* Glow effect behind button */}
+      {/* Outer glow - only on hover */}
       <motion.div
-        className="absolute -inset-1 rounded-xl bg-gradient-to-r from-emerald-400 to-cyan-400 blur-xl"
-        initial={{ opacity: 0, scale: 1 }}
-        animate={isHovered ? 
-          { scale: [1, 1.1, 1], opacity: [0.4, 0.7, 0.4] } : 
-          { scale: 1, opacity: 0 }
-        }
-        transition={isHovered ? 
-          { duration: 2, repeat: Infinity, ease: "easeInOut" } : 
-          { duration: 0.3, ease: "easeOut" }
-        }
+        className="absolute -inset-1 rounded-xl blur-xl"
+        style={{ background: 'oklch(65% 0.2 155 / 0.4)' }}
+        initial={{ opacity: 0 }}
+        animate={isHovered ? { opacity: 1 } : { opacity: 0 }}
+        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
       />
       
-      {/* Main button */}
+      {/* Main button with spotlight effect */}
       <motion.div
+        ref={buttonRef}
         onHoverStart={() => setIsHovered(true)}
         onHoverEnd={() => setIsHovered(false)}
-        whileHover={{ scale: 1.03 }}
-        whileTap={{ scale: 0.97 }}
+        onMouseMove={handleMouseMove}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
         className="relative"
       >
         <Button 
-          className="relative h-10 overflow-hidden rounded-xl bg-gradient-to-r from-emerald-500 via-emerald-500 to-emerald-600 px-5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/40"
+          className="relative h-10 overflow-hidden rounded-xl border border-emerald-300/30 bg-gradient-to-b from-emerald-400 to-emerald-500 px-5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all duration-300 hover:from-emerald-300 hover:to-emerald-400 hover:shadow-emerald-400/30"
         >
-          {/* Shimmer effect */}
+          {/* Bright spotlight effect that follows cursor */}
           <motion.div
-            className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent"
-            animate={{ translateX: ["-100%", "200%"] }}
-            transition={{ duration: 2, repeat: Infinity, repeatDelay: 3, ease: "easeInOut" }}
+            className="pointer-events-none absolute -inset-px rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            style={{
+              background: `radial-gradient(120px circle at ${mousePos.x}px ${mousePos.y}px, rgba(167,243,208,0.5), transparent 50%)`,
+            }}
           />
           
-          {/* Inner gradient border effect */}
-          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-emerald-400/20 via-transparent to-cyan-400/20 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+          {/* Top shine line */}
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent" />
           
           {/* Content */}
           <span className="relative z-10 flex items-center gap-1.5">
             Get Started
             <motion.span
-              animate={isHovered ? { x: [0, 4, 0] } : {}}
-              transition={{ duration: 0.6, ease: "easeInOut" }}
+              animate={isHovered ? { x: [0, 3, 0] } : { x: 0 }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             >
               <ArrowRight className="h-4 w-4" />
             </motion.span>
@@ -268,117 +278,189 @@ function MagicalCTAButton() {
                   animate={{ 
                     opacity: [0, 1, 0],
                     scale: [0.5, 1, 0.5],
-                    x: [0, (i - 1) * 20],
-                    y: [0, -20 - i * 5]
+                    x: [0, (i - 1) * 15],
+                    y: [0, -15 - i * 4]
                   }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.8, delay: i * 0.15, ease: "easeOut" }}
-                  className="absolute right-2 top-1/2 -translate-y-1/2"
+                  transition={{ duration: 0.7, delay: i * 0.12, ease: "easeOut" }}
+                  className="absolute right-1 top-1/2 -translate-y-1/2"
                 >
-                  <Star className="h-3 w-3 fill-emerald-300 text-emerald-300" />
+                  <Star className="h-2.5 w-2.5 fill-emerald-200 text-emerald-200" />
                 </motion.div>
               ))}
             </>
           )}
         </AnimatePresence>
       </motion.div>
-      
-      {/* Subtle pulse ring on idle */}
-      <motion.div
-        className="absolute inset-0 -z-10 rounded-xl bg-emerald-400/20"
-        animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
-        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-      />
     </Link>
   );
 }
 
-// Magical Hero CTA Button (larger version)
-function MagicalHeroCTAButton() {
+// Premium Hero CTA Button with spotlight effect and star particles
+function PremiumHeroCTAButton() {
   const [isHovered, setIsHovered] = useState(false);
-  
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const buttonRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setMousePos({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      });
+    }
+  };
+
   return (
     <Link to="/signup/user" className="relative group">
-      {/* Outer glow pulse */}
+      {/* Outer glow */}
       <motion.div
-        className="absolute -inset-2 rounded-2xl bg-gradient-to-r from-emerald-400 via-cyan-400 to-emerald-400 blur-2xl"
-        initial={{ opacity: 0, scale: 1 }}
-        animate={isHovered ? 
-          { scale: [1, 1.15, 1], opacity: [0.3, 0.6, 0.3] } : 
-          { scale: 1, opacity: 0 }
-        }
-        transition={isHovered ? 
-          { duration: 2, repeat: Infinity, ease: "easeInOut" } : 
-          { duration: 0.3, ease: "easeOut" }
-        }
+        className="absolute -inset-2 rounded-2xl blur-2xl"
+        style={{ background: 'oklch(65% 0.2 155 / 0.35)' }}
+        initial={{ opacity: 0 }}
+        animate={isHovered ? { opacity: 1 } : { opacity: 0 }}
+        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
       />
       
-      {/* Subtle idle pulse */}
-      {!isHovered && (
-        <motion.div
-          className="absolute inset-0 rounded-xl bg-emerald-500/20"
-          animate={{ scale: [1, 1.05, 1], opacity: [0.3, 0, 0.3] }}
-          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-        />
-      )}
-      
+      {/* Main button with spotlight effect */}
       <motion.div
+        ref={buttonRef}
         onHoverStart={() => setIsHovered(true)}
         onHoverEnd={() => setIsHovered(false)}
+        onMouseMove={handleMouseMove}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         className="relative"
       >
         <Button 
           size="lg"
-          className="relative h-14 overflow-hidden rounded-xl bg-gradient-to-r from-emerald-500 via-emerald-500 to-emerald-600 px-8 text-base font-semibold text-white shadow-xl shadow-emerald-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-500/40"
+          className="relative h-14 overflow-hidden rounded-xl border border-emerald-300/30 bg-gradient-to-b from-emerald-400 to-emerald-500 px-8 text-base font-semibold text-white shadow-xl shadow-emerald-500/25 transition-all duration-300 hover:from-emerald-300 hover:to-emerald-400 hover:shadow-emerald-400/30"
         >
-          {/* Animated shimmer */}
+          {/* Bright spotlight effect that follows cursor */}
           <motion.div
-            className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent"
-            animate={{ translateX: ["-100%", "200%"] }}
-            transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 2, ease: "easeInOut" }}
+            className="pointer-events-none absolute -inset-px rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            style={{
+              background: `radial-gradient(180px circle at ${mousePos.x}px ${mousePos.y}px, rgba(167,243,208,0.5), transparent 50%)`,
+            }}
           />
           
-          {/* Hover gradient overlay */}
-          <motion.div 
-            className="absolute inset-0 bg-gradient-to-r from-cyan-400/0 via-cyan-400/20 to-emerald-400/0"
-            initial={{ opacity: 0, x: "-100%" }}
-            animate={isHovered ? { opacity: 1, x: "100%" } : { opacity: 0, x: "-100%" }}
-            transition={{ duration: 0.6, ease: "easeInOut" }}
-          />
+          {/* Top shine line */}
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent" />
           
           {/* Content */}
           <span className="relative z-10 flex items-center gap-2">
             Connect to Grid
             <motion.span
-              animate={isHovered ? { x: [0, 5, 0] } : {}}
-              transition={{ duration: 0.6, ease: "easeInOut" }}
+              animate={isHovered ? { x: [0, 4, 0] } : { x: 0 }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             >
               <ArrowRight className="h-5 w-5" />
             </motion.span>
           </span>
         </Button>
         
-        {/* Sparkles on hover */}
+        {/* Floating sparkles on hover */}
         <AnimatePresence>
           {isHovered && (
             <>
               {[...Array(4)].map((_, i) => (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, scale: 0 }}
+                  initial={{ opacity: 0, scale: 0, x: 0, y: 0 }}
                   animate={{ 
                     opacity: [0, 1, 0],
                     scale: [0.3, 1, 0.3],
-                    x: (i - 1.5) * 25,
-                    y: -25 - i * 8
+                    x: (i - 1.5) * 20,
+                    y: -20 - i * 6
+                  }}
+                  exit={{ opacity: 0, scale: 0 }}
+                  transition={{ duration: 0.9, delay: i * 0.1, ease: "easeOut" }}
+                  className="absolute right-3 top-1/2"
+                >
+                  <Star className="h-3.5 w-3.5 fill-emerald-200 text-emerald-200" />
+                </motion.div>
+              ))}
+            </>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </Link>
+  );
+}
+
+// Premium Search Button with spotlight effect and star particles
+function PremiumSearchButton() {
+  const [isHovered, setIsHovered] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const buttonRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setMousePos({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      });
+    }
+  };
+
+  return (
+    <Link to="/signup/user" className="relative group">
+      <motion.div
+        ref={buttonRef}
+        onHoverStart={() => setIsHovered(true)}
+        onHoverEnd={() => setIsHovered(false)}
+        onMouseMove={handleMouseMove}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        className="relative"
+      >
+        <Button 
+          className="relative h-12 overflow-hidden rounded-xl border border-emerald-300/30 bg-gradient-to-b from-emerald-400 to-emerald-500 px-6 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all duration-300 hover:from-emerald-300 hover:to-emerald-400 hover:shadow-emerald-400/30"
+        >
+          {/* Bright spotlight effect that follows cursor */}
+          <motion.div
+            className="pointer-events-none absolute -inset-px rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            style={{
+              background: `radial-gradient(100px circle at ${mousePos.x}px ${mousePos.y}px, rgba(167,243,208,0.5), transparent 50%)`,
+            }}
+          />
+          
+          {/* Top shine line */}
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent" />
+          
+          {/* Content */}
+          <span className="relative z-10 flex items-center gap-2">
+            Search
+            <motion.span
+              animate={isHovered ? { x: [0, 3, 0] } : { x: 0 }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <ArrowRight className="h-4 w-4" />
+            </motion.span>
+          </span>
+        </Button>
+        
+        {/* Floating sparkles on hover */}
+        <AnimatePresence>
+          {isHovered && (
+            <>
+              {[...Array(2)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, scale: 0, x: 0, y: 0 }}
+                  animate={{ 
+                    opacity: [0, 1, 0],
+                    scale: [0.5, 1, 0.5],
+                    x: [0, (i === 0 ? -12 : 12)],
+                    y: [0, -12]
                   }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 1, delay: i * 0.1, ease: "easeOut" }}
-                  className="absolute right-4 top-1/2"
+                  transition={{ duration: 0.6, delay: i * 0.1, ease: "easeOut" }}
+                  className="absolute right-0 top-1/2 -translate-y-1/2"
                 >
-                  <Star className="h-4 w-4 fill-cyan-300 text-cyan-300" />
+                  <Star className="h-2.5 w-2.5 fill-emerald-200 text-emerald-200" />
                 </motion.div>
               ))}
             </>
@@ -434,7 +516,7 @@ function ModernNavbar() {
           >
             Log in
           </Link>
-          <MagicalCTAButton />
+          <PremiumCTAButton />
         </div>
       </motion.div>
     </motion.header>
@@ -609,12 +691,7 @@ export function LandingPage() {
                     onBlur={() => setIsInputFocused(false)}
                   />
                 </div>
-                <Button 
-                  className="h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all hover:shadow-emerald-500/40 hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  Search
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+                <PremiumSearchButton />
               </div>
             </motion.div>
             
@@ -912,7 +989,7 @@ export function LandingPage() {
               </p>
               
               <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <MagicalHeroCTAButton />
+                <PremiumHeroCTAButton />
                 <Button 
                   variant="outline" 
                   size="lg"
