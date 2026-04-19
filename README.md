@@ -6,7 +6,7 @@ This workspace contains a TypeScript React frontend and a Spring Boot backend wi
 
 - **Frontend:** React, Vite, React Router, TypeScript, localStorage JWT session
 - **Backend:** Spring Boot, Spring Security, JWT, Spring Data JPA, Validation
-- **Database:** H2 for local development
+- **Database:** PostgreSQL
 
 ## Project Structure
 
@@ -61,6 +61,49 @@ The frontend runs on `http://localhost:5173` and proxies API requests to the bac
 
 ## Backend
 
+### PostgreSQL Setup (Docker Compose - Recommended)
+
+```bash
+docker compose up -d
+```
+
+This starts PostgreSQL on `localhost:5432` with:
+
+- DB: `urbanfix_db`
+- User: `urbanfix_user`
+- Password: `urbanfix_pass`
+
+Stop it with:
+
+```bash
+docker compose down
+```
+
+### PostgreSQL Setup (macOS)
+
+```bash
+brew install postgresql@16
+brew services start postgresql@16
+psql postgres
+```
+
+```sql
+CREATE DATABASE urbanfix_db;
+CREATE USER urbanfix_user WITH ENCRYPTED PASSWORD 'urbanfix_pass';
+GRANT ALL PRIVILEGES ON DATABASE urbanfix_db TO urbanfix_user;
+\q
+```
+
+### Optional environment variables
+
+```bash
+export DB_URL=jdbc:postgresql://localhost:5432/urbanfix_db
+export DB_USERNAME=urbanfix_user
+export DB_PASSWORD=urbanfix_pass
+```
+
+### Run backend
+
 ```bash
 cd backend
 mvn spring-boot:run
@@ -91,7 +134,7 @@ If these fields are omitted, sensible defaults are used so existing clients cont
 
 ## Database
 
-The backend uses an in-memory H2 database, so the app is ready to run without external setup.
+The backend uses PostgreSQL with environment-configurable datasource properties.
 
 Expert-specific information is stored separately from base users in dedicated tables:
 
