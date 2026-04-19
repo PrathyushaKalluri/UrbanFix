@@ -1,5 +1,6 @@
 import { Navigate } from 'react-router-dom'
 import type { AuthSession } from '../../types/auth'
+import { getDashboardContent } from './strategy/roleDashboardStrategy'
 
 type DashboardPageProps = {
   session: AuthSession
@@ -22,18 +23,7 @@ export function DashboardPage({ session }: DashboardPageProps) {
     return <Navigate to="/login" replace />
   }
 
-  const roleCopy =
-    session.profile.role === 'EXPERT'
-      ? {
-          title: 'Expert workspace',
-          body: 'Incoming home repair requests will appear here once the request module is added.',
-          accent: 'Technician',
-        }
-      : {
-          title: 'User workspace',
-          body: 'You will be able to raise home service requests and track their status from here.',
-          accent: 'Customer',
-        }
+  const roleCopy = getDashboardContent(session.profile.role)
 
   return (
     <main className="app-shell">
