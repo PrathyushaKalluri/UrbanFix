@@ -83,7 +83,6 @@ The backend runs on `http://localhost:8080`.
 - `primaryExpertise`
 - `yearsOfExperience`
 - `expertiseAreas` (array)
-- `workAreas` (array)
 - `bio`
 - `available`
 - `servesAsResident`
@@ -98,7 +97,6 @@ Expert-specific information is stored separately from base users in dedicated ta
 
 - `expert_profiles`
 - `expert_expertise`
-- `expert_work_areas`
 
 ## Notes
 

@@ -18,7 +18,6 @@ type ExpertDetails = {
   primaryExpertise: string
   yearsOfExperience: string
   expertiseAreas: string
-  workAreas: string
   available: boolean
   servesAsResident: boolean
 }
@@ -37,7 +36,6 @@ export function SignupPage({ session, role }: SignupPageProps) {
     primaryExpertise: '',
     yearsOfExperience: '',
     expertiseAreas: '',
-    workAreas: '',
     available: true,
     servesAsResident: true,
   })
@@ -105,7 +103,7 @@ export function SignupPage({ session, role }: SignupPageProps) {
   }
 
   const updateExpertField =
-    (field: 'primaryExpertise' | 'yearsOfExperience' | 'expertiseAreas' | 'workAreas') =>
+    (field: 'primaryExpertise' | 'yearsOfExperience' | 'expertiseAreas') =>
     (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       setExpertDetails((current: ExpertDetails) => ({
         ...current,
@@ -159,7 +157,6 @@ export function SignupPage({ session, role }: SignupPageProps) {
         payload.primaryExpertise = expertDetails.primaryExpertise
         payload.yearsOfExperience = Number.parseInt(expertDetails.yearsOfExperience, 10) || 0
         payload.expertiseAreas = toList(expertDetails.expertiseAreas)
-        payload.workAreas = toList(expertDetails.workAreas)
         payload.available = expertDetails.available
         payload.servesAsResident = expertDetails.servesAsResident
       }
@@ -337,19 +334,6 @@ export function SignupPage({ session, role }: SignupPageProps) {
                 value={expertDetails.expertiseAreas}
                 onChange={updateExpertField('expertiseAreas')}
                 placeholder="Wiring upgrades, Leak detection, Inverter setup"
-                className="h-12 rounded-none border-zinc-200 bg-white px-4 py-3 text-sm tracking-wide placeholder:text-zinc-300 focus-visible:border-emerald-500/50 focus-visible:ring-0"
-                required
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="px-1 font-mono text-[10px] tracking-wider text-[#878D89] uppercase">
-                Work Areas (comma separated)
-              </Label>
-              <Input
-                value={expertDetails.workAreas}
-                onChange={updateExpertField('workAreas')}
-                placeholder="Pune Camp, Kothrud, Baner"
                 className="h-12 rounded-none border-zinc-200 bg-white px-4 py-3 text-sm tracking-wide placeholder:text-zinc-300 focus-visible:border-emerald-500/50 focus-visible:ring-0"
                 required
               />

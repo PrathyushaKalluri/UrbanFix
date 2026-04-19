@@ -47,11 +47,6 @@ public class ExpertProfile {
   @Column(name = "expertise", nullable = false)
   private Set<String> expertiseAreas = new LinkedHashSet<>();
 
-  @ElementCollection
-  @CollectionTable(name = "expert_work_areas", joinColumns = @JoinColumn(name = "expert_profile_id"))
-  @Column(name = "work_area", nullable = false)
-  private Set<String> workAreas = new LinkedHashSet<>();
-
   protected ExpertProfile() {
   }
 
@@ -62,8 +57,7 @@ public class ExpertProfile {
       String bio,
       Boolean available,
       Boolean servesAsResident,
-      Set<String> expertiseAreas,
-      Set<String> workAreas) {
+      Set<String> expertiseAreas) {
     this.user = user;
     this.yearsOfExperience = yearsOfExperience;
     this.primaryExpertise = primaryExpertise;
@@ -71,7 +65,6 @@ public class ExpertProfile {
     this.available = available;
     this.servesAsResident = servesAsResident;
     this.expertiseAreas = new LinkedHashSet<>(expertiseAreas);
-    this.workAreas = new LinkedHashSet<>(workAreas);
   }
 
   public Long getId() {
@@ -104,10 +97,6 @@ public class ExpertProfile {
 
   public Set<String> getExpertiseAreas() {
     return Set.copyOf(expertiseAreas);
-  }
-
-  public Set<String> getWorkAreas() {
-    return Set.copyOf(workAreas);
   }
 
   @Override

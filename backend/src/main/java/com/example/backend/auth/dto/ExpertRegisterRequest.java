@@ -11,7 +11,6 @@ public record ExpertRegisterRequest(
     String primaryExpertise,
     Integer yearsOfExperience,
     List<String> expertiseAreas,
-    List<String> workAreas,
     String bio,
     Boolean available,
     Boolean servesAsResident) {

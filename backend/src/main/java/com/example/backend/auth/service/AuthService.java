@@ -80,7 +80,6 @@ public class AuthService {
     String primaryExpertise = normalizePrimaryExpertise(request.primaryExpertise());
     int yearsOfExperience = normalizeYearsOfExperience(request.yearsOfExperience());
     Set<String> expertiseAreas = normalizeValues(request.expertiseAreas(), primaryExpertise);
-    Set<String> workAreas = normalizeValues(request.workAreas(), "City-Wide");
     boolean available = request.available() == null ? true : request.available();
     boolean servesAsResident = request.servesAsResident() == null ? true : request.servesAsResident();
 
@@ -91,8 +90,7 @@ public class AuthService {
         request.bio(),
       available,
       servesAsResident,
-      expertiseAreas,
-      workAreas);
+        expertiseAreas);
 
     expertProfileRepository.save(expertProfile);
 
@@ -122,7 +120,6 @@ public class AuthService {
         response.put("primaryExpertise", profile.getPrimaryExpertise());
         response.put("yearsOfExperience", profile.getYearsOfExperience());
         response.put("expertiseAreas", profile.getExpertiseAreas());
-        response.put("workAreas", profile.getWorkAreas());
         response.put("available", profile.getAvailable());
         response.put("servesAsResident", profile.getServesAsResident());
       });
