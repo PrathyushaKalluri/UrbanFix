@@ -441,8 +441,53 @@ function ModernNavbar() {
   );
 }
 
+// Typewriter hook for animated placeholder
+function useTypewriter(words: string[], typingSpeed = 100, deletingSpeed = 50, pauseDuration = 2000) {
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  const [currentText, setCurrentText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+
+  useEffect(() => {
+    const word = words[currentWordIndex];
+    
+    if (isPaused) {
+      const pauseTimer = setTimeout(() => {
+        setIsPaused(false);
+        setIsDeleting(true);
+      }, pauseDuration);
+      return () => clearTimeout(pauseTimer);
+    }
+
+    if (isDeleting) {
+      if (currentText === "") {
+        setIsDeleting(false);
+        setCurrentWordIndex((prev) => (prev + 1) % words.length);
+      } else {
+        const deleteTimer = setTimeout(() => {
+          setCurrentText(currentText.slice(0, -1));
+        }, deletingSpeed);
+        return () => clearTimeout(deleteTimer);
+      }
+    } else {
+      if (currentText === word) {
+        setIsPaused(true);
+      } else {
+        const typeTimer = setTimeout(() => {
+          setCurrentText(word.slice(0, currentText.length + 1));
+        }, typingSpeed);
+        return () => clearTimeout(typeTimer);
+      }
+    }
+  }, [currentText, isDeleting, isPaused, currentWordIndex, words, typingSpeed, deletingSpeed, pauseDuration]);
+
+  return currentText;
+}
+
 export function LandingPage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [isInputFocused, setIsInputFocused] = useState(false);
+  const typewriterText = useTypewriter(["services", "queries", "expertise"], 120, 60, 1500);
   const { scrollYProgress } = useScroll();
   const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
   
@@ -540,13 +585,30 @@ export function LandingPage() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-100/80 text-zinc-400 transition-colors group-focus-within:bg-emerald-50 group-focus-within:text-emerald-500">
                   <Search className="h-5 w-5" />
                 </div>
-                <Input
-                  type="text"
-                  placeholder="Search services, locations, expertise..."
-                  className="flex-1 border-0 bg-transparent text-base text-zinc-800 placeholder:text-zinc-400 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+                <div className="relative flex-1">
+                  {/* Animated placeholder overlay */}
+                  {!searchQuery && !isInputFocused && (
+                    <div className="pointer-events-none absolute inset-0 flex items-center">
+                      <span className="text-base text-zinc-400">
+                        Search for <span className="text-emerald-600 font-medium">{typewriterText}</span>
+                        <motion.span
+                          animate={{ opacity: [1, 0] }}
+                          transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
+                          className="inline-block ml-0.5 w-0.5 h-5 bg-emerald-500 align-middle"
+                        />
+                      </span>
+                    </div>
+                  )}
+                  <Input
+                    type="text"
+                    placeholder={isInputFocused ? "Search for services, queries, expertise..." : ""}
+                    className="w-full border-0 bg-transparent text-base text-zinc-800 placeholder:text-zinc-400 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => setIsInputFocused(true)}
+                    onBlur={() => setIsInputFocused(false)}
+                  />
+                </div>
                 <Button 
                   className="h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all hover:shadow-emerald-500/40 hover:scale-[1.02] active:scale-[0.98]"
                 >
