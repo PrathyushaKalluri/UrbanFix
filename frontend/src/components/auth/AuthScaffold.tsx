@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Navbar } from '../Navbar'
 
 type AuthScaffoldProps = {
   title: string
@@ -27,19 +28,7 @@ export function AuthScaffold({
         }}
       />
 
-      <header className="relative z-10 border-b border-zinc-200/50 bg-stone-50/80 backdrop-blur-xl">
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-4">
-          <span className="font-mono text-lg font-bold tracking-tighter text-zinc-900">UrbanFix</span>
-          <div className="flex items-center gap-6">
-            <span className="text-[11px] font-semibold tracking-[0.2em] text-emerald-600 uppercase">
-              Join ecosystem
-            </span>
-            <span className="cursor-pointer text-[11px] font-semibold tracking-[0.2em] text-zinc-500 uppercase transition-colors hover:text-emerald-500">
-              Help
-            </span>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="relative z-10 flex flex-1 items-center justify-center overflow-hidden p-6">
         <div className="absolute top-1/4 -right-20 h-96 w-96 rounded-full bg-emerald-100 opacity-50 blur-[120px]" />
