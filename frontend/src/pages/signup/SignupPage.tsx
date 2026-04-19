@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import type { ChangeEvent, FormEvent } from 'react'
+import type { ChangeEvent, FormEvent, FocusEvent } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { AuthScaffold } from '../../components/auth/AuthScaffold'
 import { signupRoutes } from '../../config/signupRoutes'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
+import { signupSchema, getFieldErrors, validateField, type SignupFormData } from '../../lib/validation'
 import type { AuthSession, Role } from '../../types/auth'
 
 type SignupPageProps = {
@@ -16,13 +17,15 @@ type SignupPageProps = {
 export function SignupPage({ session, role }: SignupPageProps) {
   const navigate = useNavigate()
   const config = signupRoutes[role]
-  const [form, setForm] = useState<{ fullName: string; email: string; password: string }>({
+  const [form, setForm] = useState<SignupFormData>({
     fullName: '',
     email: '',
     password: '',
   })
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [submitError, setSubmitError] = useState('')
   const [acceptTerms, setAcceptTerms] = useState(false)
 
   if (session.loading) {
@@ -41,17 +44,68 @@ export function SignupPage({ session, role }: SignupPageProps) {
     return <Navigate to="/dashboard" replace />
   }
 
-  const updateField = (field: 'fullName' | 'email' | 'password') => (event: ChangeEvent<HTMLInputElement>) => {
-    setForm((current: { fullName: string; email: string; password: string }) => ({
+  const updateField = (field: keyof SignupFormData) => (event: ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value
+    setForm((current) => ({
       ...current,
-      [field]: event.target.value,
+      [field]: value,
+    }))
+    
+    // Clear submit error when user starts typing
+    if (submitError) {
+      setSubmitError('')
+    }
+    
+    // Validate field immediately if it's been touched
+    if (touched[field]) {
+      const fieldError = validateField(signupSchema, field, value)
+      setErrors((current) => ({
+        ...current,
+        [field]: fieldError || '',
+      }))
+    }
+  }
+
+  const handleBlur = (field: keyof SignupFormData) => (event: FocusEvent<HTMLInputElement>) => {
+    setTouched((current) => ({
+      ...current,
+      [field]: true,
+    }))
+    
+    const fieldError = validateField(signupSchema, field, event.target.value)
+    setErrors((current) => ({
+      ...current,
+      [field]: fieldError || '',
+    }))
+  }
+
+  const handleFocus = (field: keyof SignupFormData) => () => {
+    // Clear error when user focuses on field
+    setErrors((current) => ({
+      ...current,
+      [field]: '',
     }))
   }
 
   const submitForm = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    setSubmitError('')
+    
+    // Validate all fields
+    const validationErrors = getFieldErrors(signupSchema, form)
+    
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors)
+      setTouched({ fullName: true, email: true, password: true })
+      return
+    }
+    
+    if (!acceptTerms) {
+      setSubmitError('Please accept the terms of service')
+      return
+    }
+    
     setLoading(true)
-    setError('')
 
     try {
       await session.submitAuth(config.endpoint, {
@@ -60,11 +114,21 @@ export function SignupPage({ session, role }: SignupPageProps) {
         password: form.password,
       })
       navigate('/dashboard')
-    } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : 'Authentication failed')
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Registration failed')
     } finally {
       setLoading(false)
     }
+  }
+
+  const getInputClasses = (field: string, hasError: boolean) => {
+    const baseClasses = "h-12 rounded-none bg-white px-4 py-3 text-sm tracking-wide placeholder:text-zinc-300 focus-visible:ring-0 transition-colors"
+    
+    if (hasError) {
+      return `${baseClasses} border-red-400 bg-red-50/30 focus-visible:border-red-500`
+    }
+    
+    return `${baseClasses} border-zinc-200 focus-visible:border-emerald-500/50`
   }
 
   return (
@@ -109,7 +173,8 @@ export function SignupPage({ session, role }: SignupPageProps) {
         </div>
       }
     >
-      <form className="space-y-6" onSubmit={submitForm}>
+      <form className="space-y-6" onSubmit={submitForm} noValidate>
+        {/* Full Name Field */}
         <div className="space-y-1.5">
           <Label className="px-1 font-mono text-[10px] tracking-wider text-[#878D89] uppercase">
             Full Identity
@@ -117,12 +182,21 @@ export function SignupPage({ session, role }: SignupPageProps) {
           <Input
             value={form.fullName}
             onChange={updateField('fullName')}
+            onBlur={handleBlur('fullName')}
+            onFocus={handleFocus('fullName')}
             placeholder="ERIK LINDSTROM"
-            className="h-12 rounded-none border-zinc-200 bg-white px-4 py-3 text-sm tracking-wide placeholder:text-zinc-300 focus-visible:border-emerald-500/50 focus-visible:ring-0"
-            required
+            className={getInputClasses('fullName', !!errors.fullName && touched.fullName)}
+            aria-invalid={!!errors.fullName && touched.fullName}
+            aria-describedby={errors.fullName && touched.fullName ? 'fullname-error' : undefined}
           />
+          {errors.fullName && touched.fullName && (
+            <p id="fullname-error" className="px-1 text-[11px] text-red-600 animate-in fade-in slide-in-from-top-1 duration-200">
+              {errors.fullName}
+            </p>
+          )}
         </div>
 
+        {/* Email Field */}
         <div className="space-y-1.5">
           <Label className="px-1 font-mono text-[10px] tracking-wider text-[#878D89] uppercase">
             Communication Channel
@@ -131,12 +205,21 @@ export function SignupPage({ session, role }: SignupPageProps) {
             type="email"
             value={form.email}
             onChange={updateField('email')}
+            onBlur={handleBlur('email')}
+            onFocus={handleFocus('email')}
             placeholder="ERIK@URBANFIX.SE"
-            className="h-12 rounded-none border-zinc-200 bg-white px-4 py-3 text-sm tracking-wide placeholder:text-zinc-300 focus-visible:border-emerald-500/50 focus-visible:ring-0"
-            required
+            className={getInputClasses('email', !!errors.email && touched.email)}
+            aria-invalid={!!errors.email && touched.email}
+            aria-describedby={errors.email && touched.email ? 'email-error' : undefined}
           />
+          {errors.email && touched.email && (
+            <p id="email-error" className="px-1 text-[11px] text-red-600 animate-in fade-in slide-in-from-top-1 duration-200">
+              {errors.email}
+            </p>
+          )}
         </div>
 
+        {/* Password Field */}
         <div className="space-y-1.5">
           <Label className="px-1 font-mono text-[10px] tracking-wider text-[#878D89] uppercase">
             Access Protocol
@@ -145,19 +228,32 @@ export function SignupPage({ session, role }: SignupPageProps) {
             type="password"
             value={form.password}
             onChange={updateField('password')}
+            onBlur={handleBlur('password')}
+            onFocus={handleFocus('password')}
             placeholder="••••••••••••"
-            className="h-12 rounded-none border-zinc-200 bg-white px-4 py-3 text-sm tracking-wide placeholder:text-zinc-300 focus-visible:border-emerald-500/50 focus-visible:ring-0"
-            required
+            className={getInputClasses('password', !!errors.password && touched.password)}
+            aria-invalid={!!errors.password && touched.password}
+            aria-describedby={errors.password && touched.password ? 'password-error' : undefined}
           />
+          {errors.password && touched.password && (
+            <p id="password-error" className="px-1 text-[11px] text-red-600 animate-in fade-in slide-in-from-top-1 duration-200">
+              {errors.password}
+            </p>
+          )}
+          {!errors.password && touched.password && (
+            <p className="px-1 text-[10px] text-emerald-600">
+              Password meets requirements
+            </p>
+          )}
         </div>
 
+        {/* Terms Checkbox */}
         <label className="flex items-start gap-3 py-2">
           <input
             className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-emerald-600"
             type="checkbox"
             checked={acceptTerms}
             onChange={(event: ChangeEvent<HTMLInputElement>) => setAcceptTerms(event.target.checked)}
-            required
           />
           <span className="text-[11px] leading-relaxed tracking-tight text-[#878D89] uppercase">
             I accept the{' '}
@@ -166,12 +262,16 @@ export function SignupPage({ session, role }: SignupPageProps) {
           </span>
         </label>
 
-        {error && (
-          <p className="rounded-none border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
+        {/* Submit Error (server-side errors) */}
+        {submitError && (
+          <div className="rounded-none border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {submitError}
+          </div>
         )}
 
+        {/* Submit Button */}
         <Button
-          className="h-14 w-full rounded-none border border-emerald-300/30 bg-emerald-100 text-sm font-bold tracking-[0.2em] text-emerald-700 uppercase shadow-none hover:bg-emerald-100/90"
+          className="h-14 w-full rounded-none border border-emerald-300/30 bg-emerald-100 text-sm font-bold tracking-[0.2em] text-emerald-700 uppercase shadow-none hover:bg-emerald-100/90 disabled:opacity-50 disabled:cursor-not-allowed"
           type="submit"
           disabled={loading}
         >
