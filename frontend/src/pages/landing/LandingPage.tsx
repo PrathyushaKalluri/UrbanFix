@@ -1,8 +1,8 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Navbar } from '../../components/Navbar'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { Navbar } from "../../components/Navbar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Search,
   ArrowRight,
@@ -14,10 +14,10 @@ import {
   Users,
   CheckCircle,
   Clock,
-} from 'lucide-react'
+} from "lucide-react";
 
 export function LandingPage() {
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchQuery, setSearchQuery] = useState("");
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#FCFDFC] text-[#090A0A]">
@@ -51,8 +51,9 @@ export function LandingPage() {
               Urban Reality.
             </h1>
             <p className="mx-auto max-w-2xl text-lg text-[#878D89] md:text-xl">
-              High-precision service routing and intelligent telemetry for the modern metropolis.
-              Locate verified expertise with atmospheric accuracy.
+              High-precision service routing and intelligent telemetry for the
+              modern metropolis. Locate verified expertise with atmospheric
+              accuracy.
             </p>
           </div>
 
@@ -99,9 +100,12 @@ export function LandingPage() {
                 <Route className="h-6 w-6 text-emerald-600" />
               </div>
               <div className="space-y-3">
-                <h3 className="text-lg font-bold text-[#090A0A]">Intelligent Routing</h3>
+                <h3 className="text-lg font-bold text-[#090A0A]">
+                  Intelligent Routing
+                </h3>
                 <p className="text-sm leading-relaxed text-[#878D89]">
-                  Algorithmic dispatch matching your exact coordinates with the optimal specialist in real-time.
+                  Algorithmic dispatch matching your exact coordinates with the
+                  optimal specialist in real-time.
                 </p>
               </div>
             </article>
@@ -112,9 +116,12 @@ export function LandingPage() {
                 <ShieldCheck className="h-6 w-6 text-emerald-600" />
               </div>
               <div className="space-y-3">
-                <h3 className="text-lg font-bold text-[#090A0A]">Verified Expertise</h3>
+                <h3 className="text-lg font-bold text-[#090A0A]">
+                  Verified Expertise
+                </h3>
                 <p className="text-sm leading-relaxed text-[#878D89]">
-                  Cryptographically verified credentials ensuring absolute precision and quality for every engagement.
+                  Cryptographically verified credentials ensuring absolute
+                  precision and quality for every engagement.
                 </p>
               </div>
             </article>
@@ -125,9 +132,12 @@ export function LandingPage() {
                 <Activity className="h-6 w-6 text-emerald-600" />
               </div>
               <div className="space-y-3">
-                <h3 className="text-lg font-bold text-[#090A0A]">Real-time Telemetry</h3>
+                <h3 className="text-lg font-bold text-[#090A0A]">
+                  Real-time Telemetry
+                </h3>
                 <p className="text-sm leading-relaxed text-[#878D89]">
-                  Continuous stream of diagnostic data and progress tracking via our hyper-responsive dashboard.
+                  Continuous stream of diagnostic data and progress tracking via
+                  our hyper-responsive dashboard.
                 </p>
               </div>
             </article>
@@ -145,7 +155,9 @@ export function LandingPage() {
                 <h2 className="text-3xl font-bold tracking-tight text-[#090A0A] md:text-4xl">
                   Module: Discovery
                 </h2>
-                <p className="text-[#878D89]">Precision Filtering & Spatial Awareness</p>
+                <p className="text-[#878D89]">
+                  Precision Filtering & Spatial Awareness
+                </p>
               </div>
 
               {/* Proximity Radar Card */}
@@ -156,7 +168,9 @@ export function LandingPage() {
                       <Radar className="h-8 w-8 text-emerald-600" />
                     </div>
                     <div className="text-left">
-                      <h3 className="text-xl font-bold text-[#090A0A]">Proximity Radar</h3>
+                      <h3 className="text-xl font-bold text-[#090A0A]">
+                        Proximity Radar
+                      </h3>
                       <p className="text-sm text-[#878D89]">
                         Visualize active nodes within your immediate perimeter.
                       </p>
@@ -184,7 +198,9 @@ export function LandingPage() {
             <div className="flex flex-col items-center space-y-2 text-center">
               <div className="flex items-center gap-3">
                 <Users className="h-5 w-5 text-emerald-600" />
-                <span className="font-mono text-3xl font-bold tracking-tight text-[#090A0A]">142+</span>
+                <span className="font-mono text-3xl font-bold tracking-tight text-[#090A0A]">
+                  142+
+                </span>
               </div>
               <p className="font-mono text-[10px] tracking-widest text-[#878D89] uppercase">
                 Specialists Online
@@ -193,7 +209,9 @@ export function LandingPage() {
             <div className="flex flex-col items-center space-y-2 text-center">
               <div className="flex items-center gap-3">
                 <CheckCircle className="h-5 w-5 text-emerald-600" />
-                <span className="font-mono text-3xl font-bold tracking-tight text-[#090A0A]">99.8%</span>
+                <span className="font-mono text-3xl font-bold tracking-tight text-[#090A0A]">
+                  99.8%
+                </span>
               </div>
               <p className="font-mono text-[10px] tracking-widest text-[#878D89] uppercase">
                 Resolution Rate
@@ -202,7 +220,9 @@ export function LandingPage() {
             <div className="flex flex-col items-center space-y-2 text-center">
               <div className="flex items-center gap-3">
                 <Clock className="h-5 w-5 text-emerald-600" />
-                <span className="font-mono text-3xl font-bold tracking-tight text-[#090A0A]">&lt;12m</span>
+                <span className="font-mono text-3xl font-bold tracking-tight text-[#090A0A]">
+                  &lt;12m
+                </span>
               </div>
               <p className="font-mono text-[10px] tracking-widest text-[#878D89] uppercase">
                 Avg ETA
@@ -222,7 +242,8 @@ export function LandingPage() {
                 Initialize Your Account
               </h2>
               <p className="mx-auto max-w-lg text-[#878D89]">
-                Join the network of optimized urban nodes. Secure your access to precision services today.
+                Join the network of optimized urban nodes. Secure your access to
+                precision services today.
               </p>
             </div>
             <Link to="/signup/user">
@@ -237,24 +258,36 @@ export function LandingPage() {
         {/* Footer */}
         <footer className="relative z-10 flex w-full flex-col items-center justify-center gap-6 border-t border-emerald-200/30 bg-transparent px-6 py-12 md:flex-row">
           <span className="font-mono text-[10px] tracking-tight text-[#878D89] uppercase">
-            © {new Date().getFullYear()} UrbanFix. Atmospheric Lab Precision.
+            © {new Date().getFullYear()} UrbanFix
           </span>
           <div className="flex gap-6">
-            <Link to="#" className="font-mono text-[10px] tracking-tight text-[#878D89] uppercase hover:text-emerald-600 transition-colors">
+            <Link
+              to="#"
+              className="font-mono text-[10px] tracking-tight text-[#878D89] uppercase hover:text-emerald-600 transition-colors"
+            >
               Privacy
             </Link>
-            <Link to="#" className="font-mono text-[10px] tracking-tight text-[#878D89] uppercase hover:text-emerald-600 transition-colors">
+            <Link
+              to="#"
+              className="font-mono text-[10px] tracking-tight text-[#878D89] uppercase hover:text-emerald-600 transition-colors"
+            >
               Terms
             </Link>
-            <Link to="#" className="font-mono text-[10px] tracking-tight text-[#878D89] uppercase hover:text-emerald-600 transition-colors">
+            <Link
+              to="#"
+              className="font-mono text-[10px] tracking-tight text-[#878D89] uppercase hover:text-emerald-600 transition-colors"
+            >
               API Docs
             </Link>
-            <Link to="#" className="font-mono text-[10px] tracking-tight text-[#878D89] uppercase hover:text-emerald-600 transition-colors">
+            <Link
+              to="#"
+              className="font-mono text-[10px] tracking-tight text-[#878D89] uppercase hover:text-emerald-600 transition-colors"
+            >
               Network Status
             </Link>
           </div>
         </footer>
       </main>
     </div>
-  )
+  );
 }

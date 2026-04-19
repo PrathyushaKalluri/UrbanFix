@@ -1,4 +1,5 @@
 import { Navigate } from 'react-router-dom'
+import { Navbar } from '../../components/Navbar'
 import type { AuthSession } from '../../types/auth'
 import { getDashboardContent } from './strategy/roleDashboardStrategy'
 
@@ -36,21 +37,7 @@ export function DashboardPage({ session }: DashboardPageProps) {
         }}
       />
 
-      <header className="relative z-10 border-b border-zinc-200/70 bg-stone-50/80 backdrop-blur-xl">
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-4">
-          <div>
-            <p className="font-mono text-[10px] tracking-[0.24em] text-emerald-600 uppercase">UrbanFix</p>
-            <h1 className="text-lg font-bold tracking-tight">{roleCopy.title}</h1>
-          </div>
-          <button
-            className="h-9 rounded border border-zinc-300 bg-white px-4 text-xs font-semibold tracking-[0.08em] text-zinc-700 uppercase transition-colors hover:border-emerald-500 hover:text-emerald-700"
-            type="button"
-            onClick={session.logout}
-          >
-            Logout
-          </button>
-        </div>
-      </header>
+      <Navbar isAuthenticated onLogout={session.logout} />
 
       <main className="relative z-10 mx-auto grid max-w-7xl gap-6 px-6 py-8 md:grid-cols-[1.3fr_1fr]">
         <section className="border border-zinc-200/70 bg-white/70 p-6 shadow-[0_8px_32px_rgba(9,10,10,0.04)] backdrop-blur-xl md:p-8">
