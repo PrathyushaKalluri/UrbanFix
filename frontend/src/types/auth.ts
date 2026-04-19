@@ -20,6 +20,6 @@ export type AuthProfile = {
 export type AuthSession = {
   profile: AuthProfile | null
   loading: boolean
-  submitAuth: <T extends Record<string, string>>(endpoint: string, payload: T) => Promise<unknown>
+  submitAuth: <T extends Record<string, unknown>>(endpoint: string, payload: T) => Promise<unknown>
   logout: () => void
 }

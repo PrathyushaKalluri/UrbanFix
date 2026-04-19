@@ -1,6 +1,7 @@
 package com.example.backend.auth.controller;
 
 import com.example.backend.auth.dto.AuthResponse;
+import com.example.backend.auth.dto.ExpertRegisterRequest;
 import com.example.backend.auth.dto.LoginRequest;
 import com.example.backend.auth.dto.RegisterRequest;
 import com.example.backend.auth.entity.UserAccount;
@@ -31,8 +32,8 @@ public class AuthController {
   }
 
   @PostMapping("/register/expert")
-  public AuthResponse registerExpert(@Valid @RequestBody RegisterRequest request) {
-    return authService.register(request, UserRole.EXPERT);
+  public AuthResponse registerExpert(@Valid @RequestBody ExpertRegisterRequest request) {
+    return authService.registerExpert(request);
   }
 
   @PostMapping("/login")
@@ -43,9 +44,6 @@ public class AuthController {
   @GetMapping("/me")
   public Map<String, Object> me(Authentication authentication) {
     UserAccount user = (UserAccount) authentication.getPrincipal();
-    return Map.of(
-        "fullName", user.getFullName(),
-        "email", user.getEmail(),
-        "role", user.getRole().name());
+    return authService.getCurrentUserProfile(user);
   }
 }

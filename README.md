@@ -71,14 +71,34 @@ The backend runs on `http://localhost:8080`.
 ## API
 
 - `POST /api/auth/register/user` creates a `USER` account
-- `POST /api/auth/register/expert` creates an `EXPERT` account
+- `POST /api/auth/register/expert` creates an `EXPERT` account and expert profile details
 - `POST /api/auth/login` returns a JWT token and user profile
-- `GET /api/auth/me` returns the authenticated profile
+- `GET /api/auth/me` returns the authenticated profile (and expert metadata for experts)
 - `GET /api/hello` returns a simple sample response
+
+### Expert Registration Payload
+
+`POST /api/auth/register/expert` supports these additional fields:
+
+- `primaryExpertise`
+- `yearsOfExperience`
+- `expertiseAreas` (array)
+- `workAreas` (array)
+- `bio`
+- `available`
+- `servesAsResident`
+
+If these fields are omitted, sensible defaults are used so existing clients continue to work.
 
 ## Database
 
 The backend uses an in-memory H2 database, so the app is ready to run without external setup.
+
+Expert-specific information is stored separately from base users in dedicated tables:
+
+- `expert_profiles`
+- `expert_expertise`
+- `expert_work_areas`
 
 ## Notes
 

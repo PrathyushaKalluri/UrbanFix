@@ -14,6 +14,15 @@ type SignupPageProps = {
   role: Role
 }
 
+type ExpertDetails = {
+  primaryExpertise: string
+  yearsOfExperience: string
+  expertiseAreas: string
+  workAreas: string
+  available: boolean
+  servesAsResident: boolean
+}
+
 export function SignupPage({ session, role }: SignupPageProps) {
   const navigate = useNavigate()
   const config = signupRoutes[role]
@@ -24,6 +33,14 @@ export function SignupPage({ session, role }: SignupPageProps) {
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const [expertDetails, setExpertDetails] = useState<ExpertDetails>({
+    primaryExpertise: '',
+    yearsOfExperience: '',
+    expertiseAreas: '',
+    workAreas: '',
+    available: true,
+    servesAsResident: true,
+  })
   const [loading, setLoading] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const [acceptTerms, setAcceptTerms] = useState(false)
@@ -87,6 +104,30 @@ export function SignupPage({ session, role }: SignupPageProps) {
     }))
   }
 
+  const updateExpertField =
+    (field: 'primaryExpertise' | 'yearsOfExperience' | 'expertiseAreas' | 'workAreas') =>
+    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setExpertDetails((current: ExpertDetails) => ({
+        ...current,
+        [field]: event.target.value,
+      }))
+    }
+
+  const updateExpertToggle =
+    (field: 'available' | 'servesAsResident') => (event: ChangeEvent<HTMLInputElement>) => {
+      setExpertDetails((current: ExpertDetails) => ({
+        ...current,
+        [field]: event.target.checked,
+      }))
+    }
+
+  const toList = (value: string): string[] => {
+    return value
+      .split(',')
+      .map((item: string) => item.trim())
+      .filter((item: string) => item.length > 0)
+  }
+
   const submitForm = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setSubmitError('')
@@ -108,11 +149,22 @@ export function SignupPage({ session, role }: SignupPageProps) {
     setLoading(true)
 
     try {
-      await session.submitAuth(config.endpoint, {
+      const payload: Record<string, unknown> = {
         fullName: form.fullName,
         email: form.email,
         password: form.password,
-      })
+      }
+
+      if (role === 'EXPERT') {
+        payload.primaryExpertise = expertDetails.primaryExpertise
+        payload.yearsOfExperience = Number.parseInt(expertDetails.yearsOfExperience, 10) || 0
+        payload.expertiseAreas = toList(expertDetails.expertiseAreas)
+        payload.workAreas = toList(expertDetails.workAreas)
+        payload.available = expertDetails.available
+        payload.servesAsResident = expertDetails.servesAsResident
+      }
+
+      await session.submitAuth(config.endpoint, payload)
       navigate('/dashboard')
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Registration failed')
@@ -184,7 +236,7 @@ export function SignupPage({ session, role }: SignupPageProps) {
             onChange={updateField('fullName')}
             onBlur={handleBlur('fullName')}
             onFocus={handleFocus('fullName')}
-            placeholder="ERIK LINDSTROM"
+            placeholder="Kedar Dalvi"
             className={getInputClasses('fullName', !!errors.fullName && touched.fullName)}
             aria-invalid={!!errors.fullName && touched.fullName}
             aria-describedby={errors.fullName && touched.fullName ? 'fullname-error' : undefined}
@@ -199,7 +251,7 @@ export function SignupPage({ session, role }: SignupPageProps) {
         {/* Email Field */}
         <div className="space-y-1.5">
           <Label className="px-1 font-mono text-[10px] tracking-wider text-[#878D89] uppercase">
-            Communication Channel
+            Email
           </Label>
           <Input
             type="email"
@@ -207,7 +259,7 @@ export function SignupPage({ session, role }: SignupPageProps) {
             onChange={updateField('email')}
             onBlur={handleBlur('email')}
             onFocus={handleFocus('email')}
-            placeholder="ERIK@URBANFIX.SE"
+            placeholder="kedar@urbanfix.in"
             className={getInputClasses('email', !!errors.email && touched.email)}
             aria-invalid={!!errors.email && touched.email}
             aria-describedby={errors.email && touched.email ? 'email-error' : undefined}
@@ -222,7 +274,7 @@ export function SignupPage({ session, role }: SignupPageProps) {
         {/* Password Field */}
         <div className="space-y-1.5">
           <Label className="px-1 font-mono text-[10px] tracking-wider text-[#878D89] uppercase">
-            Access Protocol
+            Password
           </Label>
           <Input
             type="password"
@@ -247,7 +299,89 @@ export function SignupPage({ session, role }: SignupPageProps) {
           )}
         </div>
 
-        {/* Terms Checkbox */}
+        {role === 'EXPERT' && (
+          <>
+            <div className="space-y-1.5">
+              <Label className="px-1 font-mono text-[10px] tracking-wider text-[#878D89] uppercase">
+                Primary Expertise
+              </Label>
+              <Input
+                value={expertDetails.primaryExpertise}
+                onChange={updateExpertField('primaryExpertise')}
+                placeholder="Electrical, Plumbing, AC Repair"
+                className="h-12 rounded-none border-zinc-200 bg-white px-4 py-3 text-sm tracking-wide placeholder:text-zinc-300 focus-visible:border-emerald-500/50 focus-visible:ring-0"
+                required
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="px-1 font-mono text-[10px] tracking-wider text-[#878D89] uppercase">
+                Years Of Experience
+              </Label>
+              <Input
+                type="number"
+                min={0}
+                value={expertDetails.yearsOfExperience}
+                onChange={updateExpertField('yearsOfExperience')}
+                placeholder="5"
+                className="h-12 rounded-none border-zinc-200 bg-white px-4 py-3 text-sm tracking-wide placeholder:text-zinc-300 focus-visible:border-emerald-500/50 focus-visible:ring-0"
+                required
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="px-1 font-mono text-[10px] tracking-wider text-[#878D89] uppercase">
+                Expertise Areas (comma separated)
+              </Label>
+              <Input
+                value={expertDetails.expertiseAreas}
+                onChange={updateExpertField('expertiseAreas')}
+                placeholder="Wiring upgrades, Leak detection, Inverter setup"
+                className="h-12 rounded-none border-zinc-200 bg-white px-4 py-3 text-sm tracking-wide placeholder:text-zinc-300 focus-visible:border-emerald-500/50 focus-visible:ring-0"
+                required
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="px-1 font-mono text-[10px] tracking-wider text-[#878D89] uppercase">
+                Work Areas (comma separated)
+              </Label>
+              <Input
+                value={expertDetails.workAreas}
+                onChange={updateExpertField('workAreas')}
+                placeholder="Pune Camp, Kothrud, Baner"
+                className="h-12 rounded-none border-zinc-200 bg-white px-4 py-3 text-sm tracking-wide placeholder:text-zinc-300 focus-visible:border-emerald-500/50 focus-visible:ring-0"
+                required
+              />
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="flex items-start gap-3 border border-zinc-200 p-3">
+                <input
+                  className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-emerald-600"
+                  type="checkbox"
+                  checked={expertDetails.available}
+                  onChange={updateExpertToggle('available')}
+                />
+                <span className="text-[11px] leading-relaxed tracking-tight text-[#878D89] uppercase">
+                  Currently available for jobs
+                </span>
+              </label>
+
+              <label className="flex items-start gap-3 border border-zinc-200 p-3">
+                <input
+                  className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-emerald-600"
+                  type="checkbox"
+                  checked={expertDetails.servesAsResident}
+                  onChange={updateExpertToggle('servesAsResident')}
+                />
+                <span className="text-[11px] leading-relaxed tracking-tight text-[#878D89] uppercase">
+                  I also use UrbanFix as resident
+                </span>
+              </label>
+            </div>
+          </>
+        )}
         <label className="flex items-start gap-3 py-2">
           <input
             className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-emerald-600"

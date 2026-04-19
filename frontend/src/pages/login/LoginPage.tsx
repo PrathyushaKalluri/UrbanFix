@@ -128,22 +128,6 @@ export function LoginPage({ session }: LoginPageProps) {
     <AuthScaffold
       title="Access Account"
       description="Authenticate to continue as resident or specialist."
-      preForm={
-        <div className="mb-8 grid grid-cols-2 gap-4">
-          <Link
-            to="/signup/user"
-            className="flex items-center justify-center border border-zinc-200 p-5 text-[10px] font-bold tracking-widest text-zinc-600 uppercase transition-all hover:border-emerald-500/60 hover:bg-zinc-50"
-          >
-            Join as resident
-          </Link>
-          <Link
-            to="/signup/expert"
-            className="flex items-center justify-center border border-zinc-200 p-5 text-[10px] font-bold tracking-widest text-zinc-600 uppercase transition-all hover:border-emerald-500/60 hover:bg-zinc-50"
-          >
-            Join as specialist
-          </Link>
-        </div>
-      }
       postForm={
         <div className="mt-8 flex justify-center border-t border-zinc-200/60 pt-6">
           <p className="text-[11px] tracking-widest text-[#878D89] uppercase">
@@ -159,7 +143,7 @@ export function LoginPage({ session }: LoginPageProps) {
         {/* Email Field */}
         <div className="space-y-1.5">
           <Label className="px-1 font-mono text-[10px] tracking-wider text-[#878D89] uppercase">
-            Communication Channel
+            Email
           </Label>
           <Input
             type="email"
@@ -167,7 +151,7 @@ export function LoginPage({ session }: LoginPageProps) {
             onChange={updateField('email')}
             onBlur={handleBlur('email')}
             onFocus={handleFocus('email')}
-            placeholder="ERIK@URBANFIX.SE"
+            placeholder="kedar@urbanfix.in"
             className={getInputClasses('email', !!errors.email && touched.email)}
             aria-invalid={!!errors.email && touched.email}
             aria-describedby={errors.email && touched.email ? 'email-error' : undefined}
@@ -182,7 +166,7 @@ export function LoginPage({ session }: LoginPageProps) {
         {/* Password Field */}
         <div className="space-y-1.5">
           <Label className="px-1 font-mono text-[10px] tracking-wider text-[#878D89] uppercase">
-            Access Protocol
+            Password
           </Label>
           <Input
             type="password"
