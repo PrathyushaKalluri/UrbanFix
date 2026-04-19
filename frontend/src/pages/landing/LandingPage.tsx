@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +21,7 @@ import {
   Sparkles,
   ArrowUpRight,
   Play,
+  Star,
 } from "lucide-react";
 
 // Animation variants
@@ -203,12 +204,197 @@ function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: strin
   return <span>{count}{suffix}</span>;
 }
 
-// Modern Navbar
+// Magical CTA Button with shimmer, glow, and particle effects
+function MagicalCTAButton() {
+  const [isHovered, setIsHovered] = useState(false);
+  
+  return (
+    <Link to="/signup/user" className="relative group">
+      {/* Glow effect behind button */}
+      <motion.div
+        className="absolute -inset-1 rounded-xl bg-gradient-to-r from-emerald-400 to-cyan-400 blur-xl"
+        initial={{ opacity: 0, scale: 1 }}
+        animate={isHovered ? 
+          { scale: [1, 1.1, 1], opacity: [0.4, 0.7, 0.4] } : 
+          { scale: 1, opacity: 0 }
+        }
+        transition={isHovered ? 
+          { duration: 2, repeat: Infinity, ease: "easeInOut" } : 
+          { duration: 0.3, ease: "easeOut" }
+        }
+      />
+      
+      {/* Main button */}
+      <motion.div
+        onHoverStart={() => setIsHovered(true)}
+        onHoverEnd={() => setIsHovered(false)}
+        whileHover={{ scale: 1.03 }}
+        whileTap={{ scale: 0.97 }}
+        className="relative"
+      >
+        <Button 
+          className="relative h-10 overflow-hidden rounded-xl bg-gradient-to-r from-emerald-500 via-emerald-500 to-emerald-600 px-5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/40"
+        >
+          {/* Shimmer effect */}
+          <motion.div
+            className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent"
+            animate={{ translateX: ["-100%", "200%"] }}
+            transition={{ duration: 2, repeat: Infinity, repeatDelay: 3, ease: "easeInOut" }}
+          />
+          
+          {/* Inner gradient border effect */}
+          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-emerald-400/20 via-transparent to-cyan-400/20 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+          
+          {/* Content */}
+          <span className="relative z-10 flex items-center gap-1.5">
+            Get Started
+            <motion.span
+              animate={isHovered ? { x: [0, 4, 0] } : {}}
+              transition={{ duration: 0.6, ease: "easeInOut" }}
+            >
+              <ArrowRight className="h-4 w-4" />
+            </motion.span>
+          </span>
+        </Button>
+        
+        {/* Floating sparkles on hover */}
+        <AnimatePresence>
+          {isHovered && (
+            <>
+              {[...Array(3)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, scale: 0, x: 0, y: 0 }}
+                  animate={{ 
+                    opacity: [0, 1, 0],
+                    scale: [0.5, 1, 0.5],
+                    x: [0, (i - 1) * 20],
+                    y: [0, -20 - i * 5]
+                  }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.8, delay: i * 0.15, ease: "easeOut" }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2"
+                >
+                  <Star className="h-3 w-3 fill-emerald-300 text-emerald-300" />
+                </motion.div>
+              ))}
+            </>
+          )}
+        </AnimatePresence>
+      </motion.div>
+      
+      {/* Subtle pulse ring on idle */}
+      <motion.div
+        className="absolute inset-0 -z-10 rounded-xl bg-emerald-400/20"
+        animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
+        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+      />
+    </Link>
+  );
+}
+
+// Magical Hero CTA Button (larger version)
+function MagicalHeroCTAButton() {
+  const [isHovered, setIsHovered] = useState(false);
+  
+  return (
+    <Link to="/signup/user" className="relative group">
+      {/* Outer glow pulse */}
+      <motion.div
+        className="absolute -inset-2 rounded-2xl bg-gradient-to-r from-emerald-400 via-cyan-400 to-emerald-400 blur-2xl"
+        initial={{ opacity: 0, scale: 1 }}
+        animate={isHovered ? 
+          { scale: [1, 1.15, 1], opacity: [0.3, 0.6, 0.3] } : 
+          { scale: 1, opacity: 0 }
+        }
+        transition={isHovered ? 
+          { duration: 2, repeat: Infinity, ease: "easeInOut" } : 
+          { duration: 0.3, ease: "easeOut" }
+        }
+      />
+      
+      {/* Subtle idle pulse */}
+      {!isHovered && (
+        <motion.div
+          className="absolute inset-0 rounded-xl bg-emerald-500/20"
+          animate={{ scale: [1, 1.05, 1], opacity: [0.3, 0, 0.3] }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+        />
+      )}
+      
+      <motion.div
+        onHoverStart={() => setIsHovered(true)}
+        onHoverEnd={() => setIsHovered(false)}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        className="relative"
+      >
+        <Button 
+          size="lg"
+          className="relative h-14 overflow-hidden rounded-xl bg-gradient-to-r from-emerald-500 via-emerald-500 to-emerald-600 px-8 text-base font-semibold text-white shadow-xl shadow-emerald-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-500/40"
+        >
+          {/* Animated shimmer */}
+          <motion.div
+            className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent"
+            animate={{ translateX: ["-100%", "200%"] }}
+            transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 2, ease: "easeInOut" }}
+          />
+          
+          {/* Hover gradient overlay */}
+          <motion.div 
+            className="absolute inset-0 bg-gradient-to-r from-cyan-400/0 via-cyan-400/20 to-emerald-400/0"
+            initial={{ opacity: 0, x: "-100%" }}
+            animate={isHovered ? { opacity: 1, x: "100%" } : { opacity: 0, x: "-100%" }}
+            transition={{ duration: 0.6, ease: "easeInOut" }}
+          />
+          
+          {/* Content */}
+          <span className="relative z-10 flex items-center gap-2">
+            Connect to Grid
+            <motion.span
+              animate={isHovered ? { x: [0, 5, 0] } : {}}
+              transition={{ duration: 0.6, ease: "easeInOut" }}
+            >
+              <ArrowRight className="h-5 w-5" />
+            </motion.span>
+          </span>
+        </Button>
+        
+        {/* Sparkles on hover */}
+        <AnimatePresence>
+          {isHovered && (
+            <>
+              {[...Array(4)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ 
+                    opacity: [0, 1, 0],
+                    scale: [0.3, 1, 0.3],
+                    x: (i - 1.5) * 25,
+                    y: -25 - i * 8
+                  }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 1, delay: i * 0.1, ease: "easeOut" }}
+                  className="absolute right-4 top-1/2"
+                >
+                  <Star className="h-4 w-4 fill-cyan-300 text-cyan-300" />
+                </motion.div>
+              ))}
+            </>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </Link>
+  );
+}
+
+// Modern Premium Navbar - Clean Floating Style
 function ModernNavbar() {
   const [scrolled, setScrolled] = useState(false);
   
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
+    const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -218,52 +404,39 @@ function ModernNavbar() {
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className={`fixed left-0 right-0 top-0 z-50 transition-all duration-300 ${
-        scrolled 
-          ? "border-b border-zinc-200/50 bg-white/80 shadow-[0_4px_24px_rgba(0,0,0,0.02)] backdrop-blur-xl" 
-          : "bg-transparent"
-      }`}
+      className="fixed left-0 right-0 top-0 z-50 px-4 py-4 sm:px-6"
     >
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-4">
+      <motion.div 
+        layout
+        className={`mx-auto flex w-full max-w-5xl items-center justify-between transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          scrolled 
+            ? "rounded-2xl bg-white/80 px-6 py-3 shadow-[0_8px_32px_rgba(0,0,0,0.06)] backdrop-blur-xl"
+            : "rounded-2xl bg-white/0 px-6 py-3"
+        }`}
+        style={{
+          border: scrolled ? "1px solid rgba(255, 255, 255, 0.5)" : "1px solid transparent",
+        }}
+      >
         <Link 
           to="/" 
-          className="flex items-center gap-2 text-lg font-semibold tracking-tight text-zinc-900 transition-colors hover:text-emerald-600"
+          className="flex items-center gap-2.5 text-lg font-semibold tracking-tight text-zinc-900 transition-all duration-300 hover:opacity-80"
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg shadow-emerald-500/20">
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg shadow-emerald-500/25">
             <Zap className="h-4 w-4 text-white" fill="currentColor" />
           </div>
-          <span>UrbanFix</span>
+          <span className="hidden sm:inline">UrbanFix</span>
         </Link>
         
-        <nav className="hidden items-center gap-8 md:flex">
-          {["Features", "How it Works", "Pricing", "API"].map((item) => (
-            <a
-              key={item}
-              href={`#${item.toLowerCase().replace(/\s/g, "-")}`}
-              className="text-sm font-medium text-zinc-600 transition-colors hover:text-emerald-600"
-            >
-              {item}
-            </a>
-          ))}
-        </nav>
-        
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <Link 
             to="/login"
-            className="hidden text-sm font-medium text-zinc-600 transition-colors hover:text-emerald-600 sm:block"
+            className="text-sm font-medium text-zinc-600 transition-all duration-300 hover:text-emerald-600"
           >
             Log in
           </Link>
-          <Link to="/signup/user">
-            <Button 
-              className="h-10 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all hover:shadow-emerald-500/40 hover:scale-[1.02] active:scale-[0.98]"
-            >
-              Get Started
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
+          <MagicalCTAButton />
         </div>
-      </div>
+      </motion.div>
     </motion.header>
   );
 }
@@ -304,7 +477,7 @@ export function LandingPage() {
         
         {/* Grid pattern */}
         <div 
-          className="absolute inset-0 opacity-[0.03]"
+          className="absolute inset-0 opacity-[0.08]"
           style={{
             backgroundImage: `linear-gradient(to right, #10b981 1px, transparent 1px), linear-gradient(to bottom, #10b981 1px, transparent 1px)`,
             backgroundSize: '60px 60px'
@@ -677,15 +850,7 @@ export function LandingPage() {
               </p>
               
               <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <Link to="/signup/user">
-                  <Button 
-                    size="lg"
-                    className="h-14 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-8 text-base font-semibold text-white shadow-xl shadow-emerald-500/30 transition-all hover:shadow-emerald-500/50 hover:scale-[1.02] active:scale-[0.98]"
-                  >
-                    Connect to Grid
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
+                <MagicalHeroCTAButton />
                 <Button 
                   variant="outline" 
                   size="lg"
