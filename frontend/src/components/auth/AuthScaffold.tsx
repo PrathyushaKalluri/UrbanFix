@@ -1,19 +1,19 @@
-import type { ReactNode } from 'react'
-import { Navbar } from '../Navbar'
+import type { ReactNode } from "react";
+import { Navbar } from "../Navbar";
 
 type AuthScaffoldProps = {
-  title: string
-  description: string
-  versionTag?: string
-  preForm?: ReactNode
-  children: ReactNode
-  postForm?: ReactNode
-}
+  title: string;
+  description: string;
+  versionTag?: string;
+  preForm?: ReactNode;
+  children: ReactNode;
+  postForm?: ReactNode;
+};
 
 export function AuthScaffold({
   title,
   description,
-  versionTag = 'v4.0.2',
+  versionTag = "v4.0.2",
   preForm,
   children,
   postForm,
@@ -44,20 +44,24 @@ export function AuthScaffold({
                 Orchestrate Your <br /> Urban Reality.
               </h1>
               <p className="max-w-md text-lg text-[#878D89]">
-                Join the precision network connecting premium maintenance with specialized
-                technical expertise.
+                Join the precision network connecting premium maintenance with
+                specialized technical expertise.
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <article className="space-y-2 border border-emerald-200/50 bg-white/70 p-6 shadow-sm backdrop-blur-xl">
-                <span className="font-mono text-xs text-emerald-600">01 // PRECISION</span>
+                <span className="font-mono text-xs text-emerald-600">
+                  01 // PRECISION
+                </span>
                 <p className="text-xs leading-relaxed font-medium text-zinc-700">
                   Verified technical standards for every domestic intervention.
                 </p>
               </article>
               <article className="space-y-2 border border-emerald-200/50 bg-white/70 p-6 shadow-sm backdrop-blur-xl">
-                <span className="font-mono text-xs text-emerald-600">02 // CLARITY</span>
+                <span className="font-mono text-xs text-emerald-600">
+                  02 // CLARITY
+                </span>
                 <p className="text-xs leading-relaxed font-medium text-zinc-700">
                   Transparent status logs and real-time orchestration.
                 </p>
@@ -78,7 +82,9 @@ export function AuthScaffold({
                 <h2 className="text-2xl font-bold text-[#090A0A]">{title}</h2>
                 <p className="mt-1 text-sm text-[#878D89]">{description}</p>
               </div>
-              <span className="font-mono text-[10px] text-[#878D89]/70">{versionTag}</span>
+              <span className="font-mono text-[10px] text-[#878D89]/70">
+                {versionTag}
+              </span>
             </div>
 
             {preForm}
@@ -90,14 +96,21 @@ export function AuthScaffold({
 
       <footer className="relative z-10 flex w-full flex-col items-center justify-center gap-8 border-t border-zinc-100 bg-transparent px-6 py-12 md:flex-row">
         <span className="font-mono text-[10px] tracking-tight text-zinc-400 uppercase">
-          © 2024 UrbanFix. Precision engineered.
+          © {new Date().getFullYear()} UrbanFix
         </span>
         <div className="flex gap-6">
-          <span className="font-mono text-[10px] tracking-tight text-zinc-400 uppercase">Privacy</span>
-          <span className="font-mono text-[10px] tracking-tight text-zinc-400 uppercase">Terms</span>
-          <span className="font-mono text-[10px] tracking-tight text-zinc-400 uppercase">Support</span>
+          <span className="font-mono text-[10px] tracking-tight text-zinc-400 uppercase">
+            Privacy
+          </span>
+          <span className="font-mono text-[10px] tracking-tight text-zinc-400 uppercase">
+            Terms
+          </span>
+          <span className="font-mono text-[10px] tracking-tight text-zinc-400 uppercase">
+            Support
+          </span>
         </div>
       </footer>
     </div>
-  )
+  );
 }
+
