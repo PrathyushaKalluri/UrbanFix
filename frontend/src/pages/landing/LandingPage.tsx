@@ -237,7 +237,7 @@ export function LandingPage() {
         {/* Footer */}
         <footer className="relative z-10 flex w-full flex-col items-center justify-center gap-6 border-t border-emerald-200/30 bg-transparent px-6 py-12 md:flex-row">
           <span className="font-mono text-[10px] tracking-tight text-[#878D89] uppercase">
-            © 2024 UrbanFix. Atmospheric Lab Precision.
+            © {new Date().getFullYear()} UrbanFix. Atmospheric Lab Precision.
           </span>
           <div className="flex gap-6">
             <Link to="#" className="font-mono text-[10px] tracking-tight text-[#878D89] uppercase hover:text-emerald-600 transition-colors">
