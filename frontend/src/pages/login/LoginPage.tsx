@@ -124,6 +124,9 @@ export function LoginPage({ session }: LoginPageProps) {
     return `${baseClasses} border-zinc-200 focus-visible:border-emerald-500/50`
   }
 
+  // Check if form is valid for button styling
+  const isFormValid = form.email && form.password && Object.keys(getFieldErrors(loginSchema, form)).length === 0
+
   return (
     <AuthScaffold
       title="Access Account"
@@ -193,11 +196,15 @@ export function LoginPage({ session }: LoginPageProps) {
           </div>
         )}
 
-        {/* Submit Button - Disabled when form is invalid */}
+        {/* Submit Button - Changes color when form is valid */}
         <Button
           type="submit"
           disabled={loading}
-          className="h-14 w-full rounded-none border border-emerald-300/30 bg-emerald-100 text-sm font-bold tracking-[0.2em] text-emerald-700 uppercase shadow-none hover:bg-emerald-100/90 disabled:opacity-50 disabled:cursor-not-allowed"
+          className={`h-14 w-full rounded-none border text-sm font-bold tracking-[0.2em] uppercase shadow-none transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
+            isFormValid
+              ? 'border-emerald-500 bg-emerald-600 text-white hover:bg-emerald-700'
+              : 'border-emerald-300/30 bg-emerald-100 text-emerald-700 hover:bg-emerald-100/90'
+          }`}
         >
           {loading ? 'Please wait…' : 'Log In'}
         </Button>
