@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { ExpertListing } from '../types/expert'
+import { fetchExpertCatalog } from '../services/expertCatalog'
 
 type ExpertCatalogState = {
   experts: ExpertListing[]
@@ -7,45 +8,46 @@ type ExpertCatalogState = {
   error: string | null
 }
 
-export function useAvailableExperts(): ExpertCatalogState {
+type UseAvailableExpertsOptions = {
+  limit?: number
+}
+
+export function useAvailableExperts(query = '', options: UseAvailableExpertsOptions = {}): ExpertCatalogState {
   const [experts, setExperts] = useState<ExpertListing[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     let active = true
-    const token = localStorage.getItem('authToken')
+    const controller = new AbortController()
+    const normalizedQuery = query.trim()
+
+    if (!normalizedQuery) {
+      setExperts([])
+      setError(null)
+      setLoading(false)
+      return () => {
+        active = false
+        controller.abort()
+      }
+    }
+
+    setLoading(true)
 
     const loadExperts = async () => {
       try {
-        const response = await fetch('/api/experts/all', {
-          headers: token
-            ? {
-                Authorization: `Bearer ${token}`,
-              }
-            : undefined,
+        const data = await fetchExpertCatalog({
+          query: normalizedQuery,
+          limit: options.limit,
+          signal: controller.signal,
         })
-
-        if (!response.ok) {
-          if (response.status === 403) {
-            throw new Error('The expert directory is temporarily unavailable for this session.')
-          }
-
-          if (response.status === 404) {
-            throw new Error('The expert directory endpoint is not available yet.')
-          }
-
-          throw new Error(`Unable to load experts (${response.status})`)
-        }
-
-        const data = (await response.json()) as ExpertListing[]
 
         if (active) {
           setExperts(data)
           setError(null)
         }
       } catch (fetchError) {
-        if (active) {
+        if (active && !(fetchError instanceof DOMException && fetchError.name === 'AbortError')) {
           setExperts([])
           setError(fetchError instanceof Error ? fetchError.message : 'Unable to load experts')
         }
@@ -60,8 +62,9 @@ export function useAvailableExperts(): ExpertCatalogState {
 
     return () => {
       active = false
+      controller.abort()
     }
-  }, [])
+  }, [query, options.limit])
 
   return { experts, loading, error }
 }
