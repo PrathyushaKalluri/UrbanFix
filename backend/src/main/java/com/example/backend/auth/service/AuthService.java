@@ -1,6 +1,7 @@
 package com.example.backend.auth.service;
 
 import com.example.backend.auth.dto.AuthResponse;
+import com.example.backend.auth.dto.ExpertListingResponse;
 import com.example.backend.auth.dto.ExpertRegisterRequest;
 import com.example.backend.auth.dto.LoginRequest;
 import com.example.backend.auth.dto.RegisterRequest;
@@ -14,6 +15,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -126,6 +128,25 @@ public class AuthService {
     }
 
     return response;
+  }
+
+  @Transactional(readOnly = true)
+  public List<ExpertListingResponse> getAllExperts() {
+    return expertProfileRepository.findAll().stream()
+        .sorted(Comparator
+            .comparing(ExpertProfile::getYearsOfExperience, Comparator.reverseOrder())
+            .thenComparing(profile -> profile.getUser().getFullName(), String.CASE_INSENSITIVE_ORDER))
+        .map(profile -> new ExpertListingResponse(
+            profile.getId(),
+            profile.getUser().getId(),
+            profile.getUser().getFullName(),
+            profile.getPrimaryExpertise(),
+            profile.getYearsOfExperience(),
+            profile.getBio(),
+            profile.getAvailable(),
+            profile.getServesAsResident(),
+            profile.getExpertiseAreas()))
+        .toList();
   }
 
   private AuthResponse buildAuthResponse(UserAccount user) {
