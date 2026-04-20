@@ -3,6 +3,7 @@ import type { ChangeEvent, FormEvent, FocusEvent } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { Home, ShieldCheck, Wrench } from 'lucide-react'
 import { AuthScaffold } from '../../components/auth/AuthScaffold'
+import { HYDERABAD_AREAS } from '../../config/hyderabadAreas'
 import { signupRoutes } from '../../config/signupRoutes'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
@@ -20,7 +21,7 @@ type ExpertDetails = {
   yearsOfExperience: string
   expertiseAreas: string
   available: boolean
-  servesAsResident: boolean
+  serviceArea: string
 }
 
 export function SignupPage({ session, role }: SignupPageProps) {
@@ -38,7 +39,7 @@ export function SignupPage({ session, role }: SignupPageProps) {
     yearsOfExperience: '',
     expertiseAreas: '',
     available: true,
-    servesAsResident: true,
+    serviceArea: HYDERABAD_AREAS[0]?.name ?? 'Madhapur',
   })
   const [loading, setLoading] = useState(false)
   const [submitError, setSubmitError] = useState('')
@@ -105,7 +106,7 @@ export function SignupPage({ session, role }: SignupPageProps) {
   }
 
   const updateExpertField =
-    (field: 'primaryExpertise' | 'yearsOfExperience' | 'expertiseAreas') =>
+    (field: 'primaryExpertise' | 'yearsOfExperience' | 'expertiseAreas' | 'serviceArea') =>
     (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       setExpertDetails((current: ExpertDetails) => ({
         ...current,
@@ -114,7 +115,7 @@ export function SignupPage({ session, role }: SignupPageProps) {
     }
 
   const updateExpertToggle =
-    (field: 'available' | 'servesAsResident') => (event: ChangeEvent<HTMLInputElement>) => {
+    (field: 'available') => (event: ChangeEvent<HTMLInputElement>) => {
       setExpertDetails((current: ExpertDetails) => ({
         ...current,
         [field]: event.target.checked,
@@ -160,7 +161,7 @@ export function SignupPage({ session, role }: SignupPageProps) {
         payload.yearsOfExperience = Number.parseInt(expertDetails.yearsOfExperience, 10) || 0
         payload.expertiseAreas = toList(expertDetails.expertiseAreas)
         payload.available = expertDetails.available
-        payload.servesAsResident = expertDetails.servesAsResident
+        payload.serviceArea = expertDetails.serviceArea
       }
 
       await session.submitAuth(config.endpoint, payload)
@@ -375,31 +376,40 @@ export function SignupPage({ session, role }: SignupPageProps) {
               />
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2">
-              <label className="flex items-start gap-3 rounded-xl border border-zinc-200/80 bg-white/70 p-3.5 backdrop-blur-sm">
-                <input
-                  className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-emerald-600"
-                  type="checkbox"
-                  checked={expertDetails.available}
-                  onChange={updateExpertToggle('available')}
-                />
-                <span className="text-[11px] leading-relaxed text-zinc-600 uppercase tracking-[0.1em]">
-                  Currently available for jobs
-                </span>
-              </label>
-
-              <label className="flex items-start gap-3 rounded-xl border border-zinc-200/80 bg-white/70 p-3.5 backdrop-blur-sm">
-                <input
-                  className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-emerald-600"
-                  type="checkbox"
-                  checked={expertDetails.servesAsResident}
-                  onChange={updateExpertToggle('servesAsResident')}
-                />
-                <span className="text-[11px] leading-relaxed text-zinc-600 uppercase tracking-[0.1em]">
-                  I also use UrbanFix as resident
-                </span>
-              </label>
+            <div className="space-y-2">
+              <div className="space-y-2">
+                <Label className="px-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
+                  Service Area (Hyderabad)
+                </Label>
+                <select
+                  value={expertDetails.serviceArea}
+                  onChange={updateExpertField('serviceArea')}
+                  className={expertInputClasses}
+                  required
+                >
+                  {HYDERABAD_AREAS.map((area) => (
+                    <option key={area.name} value={area.name}>
+                      {area.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="px-1 text-[11px] text-zinc-500">
+                  We use this area to automatically determine your service coordinates.
+                </p>
+              </div>
             </div>
+
+            <label className="flex items-start gap-3 rounded-xl border border-zinc-200/80 bg-white/70 p-3.5 backdrop-blur-sm">
+              <input
+                className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-emerald-600"
+                type="checkbox"
+                checked={expertDetails.available}
+                onChange={updateExpertToggle('available')}
+              />
+              <span className="text-[11px] leading-relaxed text-zinc-600 uppercase tracking-[0.1em]">
+                Currently available for jobs
+              </span>
+            </label>
           </>
         )}
 

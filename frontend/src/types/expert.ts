@@ -4,8 +4,9 @@ export type ExpertListing = {
   fullName: string
   primaryExpertise: string
   yearsOfExperience: number
-  bio: string | null
   available: boolean
-  servesAsResident: boolean
+  serviceArea: string | null
+  latitude: number | null
+  longitude: number | null
   expertiseAreas: string[]
 }

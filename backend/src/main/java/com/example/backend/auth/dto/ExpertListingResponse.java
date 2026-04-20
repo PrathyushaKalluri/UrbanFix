@@ -8,8 +8,9 @@ public record ExpertListingResponse(
     String fullName,
     String primaryExpertise,
     Integer yearsOfExperience,
-    String bio,
     Boolean available,
-    Boolean servesAsResident,
+    String serviceArea,
+    Double latitude,
+    Double longitude,
     Set<String> expertiseAreas) {
 }

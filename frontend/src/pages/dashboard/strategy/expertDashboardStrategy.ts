@@ -4,7 +4,6 @@ export type ExpertProfileView = AuthProfile & {
   primaryExpertise: string
   yearsOfExperience: number
   expertiseAreas: string[]
-  bio?: string
   available?: boolean
 }
 
@@ -163,10 +162,6 @@ export function getExpertDashboardContent(profile: ExpertProfileView): ExpertDas
       {
         label: 'Current mode',
         value: availabilityLabel,
-      },
-      {
-        label: 'Profile bio',
-        value: profile.bio ?? 'No bio added yet.',
       },
       {
         label: 'Working areas',

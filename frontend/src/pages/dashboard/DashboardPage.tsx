@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { Droplets, Hammer, Paintbrush, Sparkles, Zap, Wrench } from 'lucide-react'
 import { Navbar } from '../../components/Navbar'
@@ -16,8 +16,51 @@ type DashboardPageProps = {
 
 export function DashboardPage({ session }: DashboardPageProps) {
   const [expertQuery, setExpertQuery] = useState('')
-  const { experts, loading: expertsLoading, error: expertsError } = useAvailableExperts(expertQuery, { limit: 9 })
+  const [requesterCoords, setRequesterCoords] = useState<{ latitude: number; longitude: number } | null>(null)
+  const [locationStatus, setLocationStatus] = useState<'idle' | 'requesting' | 'granted' | 'denied' | 'unavailable'>('idle')
+  const hasExpertQuery = expertQuery.trim().length > 0
+  const locationReadyForSearch = hasExpertQuery && locationStatus === 'granted' && requesterCoords !== null
+  const searchableQuery = locationReadyForSearch ? expertQuery : ''
+
+  const { experts, loading: expertsLoading, error: expertsError } = useAvailableExperts(searchableQuery, {
+    limit: 9,
+    latitude: requesterCoords?.latitude,
+    longitude: requesterCoords?.longitude,
+  })
   const navigate = useNavigate()
+
+  useEffect(() => {
+    const shouldPromptLocation = expertQuery.trim().length > 0 && locationStatus === 'idle'
+
+    if (!shouldPromptLocation) {
+      return
+    }
+
+    if (!navigator.geolocation) {
+      setLocationStatus('unavailable')
+      return
+    }
+
+    setLocationStatus('requesting')
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setRequesterCoords({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        })
+        setLocationStatus('granted')
+      },
+      () => {
+        setRequesterCoords(null)
+        setLocationStatus('denied')
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 5000,
+      },
+    )
+  }, [expertQuery, locationStatus])
 
   const quickLinks = [
     {
@@ -63,8 +106,6 @@ export function DashboardPage({ session }: DashboardPageProps) {
       accent: 'from-sky-50 to-white',
     },
   ]
-  const hasExpertQuery = expertQuery.trim().length > 0
-
   if (session.loading) {
     return (
       <main className="min-h-screen bg-[#FCFDFC] px-6 py-10 text-[#090A0A]">
@@ -123,6 +164,15 @@ export function DashboardPage({ session }: DashboardPageProps) {
                 placeholder="Type a service like electrical, plumbing, or cleaning"
                 className="h-12 rounded-2xl border-zinc-300 bg-white px-5 text-base shadow-sm focus-visible:ring-emerald-400"
               />
+              {hasExpertQuery && locationStatus === 'requesting' ? (
+                <p className="mt-2 text-xs text-[#5F6562]">Requesting your location to narrow nearby experts…</p>
+              ) : null}
+              {hasExpertQuery && locationStatus === 'denied' ? (
+                <p className="mt-2 text-xs text-[#5F6562]">Location access denied. Enable location to view experts in your area and nearby areas.</p>
+              ) : null}
+              {hasExpertQuery && locationStatus === 'unavailable' ? (
+                <p className="mt-2 text-xs text-[#5F6562]">Geolocation is unavailable in this browser. Location is required to show area-based experts.</p>
+              ) : null}
             </div>
 
             <div className="mt-6">
@@ -180,12 +230,16 @@ export function DashboardPage({ session }: DashboardPageProps) {
               <>
                 <div className="mt-7 flex items-center justify-between gap-3">
                   <p className="text-xs font-mono tracking-[0.2em] text-[#878D89] uppercase">Matched experts</p>
-                  {!expertsLoading && !expertsError && experts.length > 0 ? (
+                  {locationReadyForSearch && !expertsLoading && !expertsError && experts.length > 0 ? (
                     <p className="text-sm text-[#5F6562]">{experts.length} experts found</p>
                   ) : null}
                 </div>
 
-                {expertsLoading ? (
+                {!locationReadyForSearch ? (
+                  <div className="mt-4 rounded-xl border border-dashed border-zinc-300 bg-zinc-50 px-5 py-6 text-sm text-[#5F6562]">
+                    Allow location access to show experts in your current and nearby Hyderabad areas.
+                  </div>
+                ) : expertsLoading ? (
                   <div className="mt-4 flex gap-4 overflow-x-auto pb-2">
                     {Array.from({ length: 3 }).map((_, index) => (
                       <div key={index} className="h-48 min-w-[420px] animate-pulse rounded-2xl border border-zinc-200 bg-zinc-50" />
@@ -257,9 +311,6 @@ export function DashboardPage({ session }: DashboardPageProps) {
                         </div>
 
                         <div className="md:w-[170px] md:shrink-0">
-                          <p className="line-clamp-3 text-sm leading-relaxed text-[#5F6562]">
-                            {expert.bio ?? 'Available now for active jobs and direct consultation.'}
-                          </p>
                           <Button
                             type="button"
                             className="mt-4 w-full bg-black text-white hover:bg-zinc-800"

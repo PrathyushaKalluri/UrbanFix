@@ -10,6 +10,8 @@ type ExpertCatalogState = {
 
 type UseAvailableExpertsOptions = {
   limit?: number
+  latitude?: number
+  longitude?: number
 }
 
 export function useAvailableExperts(query = '', options: UseAvailableExpertsOptions = {}): ExpertCatalogState {
@@ -39,6 +41,8 @@ export function useAvailableExperts(query = '', options: UseAvailableExpertsOpti
         const data = await fetchExpertCatalog({
           query: normalizedQuery,
           limit: options.limit,
+          latitude: options.latitude,
+          longitude: options.longitude,
           signal: controller.signal,
         })
 
@@ -64,7 +68,7 @@ export function useAvailableExperts(query = '', options: UseAvailableExpertsOpti
       active = false
       controller.abort()
     }
-  }, [query, options.limit])
+  }, [query, options.limit, options.latitude, options.longitude])
 
   return { experts, loading, error }
 }

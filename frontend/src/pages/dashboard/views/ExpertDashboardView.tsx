@@ -31,9 +31,7 @@ export function ExpertDashboardView({ session }: ExpertDashboardViewProps) {
     primaryExpertise: session.profile?.primaryExpertise ?? 'General Services',
     yearsOfExperience: session.profile?.yearsOfExperience ?? 0,
     expertiseAreas: session.profile?.expertiseAreas ?? [],
-    bio: session.profile?.bio,
     available: session.profile?.available ?? true,
-    servesAsResident: session.profile?.servesAsResident ?? false,
   } satisfies ExpertProfileView
 
   const content = getExpertDashboardContent(profile)

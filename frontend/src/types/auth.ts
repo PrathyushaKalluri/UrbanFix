@@ -18,9 +18,10 @@ export type AuthProfile = {
   primaryExpertise?: string
   yearsOfExperience?: number
   expertiseAreas?: string[]
-  bio?: string
   available?: boolean
-  servesAsResident?: boolean
+  serviceArea?: string
+  latitude?: number | null
+  longitude?: number | null
 }
 
 export type AuthSession = {

@@ -204,7 +204,7 @@ export function MessagesPage({ session }: MessagesPageProps) {
               </div>
               <div className="flex items-center gap-2 text-[#090A0A]">
                 <MessageSquareText className="h-4 w-4 text-emerald-600" />
-                {selectedExpert?.servesAsResident ? 'Resident specialist' : 'On-demand specialist'}
+                {selectedExpert?.serviceArea ? `Area: ${selectedExpert.serviceArea}` : 'Area not set'}
               </div>
             </CardContent>
           </Card>

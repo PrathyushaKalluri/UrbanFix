@@ -33,14 +33,17 @@ public class ExpertProfile {
   @Column(nullable = false)
   private String primaryExpertise;
 
-  @Column(length = 500)
-  private String bio;
-
   @Column(nullable = false)
   private Boolean available;
 
-  @Column(nullable = false)
-  private Boolean servesAsResident;
+  @Column(length = 80)
+  private String serviceArea;
+
+  @Column
+  private Double latitude;
+
+  @Column
+  private Double longitude;
 
   @ElementCollection
   @CollectionTable(name = "expert_expertise", joinColumns = @JoinColumn(name = "expert_profile_id"))
@@ -54,17 +57,19 @@ public class ExpertProfile {
       UserAccount user,
       Integer yearsOfExperience,
       String primaryExpertise,
-      String bio,
       Boolean available,
-      Boolean servesAsResident,
-      Set<String> expertiseAreas) {
+      Set<String> expertiseAreas,
+      String serviceArea,
+      Double latitude,
+      Double longitude) {
     this.user = user;
     this.yearsOfExperience = yearsOfExperience;
     this.primaryExpertise = primaryExpertise;
-    this.bio = bio;
     this.available = available;
-    this.servesAsResident = servesAsResident;
     this.expertiseAreas = new LinkedHashSet<>(expertiseAreas);
+    this.serviceArea = serviceArea;
+    this.latitude = latitude;
+    this.longitude = longitude;
   }
 
   public Long getId() {
@@ -83,20 +88,24 @@ public class ExpertProfile {
     return primaryExpertise;
   }
 
-  public String getBio() {
-    return bio;
-  }
-
   public Boolean getAvailable() {
     return available;
   }
 
-  public Boolean getServesAsResident() {
-    return servesAsResident;
-  }
-
   public Set<String> getExpertiseAreas() {
     return Set.copyOf(expertiseAreas);
+  }
+
+  public String getServiceArea() {
+    return serviceArea;
+  }
+
+  public Double getLatitude() {
+    return latitude;
+  }
+
+  public Double getLongitude() {
+    return longitude;
   }
 
   @Override

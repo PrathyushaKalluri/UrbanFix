@@ -28,6 +28,7 @@ public class AuthService {
 
   private final UserRepository userRepository;
   private final ExpertProfileRepository expertProfileRepository;
+  private final AreaCoordinateResolver areaCoordinateResolver;
   private final PasswordEncoder passwordEncoder;
   private final AuthenticationManager authenticationManager;
   private final JwtService jwtService;
@@ -35,11 +36,13 @@ public class AuthService {
   public AuthService(
       UserRepository userRepository,
       ExpertProfileRepository expertProfileRepository,
+      AreaCoordinateResolver areaCoordinateResolver,
       PasswordEncoder passwordEncoder,
       AuthenticationManager authenticationManager,
       JwtService jwtService) {
     this.userRepository = userRepository;
     this.expertProfileRepository = expertProfileRepository;
+    this.areaCoordinateResolver = areaCoordinateResolver;
     this.passwordEncoder = passwordEncoder;
     this.authenticationManager = authenticationManager;
     this.jwtService = jwtService;
@@ -83,16 +86,17 @@ public class AuthService {
     int yearsOfExperience = normalizeYearsOfExperience(request.yearsOfExperience());
     Set<String> expertiseAreas = normalizeValues(request.expertiseAreas(), primaryExpertise);
     boolean available = request.available() == null ? true : request.available();
-    boolean servesAsResident = request.servesAsResident() == null ? true : request.servesAsResident();
+    ResolvedAreaCoordinate resolvedArea = areaCoordinateResolver.resolve(request.serviceArea());
 
     ExpertProfile expertProfile = new ExpertProfile(
         savedUser,
-      yearsOfExperience,
-      primaryExpertise,
-        request.bio(),
-      available,
-      servesAsResident,
-        expertiseAreas);
+        yearsOfExperience,
+        primaryExpertise,
+        available,
+        expertiseAreas,
+        resolvedArea.areaName(),
+        resolvedArea.latitude(),
+        resolvedArea.longitude());
 
     expertProfileRepository.save(expertProfile);
 
@@ -123,7 +127,9 @@ public class AuthService {
         response.put("yearsOfExperience", profile.getYearsOfExperience());
         response.put("expertiseAreas", profile.getExpertiseAreas());
         response.put("available", profile.getAvailable());
-        response.put("servesAsResident", profile.getServesAsResident());
+        response.put("serviceArea", profile.getServiceArea());
+        response.put("latitude", profile.getLatitude());
+        response.put("longitude", profile.getLongitude());
       });
     }
 
@@ -142,9 +148,10 @@ public class AuthService {
             profile.getUser().getFullName(),
             profile.getPrimaryExpertise(),
             profile.getYearsOfExperience(),
-            profile.getBio(),
             profile.getAvailable(),
-            profile.getServesAsResident(),
+            profile.getServiceArea(),
+            profile.getLatitude(),
+            profile.getLongitude(),
             profile.getExpertiseAreas()))
         .toList();
   }
