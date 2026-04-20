@@ -471,7 +471,7 @@ function PremiumSearchButton() {
   );
 }
 
-// Modern Premium Navbar - Clean Floating Style
+// Modern Premium Navbar - Floating Glass Pill Design (21st.dev inspired)
 function ModernNavbar() {
   const [scrolled, setScrolled] = useState(false);
   
@@ -488,37 +488,71 @@ function ModernNavbar() {
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       className="fixed left-0 right-0 top-0 z-50 px-4 py-4 sm:px-6"
     >
-      <motion.div 
-        layout
-        className={`mx-auto flex w-full max-w-5xl items-center justify-between transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-          scrolled 
-            ? "rounded-2xl bg-white/80 px-6 py-3 shadow-[0_8px_32px_rgba(0,0,0,0.06)] backdrop-blur-xl"
-            : "rounded-2xl bg-white/0 px-6 py-3"
-        }`}
-        style={{
-          border: scrolled ? "1px solid rgba(255, 255, 255, 0.5)" : "1px solid transparent",
-        }}
-      >
-        <Link 
-          to="/" 
-          className="flex items-center gap-2.5 text-lg font-semibold tracking-tight text-zinc-900 transition-all duration-300 hover:opacity-80"
-        >
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg shadow-emerald-500/25">
-            <Zap className="h-4 w-4 text-white" fill="currentColor" />
+      <div className="mx-auto max-w-5xl">
+        <div className="relative flex items-center justify-between">
+          {/* Glass effect layer - fades in on scroll */}
+          <motion.div
+            className="absolute inset-0 -z-10 rounded-full bg-white/60 shadow-[0_8px_32px_rgba(0,0,0,0.08)] backdrop-blur-2xl"
+            initial={false}
+            animate={{
+              opacity: scrolled ? 1 : 0,
+              scale: scrolled ? 1 : 0.95,
+            }}
+            transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+            style={{
+              border: scrolled ? "1px solid rgba(255, 255, 255, 0.4)" : "none",
+            }}
+          />
+          
+          {/* Gradient glow behind glass */}
+          <motion.div 
+            className="pointer-events-none absolute inset-0 -z-20 rounded-full"
+            initial={false}
+            animate={{
+              opacity: scrolled ? 0.4 : 0,
+            }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            style={{
+              background: 'linear-gradient(90deg, rgba(16,185,129,0.1) 0%, rgba(52,211,153,0.15) 50%, rgba(16,185,129,0.1) 100%)',
+              filter: 'blur(8px)',
+            }}
+          />
+          
+          {/* Content - always full width, consistent padding */}
+          <div className="relative z-10 flex w-full items-center justify-between px-6 py-3">
+            <Link 
+              to="/" 
+              className="flex items-center gap-2.5 text-lg font-semibold tracking-tight text-zinc-900 transition-opacity duration-300 hover:opacity-80"
+            >
+              <motion.div 
+                className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg shadow-emerald-500/25"
+                animate={{
+                  scale: scrolled ? 0.9 : 1,
+                }}
+                transition={{ duration: 0.4 }}
+              >
+                <Zap className="h-4 w-4 text-white" fill="currentColor" />
+              </motion.div>
+              <span className="hidden sm:inline">UrbanFix</span>
+            </Link>
+            
+            <div className="flex items-center" style={{ gap: '12px' }}>
+              <Link 
+                to="/login"
+                className="text-sm font-medium text-zinc-600 transition-colors duration-300 hover:text-emerald-600"
+              >
+                Log in
+              </Link>
+              <motion.div 
+                animate={{ scale: scrolled ? 0.9 : 1 }}
+                transition={{ duration: 0.4 }}
+              >
+                <PremiumCTAButton />
+              </motion.div>
+            </div>
           </div>
-          <span className="hidden sm:inline">UrbanFix</span>
-        </Link>
-        
-        <div className="flex items-center gap-3">
-          <Link 
-            to="/login"
-            className="text-sm font-medium text-zinc-600 transition-all duration-300 hover:text-emerald-600"
-          >
-            Log in
-          </Link>
-          <PremiumCTAButton />
         </div>
-      </motion.div>
+      </div>
     </motion.header>
   );
 }
