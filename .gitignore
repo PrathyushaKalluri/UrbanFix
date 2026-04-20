@@ -49,6 +49,11 @@ frontend/*.log
 frontend/.vercel
 frontend/.netlify
 
+# Frontend - playwright testing 
+frontend/.playwright-mcp
 
 # Backend - Build outputs
 backend/target/
+
+# docs 
+docs/
