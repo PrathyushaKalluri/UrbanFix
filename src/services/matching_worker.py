@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
 from event_bus.abstractions import Consumer, Producer
-from event_bus.schemas import MatchFound, RequestCreated
+from event_bus.schemas import AssignmentCreated, MatchFound, RequestCreated
 from matching_engine.engine import MatchingEngine
 from matching_engine.models import ExpertProfile, Location, ProblemInput
+from routing_engine import ExpertResponseSimulator, RoutingEngine
 
 
 @dataclass
@@ -15,6 +16,8 @@ class MatchingWorker:
     producer: Producer
     engine: MatchingEngine
     experts: List[ExpertProfile]
+    routing_engine: Optional[RoutingEngine] = None
+    response_simulator: Optional[ExpertResponseSimulator] = None
 
     def start(self) -> None:
         self.consumer.subscribe(["requests"])
@@ -66,6 +69,34 @@ class MatchingWorker:
                 payload=match_payload.to_payload(),
                 key=request_event.request_id,
             )
+
+            if self.routing_engine is not None and self.response_simulator is not None:
+                routing_result = self.routing_engine.route(
+                    ranked_experts=response.matches,
+                    simulator=self.response_simulator,
+                )
+                assignment_payload = AssignmentCreated.build(
+                    request_id=request_event.request_id,
+                    assigned_expert_id=routing_result.assigned_expert_id,
+                    assigned_expert_name=routing_result.assigned_expert_name,
+                    contacted_expert_ids=routing_result.contacted_expert_ids,
+                    rejected_expert_ids=routing_result.rejected_expert_ids,
+                    cancelled_expert_ids=routing_result.cancelled_expert_ids,
+                    attempts=[
+                        {
+                            "expert_id": attempt.expert_id,
+                            "expert_name": attempt.expert_name,
+                            "rank": attempt.rank,
+                            "accepted": attempt.accepted,
+                        }
+                        for attempt in routing_result.attempts
+                    ],
+                )
+                self.producer.send(
+                    topic="assignments",
+                    payload=assignment_payload.to_payload(),
+                    key=request_event.request_id,
+                )
             processed += 1
 
         return processed

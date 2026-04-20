@@ -34,6 +34,7 @@ This design documents the complete backend system for **UrbanFix** — a platfor
 Core implementation is under [src](src):
 
 - [src/matching_engine](src/matching_engine): matching pipeline and scoring strategies
+- [src/routing_engine](src/routing_engine): fallback assignment routing using Chain of Responsibility
 - [src/event_bus](src/event_bus): event bus abstraction with Kafka/in-memory support
 - [src/services](src/services): query publisher, matching consumer, notification consumer
 
@@ -42,6 +43,7 @@ Core implementation is under [src](src):
 Runnable examples are under [examples](examples):
 
 - [examples/matching_example.py](examples/matching_example.py): direct matching pipeline
+- [examples/routing_example.py](examples/routing_example.py): ranked experts -> fallback assignment flow
 - [examples/event_driven_flow_example.py](examples/event_driven_flow_example.py): RequestCreated -> MatchFound -> Notification flow
 
 ### 4. **Tests**
@@ -147,10 +149,10 @@ Tests are under [tests](tests):
 
 #### 📍 **Routing Engine**
 
-- Verifies expert availability
-- Checks location feasibility
-- Applies load balancing
-- Suggests assignment route
+- Consumes ranked experts and routes top-3 with fallback handling
+- Uses Chain of Responsibility so each expert handler can accept or pass along
+- Assigns first accepting expert and cancels remaining outstanding candidates
+- Simulates acceptance/rejection behavior for deterministic tests and demos
 
 #### ⭐ **Ranking System**
 

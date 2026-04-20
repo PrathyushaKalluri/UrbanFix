@@ -93,3 +93,55 @@ class MatchFound:
 
     def to_payload(self) -> Dict[str, Any]:
         return asdict(self)
+
+
+@dataclass(frozen=True)
+class AssignmentCreated:
+    event_name: str
+    request_id: str
+    assigned_expert_id: str | None
+    assigned_expert_name: str | None
+    contacted_expert_ids: List[str]
+    rejected_expert_ids: List[str]
+    cancelled_expert_ids: List[str]
+    attempts: List[Dict[str, Any]]
+    occurred_at: str
+
+    @staticmethod
+    def build(
+        request_id: str,
+        assigned_expert_id: str | None,
+        assigned_expert_name: str | None,
+        contacted_expert_ids: List[str],
+        rejected_expert_ids: List[str],
+        cancelled_expert_ids: List[str],
+        attempts: List[Dict[str, Any]],
+    ) -> "AssignmentCreated":
+        return AssignmentCreated(
+            event_name="AssignmentCreated",
+            request_id=request_id,
+            assigned_expert_id=assigned_expert_id,
+            assigned_expert_name=assigned_expert_name,
+            contacted_expert_ids=contacted_expert_ids,
+            rejected_expert_ids=rejected_expert_ids,
+            cancelled_expert_ids=cancelled_expert_ids,
+            attempts=attempts,
+            occurred_at=datetime.now(timezone.utc).isoformat(),
+        )
+
+    @staticmethod
+    def from_payload(payload: Dict[str, Any]) -> "AssignmentCreated":
+        return AssignmentCreated(
+            event_name=payload["event_name"],
+            request_id=payload["request_id"],
+            assigned_expert_id=payload.get("assigned_expert_id"),
+            assigned_expert_name=payload.get("assigned_expert_name"),
+            contacted_expert_ids=list(payload.get("contacted_expert_ids", [])),
+            rejected_expert_ids=list(payload.get("rejected_expert_ids", [])),
+            cancelled_expert_ids=list(payload.get("cancelled_expert_ids", [])),
+            attempts=list(payload.get("attempts", [])),
+            occurred_at=payload["occurred_at"],
+        )
+
+    def to_payload(self) -> Dict[str, Any]:
+        return asdict(self)

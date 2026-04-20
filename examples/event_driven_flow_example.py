@@ -7,7 +7,9 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parents[1] / "src"))
 
 from event_bus.factory import build_event_bus
+from event_bus.schemas import AssignmentCreated
 from matching_engine import Availability, ExpertProfile, Location, ProblemInput, build_default_engine
+from routing_engine import DeterministicResponseSimulator, RoutingEngine
 from services import MatchingWorker, NotificationWorker, QueryService
 
 
@@ -46,11 +48,20 @@ def main() -> None:
         producer=bus.producer(),
         engine=build_default_engine(),
         experts=sample_experts(),
+        routing_engine=RoutingEngine(max_experts_to_route=3),
+        response_simulator=DeterministicResponseSimulator(
+            {
+                "exp-001": False,
+                "exp-002": True,
+            }
+        ),
     )
     notification_worker = NotificationWorker(consumer=bus.consumer(group_id="notifications"))
+    assignments_consumer = bus.consumer(group_id="assignments-reader")
 
     matching_worker.start()
     notification_worker.start()
+    assignments_consumer.subscribe(["assignments"])
 
     request_id = query_service.create_request(
         ProblemInput(
@@ -65,10 +76,23 @@ def main() -> None:
 
     matching_worker.process_once()
     notification_worker.process_once()
+    assignment_records = assignments_consumer.poll(max_messages=5)
+    assignments = [AssignmentCreated.from_payload(record.payload) for record in assignment_records]
 
     output = {
         "request_id": request_id,
         "notifications": notification_worker.sent_notifications,
+        "assignments": [
+            {
+                "request_id": event.request_id,
+                "assigned_expert_id": event.assigned_expert_id,
+                "assigned_expert_name": event.assigned_expert_name,
+                "contacted_expert_ids": event.contacted_expert_ids,
+                "rejected_expert_ids": event.rejected_expert_ids,
+                "cancelled_expert_ids": event.cancelled_expert_ids,
+            }
+            for event in assignments
+        ],
     }
     print(json.dumps(output, indent=2))
 
