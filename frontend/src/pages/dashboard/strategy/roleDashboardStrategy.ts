@@ -15,17 +15,17 @@ const roleStrategies: Record<Role, RoleDashboardStrategy> = {
   USER: {
     supports: 'USER',
     content: {
-      title: 'User workspace',
-      body: 'You will be able to raise home service requests and track their status from here.',
-      accent: 'Customer',
+      title: 'Expert directory',
+      body: 'Browse experts who are available right now, review their skills, and open a chat when you are ready to connect.',
+      accent: 'Resident user',
     },
   },
   EXPERT: {
     supports: 'EXPERT',
     content: {
-      title: 'Expert workspace',
-      body: 'Incoming home repair requests will appear here once the request module is added.',
-      accent: 'Technician',
+      title: 'Expert console',
+      body: 'Track incoming requests, chat with residents, and manage your availability from one work-oriented dashboard.',
+      accent: 'Specialist',
     },
   },
 }

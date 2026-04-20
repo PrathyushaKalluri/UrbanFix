@@ -15,6 +15,12 @@ export type AuthProfile = {
   fullName: string
   email: string
   role: Role
+  primaryExpertise?: string
+  yearsOfExperience?: number
+  expertiseAreas?: string[]
+  bio?: string
+  available?: boolean
+  servesAsResident?: boolean
 }
 
 export type AuthSession = {
