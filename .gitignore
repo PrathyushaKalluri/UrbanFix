@@ -48,3 +48,7 @@ frontend/.nyc_output/
 frontend/*.log
 frontend/.vercel
 frontend/.netlify
+
+
+# Backend - Build outputs
+backend/target/
