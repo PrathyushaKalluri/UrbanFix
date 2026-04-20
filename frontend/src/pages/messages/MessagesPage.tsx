@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { ArrowLeft, MessageSquareText, Send, ShieldCheck, Sparkles, Zap } from 'lucide-react'
 import { Badge } from '../../components/ui/badge'
@@ -22,6 +22,10 @@ export function MessagesPage({ session }: MessagesPageProps) {
   const { experts, loading, error } = useAvailableExperts()
   const [draft, setDraft] = useState('')
   const [messages, setMessages] = useState<ChatMessage[]>([])
+
+  useEffect(() => {
+    document.title = 'UrbanFix | Messages'
+  }, [])
 
   const selectedExpert = useMemo(
     () => experts.find((expert) => String(expert.expertId) === expertId) ?? experts[0] ?? null,

@@ -652,6 +652,10 @@ export function LandingPage() {
   const { scrollYProgress } = useScroll();
   const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
 
+  useEffect(() => {
+    document.title = "UrbanFix | Landing";
+  }, []);
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#fafafa] text-zinc-900">
       {/* Background Elements */}

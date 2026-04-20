@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import type { AuthSession } from '../../types/auth'
 import { PageShell } from '../../components/PageShell'
@@ -7,6 +8,10 @@ type HomePageProps = {
 }
 
 export function HomePage({ session }: HomePageProps) {
+  useEffect(() => {
+    document.title = 'UrbanFix | Home'
+  }, [])
+
   if (session.loading) {
     return (
       <main className="app-shell">

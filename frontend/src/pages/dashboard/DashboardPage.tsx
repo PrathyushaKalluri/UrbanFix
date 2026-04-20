@@ -62,6 +62,15 @@ export function DashboardPage({ session }: DashboardPageProps) {
     )
   }, [expertQuery, locationStatus])
 
+  useEffect(() => {
+    if (session.profile?.role === 'EXPERT') {
+      document.title = 'UrbanFix | Expert Dashboard'
+      return
+    }
+
+    document.title = 'UrbanFix | Dashboard'
+  }, [session.profile?.role])
+
   const quickLinks = [
     {
       label: 'Plumbing',

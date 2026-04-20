@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { ChangeEvent, FormEvent, FocusEvent } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { Home, ShieldCheck, Wrench } from 'lucide-react'
@@ -44,6 +44,10 @@ export function SignupPage({ session, role }: SignupPageProps) {
   const [loading, setLoading] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const [acceptTerms, setAcceptTerms] = useState(false)
+
+  useEffect(() => {
+    document.title = role === 'EXPERT' ? 'UrbanFix | Expert Signup' : 'UrbanFix | User Signup'
+  }, [role])
 
   if (session.loading) {
     return (
