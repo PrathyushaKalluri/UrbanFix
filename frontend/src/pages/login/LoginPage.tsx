@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { ChangeEvent, FormEvent, FocusEvent } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { ShieldCheck } from 'lucide-react'
 import { AuthScaffold } from '../../components/auth/AuthScaffold'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
@@ -24,18 +25,19 @@ export function LoginPage({ session }: LoginPageProps) {
   const [submitError, setSubmitError] = useState('')
 
   useEffect(() => {
-    document.title = 'Spring Boot + React'
+    document.title = 'UrbanFix | Login'
   }, [])
 
   if (session.loading) {
     return (
-      <main className="app-shell">
-        <section className="card auth-card">
-          <p className="eyebrow">Loading</p>
-          <h1>Checking your session…</h1>
-          <p className="supporting-text">Please wait while we verify your token.</p>
-        </section>
-      </main>
+      <AuthScaffold
+        title="Checking Session"
+        description="Please wait while we verify your token."
+      >
+        <div className="rounded-2xl border border-zinc-200/70 bg-white/70 px-5 py-5 text-sm text-zinc-600 backdrop-blur-sm">
+          Preparing secure access to your UrbanFix workspace...
+        </div>
+      </AuthScaffold>
     )
   }
 
@@ -114,14 +116,15 @@ export function LoginPage({ session }: LoginPageProps) {
     }
   }
 
-  const getInputClasses = (field: string, hasError: boolean) => {
-    const baseClasses = "h-12 rounded-none bg-white px-4 py-3 text-sm tracking-wide placeholder:text-zinc-300 focus-visible:ring-0 transition-colors"
-    
+  const getInputClasses = (hasError: boolean) => {
+    const baseClasses =
+      'h-12 rounded-xl border border-zinc-200/80 bg-white/85 px-4 py-3 text-sm text-zinc-800 placeholder:text-zinc-400 shadow-sm transition-all duration-200 focus-visible:border-emerald-300/70 focus-visible:bg-white focus-visible:ring-0 focus-visible:shadow-[0_0_0_3px_rgba(16,185,129,0.12)]'
+
     if (hasError) {
-      return `${baseClasses} border-red-400 bg-red-50/30 focus-visible:border-red-500`
+      return `${baseClasses} border-red-300 bg-red-50/70 focus-visible:border-red-400 focus-visible:shadow-[0_0_0_3px_rgba(248,113,113,0.18)]`
     }
-    
-    return `${baseClasses} border-zinc-200 focus-visible:border-emerald-500/50`
+
+    return baseClasses
   }
 
   // Check if form is valid for button styling
@@ -131,21 +134,32 @@ export function LoginPage({ session }: LoginPageProps) {
     <AuthScaffold
       title="Access Account"
       description="Authenticate to continue as resident or specialist."
+      preForm={
+        <div className="mb-8 rounded-2xl border border-emerald-200/60 bg-emerald-50/55 px-4 py-4 backdrop-blur-sm">
+          <p className="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-emerald-700">
+            <ShieldCheck className="h-3.5 w-3.5" />
+            Verified access layer
+          </p>
+          <p className="text-sm leading-relaxed text-zinc-600">
+            Use your UrbanFix credentials to sync with your resident or specialist dashboard.
+          </p>
+        </div>
+      }
       postForm={
         <div className="mt-8 flex justify-center border-t border-zinc-200/60 pt-6">
-          <p className="text-[11px] tracking-widest text-[#878D89] uppercase">
+          <p className="text-xs text-zinc-500">
             New to the network?{' '}
-            <Link className="font-bold text-[#090A0A] transition-colors hover:text-emerald-600" to="/signup/user">
+            <Link className="font-semibold text-emerald-600 transition-colors hover:text-emerald-700" to="/signup/user">
               Create Account
             </Link>
           </p>
         </div>
       }
     >
-      <form className="space-y-6" onSubmit={submitForm} noValidate>
+      <form className="space-y-5" onSubmit={submitForm} noValidate>
         {/* Email Field */}
-        <div className="space-y-1.5">
-          <Label className="px-1 font-mono text-[10px] tracking-wider text-[#878D89] uppercase">
+        <div className="space-y-2">
+          <Label className="px-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
             Email
           </Label>
           <Input
@@ -155,7 +169,7 @@ export function LoginPage({ session }: LoginPageProps) {
             onBlur={handleBlur('email')}
             onFocus={handleFocus('email')}
             placeholder="kedar@urbanfix.in"
-            className={getInputClasses('email', !!errors.email && touched.email)}
+            className={getInputClasses(!!errors.email && touched.email)}
             aria-invalid={!!errors.email && touched.email}
             aria-describedby={errors.email && touched.email ? 'email-error' : undefined}
           />
@@ -167,8 +181,8 @@ export function LoginPage({ session }: LoginPageProps) {
         </div>
 
         {/* Password Field */}
-        <div className="space-y-1.5">
-          <Label className="px-1 font-mono text-[10px] tracking-wider text-[#878D89] uppercase">
+        <div className="space-y-2">
+          <Label className="px-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
             Password
           </Label>
           <Input
@@ -178,7 +192,7 @@ export function LoginPage({ session }: LoginPageProps) {
             onBlur={handleBlur('password')}
             onFocus={handleFocus('password')}
             placeholder="••••••••••••"
-            className={getInputClasses('password', !!errors.password && touched.password)}
+            className={getInputClasses(!!errors.password && touched.password)}
             aria-invalid={!!errors.password && touched.password}
             aria-describedby={errors.password && touched.password ? 'password-error' : undefined}
           />
@@ -191,7 +205,7 @@ export function LoginPage({ session }: LoginPageProps) {
 
         {/* Submit Error (server-side errors) */}
         {submitError && (
-          <div className="rounded-none border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="rounded-2xl border border-red-200 bg-red-50/90 px-4 py-3 text-sm text-red-700">
             {submitError}
           </div>
         )}
@@ -200,10 +214,10 @@ export function LoginPage({ session }: LoginPageProps) {
         <Button
           type="submit"
           disabled={loading}
-          className={`h-14 w-full rounded-none border text-sm font-bold tracking-[0.2em] uppercase shadow-none transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
+          className={`h-12 w-full rounded-xl border text-sm font-semibold tracking-[0.12em] uppercase transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-60 ${
             isFormValid
-              ? 'border-emerald-500 bg-emerald-600 text-white hover:bg-emerald-700'
-              : 'border-emerald-300/30 bg-emerald-100 text-emerald-700 hover:bg-emerald-100/90'
+              ? 'border-emerald-300/40 bg-gradient-to-b from-emerald-400 to-emerald-500 text-white shadow-lg shadow-emerald-500/25 hover:from-emerald-300 hover:to-emerald-400'
+              : 'border-zinc-200 bg-white/70 text-zinc-500 hover:bg-zinc-50'
           }`}
         >
           {loading ? 'Please wait…' : 'Log In'}

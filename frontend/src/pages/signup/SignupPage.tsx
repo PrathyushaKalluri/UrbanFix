@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { ChangeEvent, FormEvent, FocusEvent } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Home, ShieldCheck, Wrench } from 'lucide-react'
 import { AuthScaffold } from '../../components/auth/AuthScaffold'
 import { signupRoutes } from '../../config/signupRoutes'
 import { Button } from '../../components/ui/button'
@@ -45,13 +46,14 @@ export function SignupPage({ session, role }: SignupPageProps) {
 
   if (session.loading) {
     return (
-      <main className="app-shell">
-        <section className="card auth-card">
-          <p className="eyebrow">Loading</p>
-          <h1>Checking your session…</h1>
-          <p className="supporting-text">Please wait while we verify your token.</p>
-        </section>
-      </main>
+      <AuthScaffold
+        title="Checking Session"
+        description="Please wait while we verify your token."
+      >
+        <div className="rounded-2xl border border-zinc-200/70 bg-white/70 px-5 py-5 text-sm text-zinc-600 backdrop-blur-sm">
+          Preparing secure access to your UrbanFix workspace...
+        </div>
+      </AuthScaffold>
     )
   }
 
@@ -170,15 +172,19 @@ export function SignupPage({ session, role }: SignupPageProps) {
     }
   }
 
-  const getInputClasses = (field: string, hasError: boolean) => {
-    const baseClasses = "h-12 rounded-none bg-white px-4 py-3 text-sm tracking-wide placeholder:text-zinc-300 focus-visible:ring-0 transition-colors"
-    
+  const getInputClasses = (hasError: boolean) => {
+    const baseClasses =
+      'h-12 rounded-xl border border-zinc-200/80 bg-white/85 px-4 py-3 text-sm text-zinc-800 placeholder:text-zinc-400 shadow-sm transition-all duration-200 focus-visible:border-emerald-300/70 focus-visible:bg-white focus-visible:ring-0 focus-visible:shadow-[0_0_0_3px_rgba(16,185,129,0.12)]'
+
     if (hasError) {
-      return `${baseClasses} border-red-400 bg-red-50/30 focus-visible:border-red-500`
+      return `${baseClasses} border-red-300 bg-red-50/70 focus-visible:border-red-400 focus-visible:shadow-[0_0_0_3px_rgba(248,113,113,0.18)]`
     }
-    
-    return `${baseClasses} border-zinc-200 focus-visible:border-emerald-500/50`
+
+    return baseClasses
   }
+
+  const expertInputClasses =
+    'h-12 rounded-xl border border-zinc-200/80 bg-white/85 px-4 py-3 text-sm text-zinc-800 placeholder:text-zinc-400 shadow-sm transition-all duration-200 focus-visible:border-emerald-300/70 focus-visible:bg-white focus-visible:ring-0 focus-visible:shadow-[0_0_0_3px_rgba(16,185,129,0.12)]'
 
   // Check if form is valid for button styling
   const isFormValid = form.fullName && form.email && form.password && 
@@ -186,51 +192,77 @@ export function SignupPage({ session, role }: SignupPageProps) {
 
   return (
     <AuthScaffold
-      title="Create Account"
-      description="Select your profile to begin."
+      title={role === 'EXPERT' ? 'Join as Specialist' : 'Create Resident Account'}
+      description="Select your profile and complete onboarding to unlock your UrbanFix workspace."
       preForm={
-        <div className="mb-8 grid grid-cols-2 gap-4">
-          <Link
-            to="/signup/user"
-            className={`flex flex-col items-center justify-center gap-3 border p-6 text-center transition-all ${
-              role === 'USER'
-                ? 'border-emerald-500 bg-emerald-100/40 text-emerald-700'
-                : 'border-zinc-200 text-[#878D89] hover:border-emerald-500/50 hover:bg-zinc-50'
-            }`}
-          >
-            <span className="text-3xl">🏠</span>
-            <span className="font-mono text-[10px] tracking-widest font-bold uppercase">Join as resident</span>
-          </Link>
+        <>
+          <div className="mb-5 rounded-2xl border border-emerald-200/60 bg-emerald-50/55 px-4 py-4 backdrop-blur-sm">
+            <p className="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-emerald-700">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              Unified onboarding fabric
+            </p>
+            <p className="text-sm leading-relaxed text-zinc-600">
+              Choose your role first, then complete account setup with the same landing-page visual language.
+            </p>
+          </div>
 
-          <Link
-            to="/signup/expert"
-            className={`flex flex-col items-center justify-center gap-3 border p-6 text-center transition-all ${
-              role === 'EXPERT'
-                ? 'border-emerald-500 bg-emerald-100/40 text-emerald-700'
-                : 'border-zinc-200 text-[#878D89] hover:border-emerald-500/50 hover:bg-zinc-50'
-            }`}
-          >
-            <span className="text-3xl">🛠️</span>
-            <span className="font-mono text-[10px] tracking-widest font-bold uppercase">Join as specialist</span>
-          </Link>
-        </div>
+          <div className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <Link
+              to="/signup/user"
+              className={`group rounded-2xl border p-5 transition-all duration-300 ${
+                role === 'USER'
+                  ? 'border-emerald-300/70 bg-emerald-50/70 shadow-[0_8px_24px_rgba(16,185,129,0.12)]'
+                  : 'border-zinc-200/80 bg-white/65 hover:border-emerald-200/70 hover:bg-emerald-50/45'
+              }`}
+            >
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-200/50 bg-white/80 text-emerald-600">
+                <Home className="h-5 w-5" />
+              </div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-700">
+                Join as Resident
+              </p>
+              <p className="mt-1 text-xs text-zinc-500">
+                Request and track home services.
+              </p>
+            </Link>
+
+            <Link
+              to="/signup/expert"
+              className={`group rounded-2xl border p-5 transition-all duration-300 ${
+                role === 'EXPERT'
+                  ? 'border-emerald-300/70 bg-emerald-50/70 shadow-[0_8px_24px_rgba(16,185,129,0.12)]'
+                  : 'border-zinc-200/80 bg-white/65 hover:border-emerald-200/70 hover:bg-emerald-50/45'
+              }`}
+            >
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-200/50 bg-white/80 text-emerald-600">
+                <Wrench className="h-5 w-5" />
+              </div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-700">
+                Join as Specialist
+              </p>
+              <p className="mt-1 text-xs text-zinc-500">
+                Offer services and manage availability.
+              </p>
+            </Link>
+          </div>
+        </>
       }
       postForm={
         <div className="mt-8 flex justify-center border-t border-zinc-200/60 pt-6">
-          <p className="text-[11px] tracking-widest text-[#878D89] uppercase">
+          <p className="text-xs text-zinc-500">
             Already in the system?{' '}
-            <Link className="font-bold text-[#090A0A] transition-colors hover:text-emerald-600" to="/login">
+            <Link className="font-semibold text-emerald-600 transition-colors hover:text-emerald-700" to="/login">
               Log In
             </Link>
           </p>
         </div>
       }
     >
-      <form className="space-y-6" onSubmit={submitForm} noValidate>
+      <form className="space-y-5" onSubmit={submitForm} noValidate>
         {/* Full Name Field */}
-        <div className="space-y-1.5">
-          <Label className="px-1 font-mono text-[10px] tracking-wider text-[#878D89] uppercase">
-            Full Identity
+        <div className="space-y-2">
+          <Label className="px-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
+            Full Name
           </Label>
           <Input
             value={form.fullName}
@@ -238,7 +270,7 @@ export function SignupPage({ session, role }: SignupPageProps) {
             onBlur={handleBlur('fullName')}
             onFocus={handleFocus('fullName')}
             placeholder="Kedar Dalvi"
-            className={getInputClasses('fullName', !!errors.fullName && touched.fullName)}
+            className={getInputClasses(!!errors.fullName && touched.fullName)}
             aria-invalid={!!errors.fullName && touched.fullName}
             aria-describedby={errors.fullName && touched.fullName ? 'fullname-error' : undefined}
           />
@@ -250,8 +282,8 @@ export function SignupPage({ session, role }: SignupPageProps) {
         </div>
 
         {/* Email Field */}
-        <div className="space-y-1.5">
-          <Label className="px-1 font-mono text-[10px] tracking-wider text-[#878D89] uppercase">
+        <div className="space-y-2">
+          <Label className="px-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
             Email
           </Label>
           <Input
@@ -261,7 +293,7 @@ export function SignupPage({ session, role }: SignupPageProps) {
             onBlur={handleBlur('email')}
             onFocus={handleFocus('email')}
             placeholder="kedar@urbanfix.in"
-            className={getInputClasses('email', !!errors.email && touched.email)}
+            className={getInputClasses(!!errors.email && touched.email)}
             aria-invalid={!!errors.email && touched.email}
             aria-describedby={errors.email && touched.email ? 'email-error' : undefined}
           />
@@ -273,8 +305,8 @@ export function SignupPage({ session, role }: SignupPageProps) {
         </div>
 
         {/* Password Field */}
-        <div className="space-y-1.5">
-          <Label className="px-1 font-mono text-[10px] tracking-wider text-[#878D89] uppercase">
+        <div className="space-y-2">
+          <Label className="px-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
             Password
           </Label>
           <Input
@@ -284,7 +316,7 @@ export function SignupPage({ session, role }: SignupPageProps) {
             onBlur={handleBlur('password')}
             onFocus={handleFocus('password')}
             placeholder="••••••••••••"
-            className={getInputClasses('password', !!errors.password && touched.password)}
+            className={getInputClasses(!!errors.password && touched.password)}
             aria-invalid={!!errors.password && touched.password}
             aria-describedby={errors.password && touched.password ? 'password-error' : undefined}
           />
@@ -302,21 +334,21 @@ export function SignupPage({ session, role }: SignupPageProps) {
 
         {role === 'EXPERT' && (
           <>
-            <div className="space-y-1.5">
-              <Label className="px-1 font-mono text-[10px] tracking-wider text-[#878D89] uppercase">
+            <div className="space-y-2">
+              <Label className="px-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
                 Primary Expertise
               </Label>
               <Input
                 value={expertDetails.primaryExpertise}
                 onChange={updateExpertField('primaryExpertise')}
                 placeholder="Electrical, Plumbing, AC Repair"
-                className="h-12 rounded-none border-zinc-200 bg-white px-4 py-3 text-sm tracking-wide placeholder:text-zinc-300 focus-visible:border-emerald-500/50 focus-visible:ring-0"
+                className={expertInputClasses}
                 required
               />
             </div>
 
-            <div className="space-y-1.5">
-              <Label className="px-1 font-mono text-[10px] tracking-wider text-[#878D89] uppercase">
+            <div className="space-y-2">
+              <Label className="px-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
                 Years Of Experience
               </Label>
               <Input
@@ -325,59 +357,60 @@ export function SignupPage({ session, role }: SignupPageProps) {
                 value={expertDetails.yearsOfExperience}
                 onChange={updateExpertField('yearsOfExperience')}
                 placeholder="5"
-                className="h-12 rounded-none border-zinc-200 bg-white px-4 py-3 text-sm tracking-wide placeholder:text-zinc-300 focus-visible:border-emerald-500/50 focus-visible:ring-0"
+                className={expertInputClasses}
                 required
               />
             </div>
 
-            <div className="space-y-1.5">
-              <Label className="px-1 font-mono text-[10px] tracking-wider text-[#878D89] uppercase">
+            <div className="space-y-2">
+              <Label className="px-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
                 Expertise Areas (comma separated)
               </Label>
               <Input
                 value={expertDetails.expertiseAreas}
                 onChange={updateExpertField('expertiseAreas')}
                 placeholder="Wiring upgrades, Leak detection, Inverter setup"
-                className="h-12 rounded-none border-zinc-200 bg-white px-4 py-3 text-sm tracking-wide placeholder:text-zinc-300 focus-visible:border-emerald-500/50 focus-visible:ring-0"
+                className={expertInputClasses}
                 required
               />
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
-              <label className="flex items-start gap-3 border border-zinc-200 p-3">
+              <label className="flex items-start gap-3 rounded-xl border border-zinc-200/80 bg-white/70 p-3.5 backdrop-blur-sm">
                 <input
                   className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-emerald-600"
                   type="checkbox"
                   checked={expertDetails.available}
                   onChange={updateExpertToggle('available')}
                 />
-                <span className="text-[11px] leading-relaxed tracking-tight text-[#878D89] uppercase">
+                <span className="text-[11px] leading-relaxed text-zinc-600 uppercase tracking-[0.1em]">
                   Currently available for jobs
                 </span>
               </label>
 
-              <label className="flex items-start gap-3 border border-zinc-200 p-3">
+              <label className="flex items-start gap-3 rounded-xl border border-zinc-200/80 bg-white/70 p-3.5 backdrop-blur-sm">
                 <input
                   className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-emerald-600"
                   type="checkbox"
                   checked={expertDetails.servesAsResident}
                   onChange={updateExpertToggle('servesAsResident')}
                 />
-                <span className="text-[11px] leading-relaxed tracking-tight text-[#878D89] uppercase">
+                <span className="text-[11px] leading-relaxed text-zinc-600 uppercase tracking-[0.1em]">
                   I also use UrbanFix as resident
                 </span>
               </label>
             </div>
           </>
         )}
-        <label className="flex items-start gap-3 py-2">
+
+        <label className="flex items-start gap-3 rounded-xl border border-zinc-200/80 bg-white/70 px-3.5 py-3 backdrop-blur-sm">
           <input
             className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-emerald-600"
             type="checkbox"
             checked={acceptTerms}
             onChange={(event: ChangeEvent<HTMLInputElement>) => setAcceptTerms(event.target.checked)}
           />
-          <span className="text-[11px] leading-relaxed tracking-tight text-[#878D89] uppercase">
+          <span className="text-[11px] leading-relaxed text-zinc-600 uppercase tracking-[0.1em]">
             I accept the{' '}
             <span className="font-semibold text-emerald-600 hover:underline">Terms of Service</span> and
             acknowledge the Privacy Infrastructure.
@@ -386,7 +419,7 @@ export function SignupPage({ session, role }: SignupPageProps) {
 
         {/* Submit Error (server-side errors) */}
         {submitError && (
-          <div className="rounded-none border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="rounded-2xl border border-red-200 bg-red-50/90 px-4 py-3 text-sm text-red-700">
             {submitError}
           </div>
         )}
@@ -395,10 +428,10 @@ export function SignupPage({ session, role }: SignupPageProps) {
         <Button
           type="submit"
           disabled={loading}
-          className={`h-14 w-full rounded-none border text-sm font-bold tracking-[0.2em] uppercase shadow-none transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
+          className={`h-12 w-full rounded-xl border text-sm font-semibold tracking-[0.12em] uppercase transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-60 ${
             isFormValid
-              ? 'border-emerald-500 bg-emerald-600 text-white hover:bg-emerald-700'
-              : 'border-emerald-300/30 bg-emerald-100 text-emerald-700 hover:bg-emerald-100/90'
+              ? 'border-emerald-300/40 bg-gradient-to-b from-emerald-400 to-emerald-500 text-white shadow-lg shadow-emerald-500/25 hover:from-emerald-300 hover:to-emerald-400'
+              : 'border-zinc-200 bg-white/70 text-zinc-500 hover:bg-zinc-50'
           }`}
         >
           {loading ? 'Please wait…' : config.button}
