@@ -5,6 +5,7 @@ from typing import List, Optional
 from pydantic import Field
 
 from .auth import CamelModel
+from .expert import ExpertListing
 
 
 class MatchRequest(CamelModel):
@@ -24,10 +25,7 @@ class MatchBreakdown(CamelModel):
     response: float
 
 
-class MatchSuggestion(CamelModel):
-    expert_id: int
-    full_name: str
-    primary_expertise: str
+class MatchSuggestion(ExpertListing):
     score: float
     breakdown: MatchBreakdown
     reasons: List[str]

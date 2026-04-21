@@ -27,6 +27,7 @@ KEYWORD_MAP: Dict[str, List[str]] = {
 
 @dataclass(frozen=True)
 class ScoredExpert:
+    candidate: object
     expert_id: int
     full_name: str
     primary_expertise: str
@@ -128,9 +129,15 @@ class MatchingService:
             "request_text": problem_text,
             "suggestions": [
                 {
-                    "expert_id": item.expert_id,
-                    "full_name": item.full_name,
-                    "primary_expertise": item.primary_expertise,
+                    "expert_id": item.candidate.expert_id,
+                    "user_id": item.candidate.user_id,
+                    "full_name": item.candidate.full_name,
+                    "primary_expertise": item.candidate.primary_expertise,
+                    "years_of_experience": item.candidate.years_of_experience,
+                    "bio": getattr(item.candidate, "bio", None),
+                    "available": item.candidate.available,
+                    "serves_as_resident": item.candidate.serves_as_resident,
+                    "expertise_areas": item.candidate.expertise_areas,
                     "score": round(item.score, 4),
                     "breakdown": {key: round(value, 4) for key, value in item.breakdown.items()},
                     "reasons": item.reasons,
@@ -209,6 +216,7 @@ class MatchingService:
             reasons.append(f"Assigned to shard bucket {candidate.region_bucket}")
 
         return ScoredExpert(
+            candidate=candidate,
             expert_id=candidate.expert_id,
             full_name=candidate.full_name,
             primary_expertise=candidate.primary_expertise,

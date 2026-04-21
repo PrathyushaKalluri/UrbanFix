@@ -1,223 +1,341 @@
-import type { ExpertListing } from '../types/expert'
-import { HYDERABAD_AREAS } from '../config/hyderabadAreas'
+import type { ExpertListing } from "../types/expert";
+import { HYDERABAD_AREAS } from "../config/hyderabadAreas";
 
-const EXPERT_CATALOG_ENDPOINT = '/api/experts/all'
+const EXPERT_CATALOG_ENDPOINT = "/api/experts/all";
+const MATCHING_RECOMMENDATIONS_ENDPOINT = "/api/matching/recommendations";
 
 export type ExpertCatalogQuery = {
-  query?: string
-  limit?: number
-  latitude?: number
-  longitude?: number
-  signal?: AbortSignal
-}
+    query?: string;
+    limit?: number;
+    latitude?: number;
+    longitude?: number;
+    signal?: AbortSignal;
+};
+
+type MatchingRequest = {
+    problemText: string;
+    topN?: number;
+    latitude?: number;
+    longitude?: number;
+};
+
+type MatchingSuggestion = {
+    expertId: number;
+};
+
+type MatchingResponse = {
+    suggestions: MatchingSuggestion[];
+};
 
 function normalizeText(value: string) {
-  return value.trim().toLowerCase()
+    return value.trim().toLowerCase();
+}
+
+function isAbortError(error: unknown) {
+    return error instanceof DOMException && error.name === "AbortError";
 }
 
 function isValidCoordinate(latitude?: number, longitude?: number) {
-  return (
-    typeof latitude === 'number' &&
-    typeof longitude === 'number' &&
-    Number.isFinite(latitude) &&
-    Number.isFinite(longitude)
-  )
+    return (
+        typeof latitude === "number" &&
+        typeof longitude === "number" &&
+        Number.isFinite(latitude) &&
+        Number.isFinite(longitude)
+    );
 }
 
 function toRadians(degrees: number) {
-  return (degrees * Math.PI) / 180
+    return (degrees * Math.PI) / 180;
 }
 
-function calculateDistanceKm(fromLatitude: number, fromLongitude: number, toLatitude: number, toLongitude: number) {
-  const earthRadiusKm = 6371
-  const deltaLatitude = toRadians(toLatitude - fromLatitude)
-  const deltaLongitude = toRadians(toLongitude - fromLongitude)
+function calculateDistanceKm(
+    fromLatitude: number,
+    fromLongitude: number,
+    toLatitude: number,
+    toLongitude: number,
+) {
+    const earthRadiusKm = 6371;
+    const deltaLatitude = toRadians(toLatitude - fromLatitude);
+    const deltaLongitude = toRadians(toLongitude - fromLongitude);
 
-  const sinLatitude = Math.sin(deltaLatitude / 2)
-  const sinLongitude = Math.sin(deltaLongitude / 2)
+    const sinLatitude = Math.sin(deltaLatitude / 2);
+    const sinLongitude = Math.sin(deltaLongitude / 2);
 
-  const a =
-    sinLatitude * sinLatitude +
-    Math.cos(toRadians(fromLatitude)) * Math.cos(toRadians(toLatitude)) * sinLongitude * sinLongitude
+    const a =
+        sinLatitude * sinLatitude +
+        Math.cos(toRadians(fromLatitude)) *
+            Math.cos(toRadians(toLatitude)) *
+            sinLongitude *
+            sinLongitude;
 
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-  return earthRadiusKm * c
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return earthRadiusKm * c;
 }
 
-function getExpertDistanceKm(expert: ExpertListing, latitude?: number, longitude?: number) {
-  if (!isValidCoordinate(latitude, longitude)) {
-    return null
-  }
+function getExpertDistanceKm(
+    expert: ExpertListing,
+    latitude?: number,
+    longitude?: number,
+) {
+    if (!isValidCoordinate(latitude, longitude)) {
+        return null;
+    }
 
-  if (!isValidCoordinate(expert.latitude ?? undefined, expert.longitude ?? undefined)) {
-    return null
-  }
+    if (
+        !isValidCoordinate(
+            expert.latitude ?? undefined,
+            expert.longitude ?? undefined,
+        )
+    ) {
+        return null;
+    }
 
-  return calculateDistanceKm(latitude, longitude, expert.latitude as number, expert.longitude as number)
+    return calculateDistanceKm(
+        latitude!,
+        longitude!,
+        expert.latitude as number,
+        expert.longitude as number,
+    );
 }
 
 function scoreDistance(
-  expert: ExpertListing,
-  latitude?: number,
-  longitude?: number,
+    expert: ExpertListing,
+    latitude?: number,
+    longitude?: number,
 ) {
-  const distanceKm = getExpertDistanceKm(expert, latitude, longitude)
-  if (distanceKm === null) {
-    return 0
-  }
+    const distanceKm = getExpertDistanceKm(expert, latitude, longitude);
+    if (distanceKm === null) {
+        return 0;
+    }
 
-  if (distanceKm <= 3) {
-    return 45
-  }
+    if (distanceKm <= 3) {
+        return 45;
+    }
 
-  if (distanceKm <= 10) {
-    return 30
-  }
+    if (distanceKm <= 10) {
+        return 30;
+    }
 
-  if (distanceKm <= 25) {
-    return 15
-  }
+    if (distanceKm <= 25) {
+        return 15;
+    }
 
-  return 0
+    return 0;
 }
 
 function narrowNearbyExperts(
-  expertsWithScore: Array<{ expert: ExpertListing; score: number; distanceKm: number | null }>,
-  latitude?: number,
-  longitude?: number,
+    expertsWithScore: Array<{
+        expert: ExpertListing;
+        score: number;
+        distanceKm: number | null;
+    }>,
+    latitude?: number,
+    longitude?: number,
 ) {
-  if (!isValidCoordinate(latitude, longitude)) {
-    return expertsWithScore
-  }
+    if (!isValidCoordinate(latitude, longitude)) {
+        return expertsWithScore;
+    }
 
-  const nearestAreaNames = HYDERABAD_AREAS
-    .map((area) => ({
-      name: area.name,
-      distanceKm: calculateDistanceKm(latitude, longitude, area.latitude, area.longitude),
+    const nearestAreaNames = HYDERABAD_AREAS.map((area) => ({
+        name: area.name,
+        distanceKm: calculateDistanceKm(
+            latitude!,
+            longitude!,
+            area.latitude,
+            area.longitude,
+        ),
     }))
-    .sort((left, right) => left.distanceKm - right.distanceKm)
-    .slice(0, 4)
-    .map((area) => area.name)
+        .sort((left, right) => left.distanceKm - right.distanceKm)
+        .slice(0, 4)
+        .map((area) => area.name);
 
-  const relevantAreas = new Set(nearestAreaNames)
+    const relevantAreas = new Set(nearestAreaNames);
 
-  const expertsInRelevantAreas = expertsWithScore.filter(({ expert }) =>
-    expert.serviceArea ? relevantAreas.has(expert.serviceArea) : false,
-  )
+    const expertsInRelevantAreas = expertsWithScore.filter(({ expert }) =>
+        expert.serviceArea ? relevantAreas.has(expert.serviceArea) : false,
+    );
 
-  if (expertsInRelevantAreas.length > 0) {
-    return expertsInRelevantAreas
-  }
+    if (expertsInRelevantAreas.length > 0) {
+        return expertsInRelevantAreas;
+    }
 
-  const nearbyExperts = expertsWithScore.filter(({ distanceKm }) => distanceKm !== null && distanceKm <= 20)
+    const nearbyExperts = expertsWithScore.filter(
+        ({ distanceKm }) => distanceKm !== null && distanceKm <= 20,
+    );
 
-  const nearbyAreaExperts = nearbyExperts.filter(({ expert }) => Boolean(expert.serviceArea))
+    const nearbyAreaExperts = nearbyExperts.filter(({ expert }) =>
+        Boolean(expert.serviceArea),
+    );
 
-  if (nearbyAreaExperts.length >= 3) {
-    return nearbyAreaExperts
-  }
+    if (nearbyAreaExperts.length >= 3) {
+        return nearbyAreaExperts;
+    }
 
-  if (nearbyExperts.length >= 3) {
-    return nearbyExperts
-  }
+    if (nearbyExperts.length >= 3) {
+        return nearbyExperts;
+    }
 
-  return expertsWithScore
+    return expertsWithScore;
 }
 
 function scoreExpert(expert: ExpertListing, query: string) {
-  const normalizedQuery = normalizeText(query)
+    const normalizedQuery = normalizeText(query);
 
-  if (!normalizedQuery) {
-    return 1
-  }
+    if (!normalizedQuery) {
+        return 1;
+    }
 
-  const searchableText = [
-    expert.fullName,
-    expert.primaryExpertise,
-    ...expert.expertiseAreas,
-  ]
-    .join(' ')
-    .toLowerCase()
+    const searchableText = [
+        expert.fullName,
+        expert.primaryExpertise,
+        ...expert.expertiseAreas,
+    ]
+        .join(" ")
+        .toLowerCase();
 
-  if (searchableText.includes(normalizedQuery)) {
-    return 100
-  }
+    if (searchableText.includes(normalizedQuery)) {
+        return 100;
+    }
 
-  const queryTerms = normalizedQuery.split(/\s+/).filter(Boolean)
-  if (queryTerms.length === 0) {
-    return 1
-  }
+    const queryTerms = normalizedQuery.split(/\s+/).filter(Boolean);
+    if (queryTerms.length === 0) {
+        return 1;
+    }
 
-  return queryTerms.reduce((total, term) => total + (searchableText.includes(term) ? 10 : 0), 0)
+    return queryTerms.reduce(
+        (total, term) => total + (searchableText.includes(term) ? 10 : 0),
+        0,
+    );
 }
 
-export function rankExperts(experts: ExpertListing[], query = '', limit?: number, latitude?: number, longitude?: number) {
-  const normalizedQuery = normalizeText(query)
+export function rankExperts(
+    experts: ExpertListing[],
+    query = "",
+    limit?: number,
+    latitude?: number,
+    longitude?: number,
+) {
+    const normalizedQuery = normalizeText(query);
 
-  const expertsWithScore = [...experts]
-    .map((expert) => ({
-      expert,
-      distanceKm: getExpertDistanceKm(expert, latitude, longitude),
-      score: scoreExpert(expert, normalizedQuery) + scoreDistance(expert, latitude, longitude),
-    }))
-    .filter(({ score }) => score > 0)
-    .sort((left, right) => {
-      if (right.score !== left.score) {
-        return right.score - left.score
-      }
+    const expertsWithScore = [...experts]
+        .map((expert) => ({
+            expert,
+            distanceKm: getExpertDistanceKm(expert, latitude, longitude),
+            score:
+                scoreExpert(expert, normalizedQuery) +
+                scoreDistance(expert, latitude, longitude),
+        }))
+        .filter(({ score }) => score > 0)
+        .sort((left, right) => {
+            if (right.score !== left.score) {
+                return right.score - left.score;
+            }
 
-      if (left.distanceKm !== null && right.distanceKm !== null && left.distanceKm !== right.distanceKm) {
-        return left.distanceKm - right.distanceKm
-      }
+            if (
+                left.distanceKm !== null &&
+                right.distanceKm !== null &&
+                left.distanceKm !== right.distanceKm
+            ) {
+                return left.distanceKm - right.distanceKm;
+            }
 
-      if (left.distanceKm !== null && right.distanceKm === null) {
-        return -1
-      }
+            if (left.distanceKm !== null && right.distanceKm === null) {
+                return -1;
+            }
 
-      if (left.distanceKm === null && right.distanceKm !== null) {
-        return 1
-      }
+            if (left.distanceKm === null && right.distanceKm !== null) {
+                return 1;
+            }
 
-      return left.expert.fullName.localeCompare(right.expert.fullName)
-    })
+            return left.expert.fullName.localeCompare(right.expert.fullName);
+        });
 
-  const narrowedExperts = narrowNearbyExperts(expertsWithScore, latitude, longitude)
+    const narrowedExperts = narrowNearbyExperts(
+        expertsWithScore,
+        latitude,
+        longitude,
+    );
 
-  const rankedExperts = narrowedExperts
-    .map(({ expert }) => expert)
+    const rankedExperts = narrowedExperts.map(({ expert }) => expert);
 
-  if (!normalizedQuery) {
-    return typeof limit === 'number' ? rankedExperts.slice(0, limit) : rankedExperts
-  }
+    if (!normalizedQuery) {
+        return typeof limit === "number"
+            ? rankedExperts.slice(0, limit)
+            : rankedExperts;
+    }
 
-  return typeof limit === 'number' ? rankedExperts.slice(0, limit) : rankedExperts
+    return typeof limit === "number"
+        ? rankedExperts.slice(0, limit)
+        : rankedExperts;
 }
 
-export async function fetchExpertCatalog({ query, limit, latitude, longitude, signal }: ExpertCatalogQuery = {}) {
-  const token = localStorage.getItem('authToken')
+const EXPERT_SEARCH_ENDPOINT = "/api/experts/search";
 
-  const response = await fetch(EXPERT_CATALOG_ENDPOINT, {
+export async function fetchExpertCatalog({
+    query,
+    limit,
+    latitude,
+    longitude,
     signal,
-    headers: token
-      ? {
-          Authorization: `Bearer ${token}`,
+}: ExpertCatalogQuery = {}) {
+    const normalizedQuery = query?.trim() ?? "";
+    const token = localStorage.getItem("authToken");
+
+    if (normalizedQuery) {
+        const payload: MatchingRequest = {
+            problemText: normalizedQuery,
+            topN: limit ?? 20,
+        };
+
+        if (isValidCoordinate(latitude, longitude)) {
+            payload.latitude = latitude;
+            payload.longitude = longitude;
         }
-      : undefined,
-  })
 
-  if (!response.ok) {
-    if (response.status === 403) {
-      throw new Error('The expert directory is temporarily unavailable for this session.')
+        const response = await fetch(MATCHING_RECOMMENDATIONS_ENDPOINT, {
+            method: "POST",
+            signal,
+            headers: {
+                "Content-Type": "application/json",
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Unable to load matching recommendations (${response.status})`);
+        }
+
+        const data = (await response.json()) as MatchingResponse;
+        return data.suggestions as unknown as ExpertListing[];
     }
 
-    if (response.status === 404) {
-      throw new Error('The expert directory endpoint is not available yet.')
+    const url = new URL(EXPERT_SEARCH_ENDPOINT, window.location.origin);
+    const pageSize = limit ?? 20;
+    url.searchParams.set("pageSize", pageSize.toString());
+    
+    if (isValidCoordinate(latitude, longitude)) {
+        url.searchParams.set("latitude", latitude!.toString());
+        url.searchParams.set("longitude", longitude!.toString());
     }
 
-    throw new Error(`Unable to load experts (${response.status})`)
-  }
+    const response = await fetch(url.toString(), {
+        signal,
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    });
 
-  const experts = (await response.json()) as ExpertListing[]
+    if (!response.ok) {
+        if (response.status === 403) {
+            throw new Error("The expert directory is temporarily unavailable for this session.");
+        }
+        if (response.status === 404) {
+            throw new Error("The expert directory endpoint is not available yet.");
+        }
+        throw new Error(`Unable to load experts (${response.status})`);
+    }
 
-  return rankExperts(experts, query, limit, latitude, longitude)
+    const data = await response.json();
+    const experts = data.items as ExpertListing[];
+    
+    return rankExperts(experts, normalizedQuery, limit, latitude, longitude);
 }

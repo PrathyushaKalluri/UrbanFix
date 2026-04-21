@@ -134,41 +134,52 @@ class ShardExpertStore:
     ) -> Dict[str, Any]:
         rows: List[Dict[str, Any]] = []
         shard_ids = self._target_shards(region_buckets)
+        where_clauses: List[str] = []
+        params: List[Any] = []
+
+        if available_only:
+            where_clauses.append("available = 1")
+        if primary_expertise:
+            where_clauses.append("LOWER(primary_expertise) = LOWER(?)")
+            params.append(primary_expertise)
+        if serves_as_resident is not None:
+            where_clauses.append("serves_as_resident = ?")
+            params.append(1 if serves_as_resident else 0)
+        if min_years_experience is not None:
+            where_clauses.append("years_of_experience >= ?")
+            params.append(min_years_experience)
+        if max_years_experience is not None:
+            where_clauses.append("years_of_experience <= ?")
+            params.append(max_years_experience)
+        if region_buckets:
+            placeholders = ",".join("?" for _ in region_buckets)
+            where_clauses.append(f"COALESCE(region_bucket, 'global') IN ({placeholders})")
+            params.extend(region_buckets)
+        if expertise_area:
+            where_clauses.append("LOWER(expertise_areas_json) LIKE ?")
+            params.append(f"%{expertise_area.lower()}%")
+        if search:
+            search_term = f"%{search.strip().lower()}%"
+            where_clauses.append(
+                "("
+                "LOWER(full_name) LIKE ? OR LOWER(email) LIKE ? "
+                "OR LOWER(primary_expertise) LIKE ? "
+                "OR LOWER(COALESCE(bio, '')) LIKE ? "
+                "OR LOWER(expertise_areas_json) LIKE ?"
+                ")"
+            )
+            params.extend([search_term, search_term, search_term, search_term, search_term])
+
+        sql = "SELECT * FROM expert_directory"
+        if where_clauses:
+            sql += " WHERE " + " AND ".join(where_clauses)
+
         for shard_id in shard_ids:
             with self._connect(shard_id) as connection:
                 connection.row_factory = sqlite3.Row
-                shard_rows = connection.execute("SELECT * FROM expert_directory").fetchall()
-            for row in shard_rows:
-                expert = self._row_to_expert(row)
-                if available_only and not expert["available"]:
-                    continue
-                if primary_expertise and expert["primary_expertise"].lower() != primary_expertise.lower():
-                    continue
-                if serves_as_resident is not None and bool(expert["serves_as_resident"]) != serves_as_resident:
-                    continue
-                if min_years_experience is not None and expert["years_of_experience"] < min_years_experience:
-                    continue
-                if max_years_experience is not None and expert["years_of_experience"] > max_years_experience:
-                    continue
-                if region_buckets and (expert.get("region_bucket") or "global") not in set(region_buckets):
-                    continue
-                if expertise_area:
-                    needle = expertise_area.lower()
-                    if not any(needle in item.lower() for item in expert["expertise_areas"]):
-                        continue
-                if search:
-                    haystack = " ".join(
-                        [
-                            expert["full_name"],
-                            expert["email"],
-                            expert["primary_expertise"],
-                            expert.get("bio") or "",
-                            " ".join(expert.get("expertise_areas", [])),
-                        ]
-                    ).lower()
-                    if search.lower().strip() not in haystack:
-                        continue
-                rows.append(expert)
+                shard_rows = connection.execute(sql, params).fetchall()
+                for row in shard_rows:
+                    rows.append(self._row_to_expert(row))
 
         rows.sort(key=lambda item: (-int(item.get("years_of_experience", 0)), item.get("full_name", "").lower()))
         total_items = len(rows)
@@ -181,7 +192,7 @@ class ShardExpertStore:
             "total_pages": ((total_items + page_size - 1) // page_size) if total_items else 0,
             "signature": {
                 "total_items": total_items,
-                "latest_updated_at": max((item.get("updated_at") for item in rows), default=None),
+                "latest_updated_at": max((item.get("updated_at") for item in rows), default=None) if rows else None,
             },
         }
 
