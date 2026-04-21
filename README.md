@@ -1,3 +1,21 @@
+# UrbanFix Polyglot Workspace
+
+This repository now contains a combined architecture resulting from the merge of the Python Matching Engine and the new Java/Spring Boot + React stack.
+
+## 🚀 Mixed Architecture Overview
+
+### 1. **Java/Spring Boot Backend & React Frontend** (from `main`)
+The `main` branch introduced a modern Java Spring Boot infrastructure and a React-based frontend.
+- **Frontend**: [frontend](frontend)
+- **Backend (Java)**: [backend](backend) (Pom.xml based)
+
+### 2. **Python Matching Engine & FastAPI** (from `feature/matching-engine-core`)
+The core matching intelligence is implemented in Python for high-performance semantic search and scoring.
+- **Matching Core**: [src/matching_engine](src/matching_engine)
+- **API (FastAPI)**: [backend/app](backend/app)
+
+---
+
 # UrbanFix Backend System Design
 
 Professional backend architecture for a scalable expert matching platform.
