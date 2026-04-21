@@ -72,10 +72,15 @@ def seed_demo_data(connection) -> None:
 
     # EXPERT EXPERTISE
     expertise_df = pd.read_csv(expert_expertise_csv)
+    profile_id_to_user_id = {row['id']: row['user_id'] for _, row in profiles_df.iterrows()}
+    
     expertise_rows = []
     for _, row in expertise_df.iterrows():
         # The CSV has expert_profile_id and expertise (comma-separated)
-        user_id = row['expert_profile_id']
+        user_id = profile_id_to_user_id.get(row['expert_profile_id'])
+        if not user_id:
+            continue
         for skill in str(row['expertise']).split(','):
-            expertise_rows.append((user_id, skill.strip()))
+            if skill.strip():
+                expertise_rows.append((user_id, skill.strip()))
     _execute_many(connection, "INSERT INTO expert_expertise (user_id, skill) VALUES (?, ?)", expertise_rows)
