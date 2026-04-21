@@ -2,6 +2,8 @@
 __pycache__/
 *.py[cod]
 *$py.class
+backend/*.db
+backend/**/*.db
 
 # Test and coverage artifacts
 .pytest_cache/

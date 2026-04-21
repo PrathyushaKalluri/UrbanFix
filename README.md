@@ -38,6 +38,12 @@ Core implementation is under [src](src):
 - [src/event_bus](src/event_bus): event bus abstraction with Kafka/in-memory support
 - [src/services](src/services): query publisher, matching consumer, notification consumer
 
+Python backend service for API integration is under [backend/app](backend/app):
+
+- FastAPI REST API compatible with the frontend contract
+- JWT auth, expert directory, and expert matching endpoints
+- Portable SQLite runtime for local execution, PostgreSQL-ready schema under [backend/sql](backend/sql)
+
 ### 3. **Examples**
 
 Runnable examples are under [examples](examples):
@@ -52,6 +58,12 @@ Tests are under [tests](tests):
 
 - [tests/test_event_flow.py](tests/test_event_flow.py)
 - [tests/test_matching_performance.py](tests/test_matching_performance.py)
+
+Backend API tests are under [backend/tests](backend/tests).
+
+### 5. **Handoff Guide**
+
+- [docs/BACKEND_HANDOFF.md](docs/BACKEND_HANDOFF.md): backend contract, schema, matching behavior, and frontend integration notes
 
 ---
 
