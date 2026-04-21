@@ -49,3 +49,6 @@ QUICK_REFERENCE.md
 DECISION_RECORDS.md
 
 docs/
+node_modules/
+frontend/node_modules/
+backend/target/
