@@ -27,20 +27,6 @@ class ExpertService:
         self.shard_store = shard_store
 
     def list_experts(self, available_only: bool = False) -> List[Dict[str, object]]:
-        if self.shard_store is not None:
-            shard_result = self.shard_store.query_experts(
-                available_only=available_only,
-                search=None,
-                primary_expertise=None,
-                expertise_area=None,
-                serves_as_resident=None,
-                min_years_experience=None,
-                max_years_experience=None,
-                region_buckets=None,
-                page=1,
-                page_size=100000,
-            )
-            return [self._to_listing_dict(item) for item in shard_result["items"]]
         experts = self.repository.expert_rows(available_only=available_only)
         return [self._to_listing(expert) for expert in experts]
 
@@ -89,30 +75,16 @@ class ExpertService:
             end = start + page_size
             return items[start:end], total_items_local, ceil(total_items_local / page_size) if total_items_local else 0
 
-        if self.shard_store is not None:
-            signature = self.shard_store.query_experts(
-                available_only=available_only,
-                search=search,
-                primary_expertise=primary_expertise,
-                expertise_area=expertise_area,
-                serves_as_resident=serves_as_resident,
-                min_years_experience=min_years_experience,
-                max_years_experience=max_years_experience,
-                region_buckets=region_buckets,
-                page=1,
-                page_size=100000,
-            )["signature"]
-        else:
-            signature = self.repository.expert_catalog_signature(
-                available_only=available_only,
-                search=search,
-                primary_expertise=primary_expertise,
-                expertise_area=expertise_area,
-                serves_as_resident=serves_as_resident,
-                min_years_experience=min_years_experience,
-                max_years_experience=max_years_experience,
-                region_buckets=region_buckets,
-            )
+        signature = self.repository.expert_catalog_signature(
+            available_only=available_only,
+            search=search,
+            primary_expertise=primary_expertise,
+            expertise_area=expertise_area,
+            serves_as_resident=serves_as_resident,
+            min_years_experience=min_years_experience,
+            max_years_experience=max_years_experience,
+            region_buckets=region_buckets,
+        )
         cache_key = self._cache_key(
             "expert-search",
             {
@@ -136,32 +108,17 @@ class ExpertService:
             if isinstance(cached, dict):
                 return cached
 
-        if self.shard_store is not None:
-            fanout = self.shard_store.query_experts(
-                available_only=available_only,
-                search=search,
-                primary_expertise=primary_expertise,
-                expertise_area=expertise_area,
-                serves_as_resident=serves_as_resident,
-                min_years_experience=min_years_experience,
-                max_years_experience=max_years_experience,
-                region_buckets=region_buckets,
-                page_size=100000,
-                page=1,
-            )
-            items = [self._to_listing_dict(item) for item in fanout["items"] if within_radius(item.get("latitude"), item.get("longitude"))]
-        else:
-            experts = self.repository.expert_rows(
-                available_only=available_only,
-                search=search,
-                primary_expertise=primary_expertise,
-                expertise_area=expertise_area,
-                serves_as_resident=serves_as_resident,
-                min_years_experience=min_years_experience,
-                max_years_experience=max_years_experience,
-                region_buckets=region_buckets,
-            )
-            items = [self._to_listing(expert) for expert in experts if within_radius(expert.latitude, expert.longitude)]
+        experts = self.repository.expert_rows(
+            available_only=available_only,
+            search=search,
+            primary_expertise=primary_expertise,
+            expertise_area=expertise_area,
+            serves_as_resident=serves_as_resident,
+            min_years_experience=min_years_experience,
+            max_years_experience=max_years_experience,
+            region_buckets=region_buckets,
+        )
+        items = [self._to_listing(expert) for expert in experts if within_radius(expert.latitude, expert.longitude)]
 
         items = sort_items(items)
         items, total_items, total_pages = paginate(items)

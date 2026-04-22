@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Activity, ArrowLeft, BriefcaseBusiness, Clock3, MapPin, MessageSquareText, PauseCircle, PlayCircle, ShieldCheck, Star, UserRound, Zap } from 'lucide-react'
 import { Navbar } from '../../../components/Navbar'
 import { Badge } from '../../../components/ui/badge'
@@ -7,6 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import type { AuthSession } from '../../../types/auth'
 import type { ExpertProfileView } from '../strategy/expertDashboardStrategy'
 import { getExpertDashboardContent } from '../strategy/expertDashboardStrategy'
+
+const SPRING_API_BASE_URL = import.meta.env.VITE_SPRING_API_BASE_URL ?? 'http://localhost:8080'
 
 type ExpertDashboardViewProps = {
   session: AuthSession
@@ -36,12 +38,62 @@ export function ExpertDashboardView({ session }: ExpertDashboardViewProps) {
 
   const content = getExpertDashboardContent(profile)
   const [acceptingJobs, setAcceptingJobs] = useState(profile.available)
+  const [savingAvailability, setSavingAvailability] = useState(false)
+  const [availabilityError, setAvailabilityError] = useState('')
   const [selectedJobId, setSelectedJobId] = useState(
     content.newRequests[0]?.id ?? content.activeJobs[0]?.id ?? content.completedJobs[0]?.id ?? '',
   )
 
+  useEffect(() => {
+    setAcceptingJobs(profile.available)
+  }, [profile.available])
+
   const allJobs = [...content.newRequests, ...content.activeJobs, ...content.completedJobs]
   const selectedJob = allJobs.find((job) => job.id === selectedJobId) ?? allJobs[0]
+
+  const handleAvailabilityToggle = async () => {
+    const nextAvailability = !acceptingJobs
+    const token = localStorage.getItem('authToken')
+
+    if (!token) {
+      return
+    }
+
+    setAcceptingJobs(nextAvailability)
+    setAvailabilityError('')
+    setSavingAvailability(true)
+
+    try {
+      const response = await fetch(`${SPRING_API_BASE_URL}/api/auth/me/availability`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ available: nextAvailability }),
+      })
+
+      if (!response.ok) {
+        const fallbackMessage = 'Unable to update availability right now.'
+        const responseText = await response.text()
+
+        throw new Error(responseText.trim() || fallbackMessage)
+      }
+
+      const updatedProfile = (await response.json()) as { available?: boolean }
+      setAcceptingJobs(updatedProfile.available ?? nextAvailability)
+      try {
+        await session.refreshProfile?.()
+      } catch {
+        setAvailabilityError('Saved, but the session view could not refresh.')
+      }
+    } catch (error) {
+      setAcceptingJobs(!nextAvailability)
+      setAvailabilityError(error instanceof Error ? error.message : 'Unable to update availability right now.')
+    } finally {
+      setSavingAvailability(false)
+    }
+  }
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#FCFDFC] text-[#090A0A]">
@@ -96,12 +148,18 @@ export function ExpertDashboardView({ session }: ExpertDashboardViewProps) {
               <Badge className={acceptingJobs ? 'border border-[#2563EB]/30 bg-[#EFF6FF] text-[#1D4ED8]' : 'border border-[#EBECEB] bg-white text-[#878D89]'}>
                 {acceptingJobs ? 'SYS SECURE' : 'SYS PAUSED'}
               </Badge>
-              <Button type="button" variant="outline" size="sm" onClick={() => setAcceptingJobs((current) => !current)}>
+              <Button type="button" variant="outline" size="sm" onClick={handleAvailabilityToggle} disabled={savingAvailability}>
                 {acceptingJobs ? <PauseCircle className="h-4 w-4" /> : <PlayCircle className="h-4 w-4" />}
-                {acceptingJobs ? 'Pause availability' : 'Resume availability'}
+                {savingAvailability ? 'Saving...' : acceptingJobs ? 'Pause availability' : 'Resume availability'}
               </Button>
             </div>
           </div>
+
+          {availabilityError ? (
+            <div className="border-b border-rose-200 bg-rose-50 px-6 py-3 text-sm text-rose-700">
+              {availabilityError}
+            </div>
+          ) : null}
 
           <div className="px-6 py-5">
             <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#EBECEB] pb-5">

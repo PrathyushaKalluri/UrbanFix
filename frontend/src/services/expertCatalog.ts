@@ -28,20 +28,37 @@ type MatchingResponse = {
 };
 
 function normalizeExpertListing(expert: Partial<ExpertListing> & Record<string, unknown>): ExpertListing {
+    const parseBoolean = (value: unknown) => {
+        if (typeof value === 'boolean') {
+            return value;
+        }
+
+        if (typeof value === 'string') {
+            return value.toLowerCase() === 'true';
+        }
+
+        if (typeof value === 'number') {
+            return value !== 0;
+        }
+
+        return false;
+    };
+
     return {
         expertId: Number(expert.expertId ?? expert.expert_id ?? 0),
         userId: Number(expert.userId ?? expert.user_id ?? 0),
         fullName: String(expert.fullName ?? expert.full_name ?? ''),
         primaryExpertise: String(expert.primaryExpertise ?? expert.primary_expertise ?? ''),
         yearsOfExperience: Number(expert.yearsOfExperience ?? expert.years_of_experience ?? 0),
-        available: Boolean(expert.available ?? false),
+        available: parseBoolean(expert.available ?? expert.is_available ?? false),
         serviceArea: (expert.serviceArea ?? expert.service_area ?? null) as string | null,
         latitude: (expert.latitude ?? null) as number | null,
         longitude: (expert.longitude ?? null) as number | null,
         expertiseAreas: Array.isArray(expert.expertiseAreas)
-            ? expert.expertiseAreas.map((item) => String(item))
+            ? expert.expertiseAreas
+                .filter((item): item is string => typeof item === 'string')
             : Array.isArray(expert.expertise_areas)
-                ? expert.expertise_areas.map((item) => String(item))
+                ? expert.expertise_areas.filter((item): item is string => typeof item === 'string')
                 : [],
     };
 }

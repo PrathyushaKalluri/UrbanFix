@@ -92,6 +92,10 @@ public class ExpertProfile {
     return available;
   }
 
+  public void setAvailable(Boolean available) {
+    this.available = available;
+  }
+
   public Set<String> getExpertiseAreas() {
     return Set.copyOf(expertiseAreas);
   }

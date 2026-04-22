@@ -71,22 +71,7 @@ class MatchingService:
                 return False
             return haversine_km(latitude, longitude, candidate.latitude, candidate.longitude) <= radius_km
 
-        if self.shard_store is not None:
-            shard_result = self.shard_store.query_experts(
-                available_only=True,
-                search=None,
-                primary_expertise=None,
-                expertise_area=None,
-                serves_as_resident=None,
-                min_years_experience=None,
-                max_years_experience=None,
-                region_buckets=region_buckets,
-                page=1,
-                page_size=100000,
-            )
-            signature = shard_result["signature"]
-        else:
-            signature = self.repository.expert_catalog_signature(available_only=True, region_buckets=region_buckets)
+        signature = self.repository.expert_catalog_signature(available_only=True, region_buckets=region_buckets)
         cache_key = self._cache_key(
             "expert-match",
             {
@@ -104,22 +89,7 @@ class MatchingService:
             if isinstance(cached, dict):
                 return cached
 
-        if self.shard_store is not None:
-            shard_rows = self.shard_store.query_experts(
-                available_only=True,
-                search=None,
-                primary_expertise=None,
-                expertise_area=None,
-                serves_as_resident=None,
-                min_years_experience=None,
-                max_years_experience=None,
-                region_buckets=region_buckets,
-                page=1,
-                page_size=100000,
-            )["items"]
-            candidates = [self._candidate_from_dict(item) for item in shard_rows]
-        else:
-            candidates = self.repository.expert_rows(available_only=True, region_buckets=region_buckets)
+        candidates = self.repository.expert_rows(available_only=True, region_buckets=region_buckets)
         candidates = [candidate for candidate in candidates if within_radius(candidate)]
         request_terms = self._infer_terms(problem_text)
         candidates = self._filter_candidates_by_terms(candidates, request_terms)

@@ -136,6 +136,21 @@ public class AuthService {
     return response;
   }
 
+  @Transactional
+  public Map<String, Object> updateExpertAvailability(UserAccount user, boolean available) {
+    if (user.getRole() != UserRole.EXPERT) {
+      throw new IllegalArgumentException("Only expert accounts can update availability");
+    }
+
+    ExpertProfile profile = expertProfileRepository.findByUserId(user.getId())
+        .orElseThrow(() -> new IllegalStateException("Expert profile not found"));
+
+    profile.setAvailable(available);
+    expertProfileRepository.saveAndFlush(profile);
+
+    return getCurrentUserProfile(user);
+  }
+
   @Transactional(readOnly = true)
   public List<ExpertListingResponse> getAllExperts() {
     return expertProfileRepository.findAll().stream()

@@ -17,6 +17,20 @@ export function useAuthSession(): AuthSession {
   const [profile, setProfile] = useState<AuthProfile | null>(null)
   const [loading, setLoading] = useState<boolean>(Boolean(token))
 
+  const loadProfile = async (currentToken: string) => {
+    const response = await fetch('/api/auth/me', {
+      headers: {
+        Authorization: `Bearer ${currentToken}`,
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error('Session expired')
+    }
+
+    return response.json() as Promise<AuthProfile>
+  }
+
   useEffect(() => {
     let active = true
 
@@ -27,19 +41,9 @@ export function useAuthSession(): AuthSession {
       }
     }
 
-    const loadProfile = async () => {
+    const syncProfile = async () => {
       try {
-        const response = await fetch('/api/auth/me', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-
-        if (!response.ok) {
-          throw new Error('Session expired')
-        }
-
-        const data: AuthProfile = await response.json()
+        const data = await loadProfile(token)
 
         if (active) {
           setProfile(data)
@@ -57,7 +61,7 @@ export function useAuthSession(): AuthSession {
       }
     }
 
-    loadProfile()
+    syncProfile()
 
     return () => {
       active = false
@@ -96,6 +100,15 @@ export function useAuthSession(): AuthSession {
     return authData
   }
 
+  const refreshProfile: AuthSession['refreshProfile'] = async () => {
+    if (!token) {
+      return
+    }
+
+    const data = await loadProfile(token)
+    setProfile(data)
+  }
+
   const logout = () => {
     localStorage.removeItem('authToken')
     setToken('')
@@ -106,6 +119,7 @@ export function useAuthSession(): AuthSession {
     profile,
     loading,
     submitAuth,
+    refreshProfile,
     logout,
   }
 }
