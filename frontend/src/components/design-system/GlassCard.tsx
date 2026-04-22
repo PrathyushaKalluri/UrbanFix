@@ -24,7 +24,7 @@ export function GlassCard({
       <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
         <div className="absolute inset-0 bg-gradient-to-br from-zinc-50/60 via-transparent to-transparent" />
       </div>
-      <div className="relative z-10">{children}</div>
+      <div className="relative z-10 flex h-full flex-col">{children}</div>
     </motion.div>
   );
 }
