@@ -27,8 +27,6 @@ import {
   SectionLabel,
 } from '../../../components/design-system'
 
-const SPRING_API_BASE_URL = import.meta.env.VITE_SPRING_API_BASE_URL ?? 'http://localhost:8080'
-
 const expertNavItems = [
   { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
   { label: 'Messages', icon: MessageSquare, href: '/messages/1' },
@@ -90,7 +88,7 @@ export function ExpertDashboardView({ session }: ExpertDashboardViewProps) {
     setSavingAvailability(true)
 
     try {
-      const response = await fetch(`${SPRING_API_BASE_URL}/api/auth/me/availability`, {
+      const response = await fetch('/api/auth/me/availability', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -100,9 +98,15 @@ export function ExpertDashboardView({ session }: ExpertDashboardViewProps) {
       })
 
       if (!response.ok) {
-        const fallbackMessage = 'Unable to update availability right now.'
-        const responseText = await response.text()
-
+        const fallbackMessage = `Unable to update availability (HTTP ${response.status}).`
+        const cloned = response.clone()
+        let responseText = ''
+        try {
+          const errorJson = await cloned.json()
+          responseText = errorJson.message ?? errorJson.error ?? JSON.stringify(errorJson)
+        } catch {
+          responseText = await response.text()
+        }
         throw new Error(responseText.trim() || fallbackMessage)
       }
 
@@ -115,7 +119,9 @@ export function ExpertDashboardView({ session }: ExpertDashboardViewProps) {
       }
     } catch (error) {
       setAcceptingJobs(!nextAvailability)
-      setAvailabilityError(error instanceof Error ? error.message : 'Unable to update availability right now.')
+      const message = error instanceof Error ? error.message : 'Unable to update availability right now.'
+      console.error('[Availability Toggle]', error)
+      setAvailabilityError(message)
     } finally {
       setSavingAvailability(false)
     }

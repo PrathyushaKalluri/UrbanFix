@@ -175,3 +175,46 @@ class PostgresAuthService:
                 )
 
         return profile
+
+    def update_expert_availability(self, user_id: int, available: bool) -> Dict[str, object]:
+        user = self.repository.fetchone("SELECT * FROM users WHERE id = ?", [user_id])
+        if not user:
+            raise LookupError("User not found")
+        if user.get("role") != "EXPERT":
+            raise PermissionError("Only expert accounts can update availability")
+
+        self.repository.execute(
+            "UPDATE expert_profiles SET available = ? WHERE user_id = ?",
+            [available, user_id]
+        )
+
+        if self.shard_store is not None:
+            expert = self.repository.expert_row_by_user_id(user_id)
+            if expert is not None:
+                self.shard_store.upsert_expert(
+                    {
+                        "expert_id": expert.expert_id,
+                        "user_id": expert.user_id,
+                        "full_name": expert.full_name,
+                        "email": expert.email,
+                        "primary_expertise": expert.primary_expertise,
+                        "years_of_experience": expert.years_of_experience,
+                        "bio": expert.bio,
+                        "available": bool(available),
+                        "serves_as_resident": expert.serves_as_resident,
+                        "expertise_areas": expert.expertise_areas,
+                        "avg_rating": expert.avg_rating,
+                        "total_jobs": expert.total_jobs,
+                        "acceptance_rate": expert.acceptance_rate,
+                        "completion_rate": expert.completion_rate,
+                        "cancellation_rate": expert.cancellation_rate,
+                        "avg_response_time_sec": expert.avg_response_time_sec,
+                        "latitude": expert.latitude,
+                        "longitude": expert.longitude,
+                        "city": expert.city,
+                        "region_bucket": expert.region_bucket,
+                        "shard_id": expert.shard_id,
+                    }
+                )
+
+        return self.current_user_profile(user_id)

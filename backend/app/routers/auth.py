@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, status
 
 from ..db.postgres_repository import PostgresRepository
 from ..schemas.auth import AuthProfile, AuthResponse, LoginRequest, RegisterExpertRequest, RegisterUserRequest
+from ..schemas.expert import ExpertAvailabilityUpdate
 from ..services.postgres_auth_service import PostgresAuthService
 from .dependencies import (
     build_rate_limit_dependency,
@@ -72,4 +73,24 @@ def me(current_user = Depends(get_current_user_dependency), repository: Postgres
         result = service.current_user_profile(current_user.user_id)
     except LookupError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    return AuthProfile(**result)
+
+
+@router.patch("/me/availability", response_model=AuthProfile)
+def update_availability(
+    payload: ExpertAvailabilityUpdate,
+    current_user=Depends(get_current_user_dependency),
+    repository: PostgresRepository = Depends(get_postgres_repository_dependency),
+    shard_router=Depends(get_shard_router_dependency),
+    shard_store=Depends(get_shard_store_dependency),
+) -> AuthProfile:
+    if current_user.role != "EXPERT":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Expert role required")
+    service = PostgresAuthService(repository, shard_router, shard_store)
+    try:
+        result = service.update_expert_availability(current_user.user_id, payload.available)
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except PermissionError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
     return AuthProfile(**result)
