@@ -44,7 +44,7 @@ export function Combobox({
   const [query, setQuery] = React.useState("")
   const [activeIndex, setActiveIndex] = React.useState(0)
 
-  const selectedOption = options.find((option) => option.value === value) ?? options[0]
+  const selectedOption = options.find((option) => option.value === value) ?? null
   const selectedIndex = options.findIndex((option) => option.value === value)
 
   const search = query.trim().toLowerCase()

@@ -4,7 +4,7 @@ import path from "path";
 
 export default defineConfig(() => {
     const springApiTarget =
-        process.env.VITE_SPRING_API_PROXY_TARGET ?? "http://localhost:8080";
+        process.env.VITE_SPRING_API_PROXY_TARGET ?? "http://localhost:8000";
     const matchingApiTarget =
         process.env.VITE_MATCHING_API_PROXY_TARGET ?? "http://localhost:8000";
 

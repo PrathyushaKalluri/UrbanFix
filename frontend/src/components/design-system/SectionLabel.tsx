@@ -14,7 +14,7 @@ export function SectionLabel({
   const variantClasses = {
     default:
       "text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500",
-    blue: "text-[11px] font-semibold uppercase tracking-[0.14em] text-blue-700",
+    blue: "text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-700",
     mono: "font-mono text-[10px] tracking-[0.2em] text-zinc-500 uppercase",
   };
 

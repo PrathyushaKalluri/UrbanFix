@@ -4,6 +4,7 @@ import { HomePage } from '../pages/home/HomePage'
 import { LandingPage } from '../pages/landing/LandingPage'
 import { LoginPage } from '../pages/login/LoginPage'
 import { MessagesPage } from '../pages/messages/MessagesPage'
+import { ProfilePage } from '../pages/profile/ProfilePage'
 import { ExpertSignupPage } from '../pages/signup/ExpertSignupPage'
 import { UserSignupPage } from '../pages/signup/UserSignupPage'
 import { useAuthSession } from '../hooks/useAuthSession'
@@ -21,6 +22,7 @@ export function AppRoutes() {
       <Route path="/signup/expert" element={<ExpertSignupPage session={session} />} />
       <Route path="/dashboard" element={<DashboardPage session={session} />} />
       <Route path="/messages/:expertId" element={<MessagesPage session={session} />} />
+      <Route path="/profile" element={<ProfilePage session={session} />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

@@ -55,3 +55,4 @@ backend/target/
 
 # testing
 frontend/.playwright-mcp
+.playwright-mcp/
