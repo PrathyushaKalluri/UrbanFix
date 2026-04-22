@@ -65,3 +65,9 @@ class AuthProfile(CamelModel):
     longitude: Optional[float] = None
     region_bucket: Optional[str] = None
     shard_id: Optional[int] = None
+    avg_rating: Optional[float] = None
+    total_jobs: Optional[int] = None
+    acceptance_rate: Optional[float] = None
+    completion_rate: Optional[float] = None
+    cancellation_rate: Optional[float] = None
+    avg_response_time_sec: Optional[int] = None

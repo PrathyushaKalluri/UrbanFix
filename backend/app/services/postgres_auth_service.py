@@ -171,6 +171,12 @@ class PostgresAuthService:
                         "longitude": expert.get("longitude"),
                         "region_bucket": None,
                         "shard_id": None,
+                        "avg_rating": float(expert.get("avg_rating") or 0),
+                        "total_jobs": int(expert.get("total_jobs") or 0),
+                        "acceptance_rate": float(expert.get("acceptance_rate") or 0),
+                        "completion_rate": float(expert.get("completion_rate") or 0),
+                        "cancellation_rate": float(expert.get("cancellation_rate") or 0),
+                        "avg_response_time_sec": int(expert.get("avg_response_time_sec") or 0),
                     }
                 )
 

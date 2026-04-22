@@ -22,6 +22,12 @@ export type AuthProfile = {
   serviceArea?: string
   latitude?: number | null
   longitude?: number | null
+  avgRating?: number
+  totalJobs?: number
+  acceptanceRate?: number
+  completionRate?: number
+  cancellationRate?: number
+  avgResponseTimeSec?: number
 }
 
 export type AuthSession = {
