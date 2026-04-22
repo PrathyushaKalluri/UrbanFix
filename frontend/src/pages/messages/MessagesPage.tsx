@@ -36,7 +36,7 @@ export function MessagesPage({ session }: MessagesPageProps) {
     return (
       <main className="min-h-screen bg-[#FCFDFC] px-6 py-10 text-[#090A0A]">
         <section className="mx-auto max-w-3xl border border-zinc-200/70 bg-white/70 p-8 shadow-[0_8px_32px_rgba(9,10,10,0.04)] backdrop-blur-xl">
-          <p className="font-mono text-[10px] tracking-[0.22em] text-emerald-600 uppercase">Loading</p>
+          <p className="font-mono text-[10px] tracking-[0.22em] text-blue-600 uppercase">Loading</p>
           <h1 className="mt-3 text-3xl font-bold tracking-tight">Opening chat…</h1>
         </section>
       </main>
@@ -96,7 +96,7 @@ export function MessagesPage({ session }: MessagesPageProps) {
               <h1 className="text-xl font-semibold tracking-tight">Live chat</h1>
             </div>
           </div>
-          <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
+          <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700">
             Secure link active
           </Badge>
         </div>
@@ -113,7 +113,7 @@ export function MessagesPage({ session }: MessagesPageProps) {
                 key={expert.expertId}
                 to={`/messages/${expert.expertId}`}
                 className={`flex gap-3 border px-3 py-3 transition-colors ${
-                  String(expert.expertId) === expertId ? 'border-emerald-300 bg-emerald-50' : 'border-zinc-200 bg-white hover:bg-zinc-50'
+                  String(expert.expertId) === expertId ? 'border-blue-300 bg-blue-50' : 'border-zinc-200 bg-white hover:bg-zinc-50'
                 }`}
               >
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#090A0A] text-xs font-semibold text-white">
@@ -126,7 +126,7 @@ export function MessagesPage({ session }: MessagesPageProps) {
                 <div className="min-w-0">
                   <div className="flex items-center justify-between gap-2">
                     <p className="truncate text-sm font-semibold">{expert.fullName}</p>
-                    <span className="font-mono text-[10px] text-emerald-700">LIVE</span>
+                    <span className="font-mono text-[10px] text-blue-700">LIVE</span>
                   </div>
                   <p className="truncate text-xs text-[#5F6562]">{expert.primaryExpertise}</p>
                 </div>
@@ -157,7 +157,7 @@ export function MessagesPage({ session }: MessagesPageProps) {
                     message.author === 'SYSTEM'
                       ? 'border-dashed border-zinc-300 bg-zinc-50 text-[#5F6562]'
                       : message.author === 'USER'
-                        ? 'border-emerald-200 bg-emerald-50 text-[#090A0A]'
+                        ? 'border-blue-200 bg-blue-50 text-[#090A0A]'
                         : 'border-zinc-200 bg-white text-[#090A0A]'
                   }`}
                 >
@@ -172,7 +172,7 @@ export function MessagesPage({ session }: MessagesPageProps) {
               </label>
               <textarea
                 id="message-draft"
-                className="min-h-28 w-full border border-zinc-200 bg-white px-4 py-3 text-sm outline-none transition-colors focus:border-emerald-300"
+                className="min-h-28 w-full border border-zinc-200 bg-white px-4 py-3 text-sm outline-none transition-colors focus:border-blue-300"
                 placeholder="Type a request, ETA update, or follow-up…"
                 value={draft}
                 onChange={(event) => setDraft(event.target.value)}
@@ -199,15 +199,15 @@ export function MessagesPage({ session }: MessagesPageProps) {
             </CardHeader>
             <CardContent className="space-y-3 text-sm text-[#5F6562]">
               <div className="flex items-center gap-2 text-[#090A0A]">
-                <Sparkles className="h-4 w-4 text-emerald-600" />
+                <Sparkles className="h-4 w-4 text-blue-600" />
                 {selectedExpert ? `${selectedExpert.yearsOfExperience} years of experience` : 'Waiting for selection'}
               </div>
               <div className="flex items-center gap-2 text-[#090A0A]">
-                <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                <ShieldCheck className="h-4 w-4 text-blue-600" />
                 {selectedExpert?.available ? 'Accepting jobs now' : 'Offline'}
               </div>
               <div className="flex items-center gap-2 text-[#090A0A]">
-                <MessageSquareText className="h-4 w-4 text-emerald-600" />
+                <MessageSquareText className="h-4 w-4 text-blue-600" />
                 {selectedExpert?.serviceArea ? `Area: ${selectedExpert.serviceArea}` : 'Area not set'}
               </div>
             </CardContent>
@@ -225,11 +225,11 @@ export function MessagesPage({ session }: MessagesPageProps) {
               </div>
               <div className="flex items-center justify-between border-b border-zinc-200/70 pb-3">
                 <span>Status</span>
-                <span className="font-mono text-xs text-emerald-700">CONNECTED</span>
+                <span className="font-mono text-xs text-blue-700">CONNECTED</span>
               </div>
               <div className="flex items-center justify-between">
                 <span>Signal</span>
-                <span className="flex items-center gap-1 font-mono text-xs text-[#090A0A]"><Zap className="h-3.5 w-3.5 text-emerald-600" />STRONG</span>
+                <span className="flex items-center gap-1 font-mono text-xs text-[#090A0A]"><Zap className="h-3.5 w-3.5 text-blue-600" />STRONG</span>
               </div>
             </CardContent>
           </Card>

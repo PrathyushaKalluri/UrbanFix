@@ -21,6 +21,7 @@ import {
   Users,
   CheckCircle,
   Clock,
+  HandHeart,
   Zap,
   Globe,
   MapPin,
@@ -93,7 +94,7 @@ function FloatingParticles() {
       {[...Array(6)].map((_, i) => (
         <motion.div
           key={i}
-          className="absolute h-1 w-1 rounded-full bg-emerald-400/30"
+          className="absolute h-1 w-1 rounded-full bg-blue-400/30"
           style={{
             left: `${15 + i * 15}%`,
             top: `${20 + (i % 3) * 25}%`,
@@ -129,14 +130,14 @@ function GlassCard({
       variants={fadeInUp}
       whileHover={{
         y: -4,
-        boxShadow: "0 8px 32px rgba(16, 185, 129, 0.15)",
+        boxShadow: "0 8px 32px rgba(59, 130, 246, 0.15)",
         transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] },
       }}
       className={`group relative overflow-hidden rounded-2xl border border-white/50 bg-white/70 p-8 shadow-[0_4px_24px_rgba(0,0,0,0.04)] backdrop-blur-xl transition-all duration-300 ${className}`}
     >
       {/* Hover glow effect */}
       <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/50 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-transparent to-transparent" />
       </div>
       <div className="relative z-10">{children}</div>
     </motion.div>
@@ -146,8 +147,8 @@ function GlassCard({
 // Feature icon wrapper
 function FeatureIcon({ icon: Icon }: { icon: React.ElementType }) {
   return (
-    <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl border border-emerald-200/50 bg-gradient-to-br from-emerald-50/80 to-emerald-100/50 shadow-sm transition-all duration-300 group-hover:shadow-[0_0_20px_rgba(16,185,129,0.2)] group-hover:border-emerald-300/50">
-      <Icon className="h-6 w-6 text-emerald-600" strokeWidth={1.5} />
+    <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl border border-blue-200/50 bg-gradient-to-br from-blue-50/80 to-blue-100/50 shadow-sm transition-all duration-300 group-hover:shadow-[0_0_20px_rgba(59,130,246,0.2)] group-hover:border-blue-300/50">
+      <Icon className="h-6 w-6 text-blue-600" strokeWidth={1.5} />
     </div>
   );
 }
@@ -170,8 +171,8 @@ function StatItem({
       className="flex flex-col items-center space-y-3 text-center"
     >
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-emerald-200/50 bg-emerald-50/50">
-          <Icon className="h-5 w-5 text-emerald-600" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-blue-200/50 bg-blue-50/50">
+          <Icon className="h-5 w-5 text-blue-600" />
         </div>
         <span className="text-4xl font-semibold tracking-tight text-zinc-900">
           {value}
@@ -242,7 +243,7 @@ function PremiumCTAButton() {
       {/* Outer glow - only on hover */}
       <motion.div
         className="absolute -inset-1 rounded-xl blur-xl"
-        style={{ background: "oklch(65% 0.2 155 / 0.4)" }}
+        style={{ background: "oklch(65% 0.2 255 / 0.4)" }}
         initial={{ opacity: 0 }}
         animate={isHovered ? { opacity: 1 } : { opacity: 0 }}
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
@@ -258,12 +259,12 @@ function PremiumCTAButton() {
         whileTap={{ scale: 0.98 }}
         className="relative"
       >
-        <Button className="relative h-10 overflow-hidden rounded-xl border border-emerald-300/30 bg-gradient-to-b from-emerald-400 to-emerald-500 px-5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all duration-300 hover:from-emerald-300 hover:to-emerald-400 hover:shadow-emerald-400/30">
+        <Button className="relative h-10 overflow-hidden rounded-xl border border-blue-300/30 bg-gradient-to-b from-blue-400 to-blue-500 px-5 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 transition-all duration-300 hover:from-blue-300 hover:to-blue-400 hover:shadow-blue-400/30">
           {/* Bright spotlight effect that follows cursor */}
           <motion.div
             className="pointer-events-none absolute -inset-px rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
             style={{
-              background: `radial-gradient(120px circle at ${mousePos.x}px ${mousePos.y}px, rgba(167,243,208,0.5), transparent 50%)`,
+              background: `radial-gradient(120px circle at ${mousePos.x}px ${mousePos.y}px, rgba(191,219,254,0.5), transparent 50%)`,
             }}
           />
 
@@ -304,7 +305,7 @@ function PremiumCTAButton() {
                   }}
                   className="absolute right-1 top-1/2 -translate-y-1/2"
                 >
-                  <Star className="h-2.5 w-2.5 fill-emerald-200 text-emerald-200" />
+                  <Star className="h-2.5 w-2.5 fill-blue-200 text-blue-200" />
                 </motion.div>
               ))}
             </>
@@ -336,7 +337,7 @@ function PremiumHeroCTAButton() {
       {/* Outer glow */}
       <motion.div
         className="absolute -inset-2 rounded-2xl blur-2xl"
-        style={{ background: "oklch(65% 0.2 155 / 0.35)" }}
+        style={{ background: "oklch(65% 0.2 255 / 0.35)" }}
         initial={{ opacity: 0 }}
         animate={isHovered ? { opacity: 1 } : { opacity: 0 }}
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
@@ -354,13 +355,13 @@ function PremiumHeroCTAButton() {
       >
         <Button
           size="lg"
-          className="relative h-14 overflow-hidden rounded-xl border border-emerald-300/30 bg-gradient-to-b from-emerald-400 to-emerald-500 px-8 text-base font-semibold text-white shadow-xl shadow-emerald-500/25 transition-all duration-300 hover:from-emerald-300 hover:to-emerald-400 hover:shadow-emerald-400/30"
+          className="relative h-14 overflow-hidden rounded-xl border border-blue-300/30 bg-gradient-to-b from-blue-400 to-blue-500 px-8 text-base font-semibold text-white shadow-xl shadow-blue-500/25 transition-all duration-300 hover:from-blue-300 hover:to-blue-400 hover:shadow-blue-400/30"
         >
           {/* Bright spotlight effect that follows cursor */}
           <motion.div
             className="pointer-events-none absolute -inset-px rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
             style={{
-              background: `radial-gradient(180px circle at ${mousePos.x}px ${mousePos.y}px, rgba(167,243,208,0.5), transparent 50%)`,
+              background: `radial-gradient(180px circle at ${mousePos.x}px ${mousePos.y}px, rgba(191,219,254,0.5), transparent 50%)`,
             }}
           />
 
@@ -401,7 +402,7 @@ function PremiumHeroCTAButton() {
                   }}
                   className="absolute right-3 top-1/2"
                 >
-                  <Star className="h-3.5 w-3.5 fill-emerald-200 text-emerald-200" />
+                  <Star className="h-3.5 w-3.5 fill-blue-200 text-blue-200" />
                 </motion.div>
               ))}
             </>
@@ -439,12 +440,12 @@ function PremiumSearchButton() {
         whileTap={{ scale: 0.98 }}
         className="relative"
       >
-        <Button className="relative h-12 overflow-hidden rounded-xl border border-emerald-300/30 bg-gradient-to-b from-emerald-400 to-emerald-500 px-6 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all duration-300 hover:from-emerald-300 hover:to-emerald-400 hover:shadow-emerald-400/30">
+        <Button className="relative h-12 overflow-hidden rounded-xl border border-blue-300/30 bg-gradient-to-b from-blue-400 to-blue-500 px-6 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 transition-all duration-300 hover:from-blue-300 hover:to-blue-400 hover:shadow-blue-400/30">
           {/* Bright spotlight effect that follows cursor */}
           <motion.div
             className="pointer-events-none absolute -inset-px rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
             style={{
-              background: `radial-gradient(100px circle at ${mousePos.x}px ${mousePos.y}px, rgba(167,243,208,0.5), transparent 50%)`,
+              background: `radial-gradient(100px circle at ${mousePos.x}px ${mousePos.y}px, rgba(191,219,254,0.5), transparent 50%)`,
             }}
           />
 
@@ -485,7 +486,7 @@ function PremiumSearchButton() {
                   }}
                   className="absolute right-0 top-1/2 -translate-y-1/2"
                 >
-                  <Star className="h-2.5 w-2.5 fill-emerald-200 text-emerald-200" />
+                  <Star className="h-2.5 w-2.5 fill-blue-200 text-blue-200" />
                 </motion.div>
               ))}
             </>
@@ -539,7 +540,7 @@ function ModernNavbar() {
             transition={{ duration: 0.5, delay: 0.1 }}
             style={{
               background:
-                "linear-gradient(90deg, rgba(16,185,129,0.1) 0%, rgba(52,211,153,0.15) 50%, rgba(16,185,129,0.1) 100%)",
+                "linear-gradient(90deg, rgba(59,130,246,0.1) 0%, rgba(96,165,250,0.15) 50%, rgba(59,130,246,0.1) 100%)",
               filter: "blur(8px)",
             }}
           />
@@ -551,13 +552,13 @@ function ModernNavbar() {
               className="flex items-center gap-2.5 text-lg font-semibold tracking-tight text-zinc-900 transition-opacity duration-300 hover:opacity-80"
             >
               <motion.div
-                className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg shadow-emerald-500/25"
+                className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg shadow-blue-500/25"
                 animate={{
                   scale: scrolled ? 0.9 : 1,
                 }}
                 transition={{ duration: 0.4 }}
               >
-                <Zap className="h-4 w-4 text-white" fill="currentColor" />
+                <HandHeart className="h-4 w-4 text-white" fill="none" />
               </motion.div>
               <span className="hidden sm:inline">UrbanFix</span>
             </Link>
@@ -565,7 +566,7 @@ function ModernNavbar() {
             <div className="flex items-center" style={{ gap: "12px" }}>
               <Link
                 to="/login"
-                className="text-sm font-medium text-zinc-600 transition-colors duration-300 hover:text-emerald-600"
+                className="text-sm font-medium text-zinc-600 transition-colors duration-300 hover:text-blue-600"
               >
                 Log in
               </Link>
@@ -670,11 +671,11 @@ export function LandingPage() {
 
         {/* Animated gradient orbs */}
         <GradientOrb
-          className="-left-40 top-0 h-[600px] w-[600px] bg-emerald-300/20"
+          className="-left-40 top-0 h-[600px] w-[600px] bg-blue-300/20"
           delay={0}
         />
         <GradientOrb
-          className="right-0 top-40 h-[800px] w-[800px] bg-emerald-200/15"
+          className="right-0 top-40 h-[800px] w-[800px] bg-blue-200/15"
           delay={5}
         />
         <GradientOrb
@@ -689,7 +690,7 @@ export function LandingPage() {
         <div
           className="absolute inset-0 opacity-[0.08]"
           style={{
-            backgroundImage: `linear-gradient(to right, #10b981 1px, transparent 1px), linear-gradient(to bottom, #10b981 1px, transparent 1px)`,
+            backgroundImage: `linear-gradient(to right, #3b82f6 1px, transparent 1px), linear-gradient(to bottom, #3b82f6 1px, transparent 1px)`,
             backgroundSize: "60px 60px",
           }}
         />
@@ -712,7 +713,7 @@ export function LandingPage() {
             <motion.div variants={fadeInUp} className="mb-8">
               <Badge
                 variant="outline"
-                className="h-8 rounded-full border-emerald-200/50 bg-emerald-50/50 px-4 text-xs font-semibold uppercase tracking-wider text-emerald-700 backdrop-blur-sm"
+                className="h-8 rounded-full border-blue-200/50 bg-blue-50/50 px-4 text-xs font-semibold uppercase tracking-wider text-blue-700 backdrop-blur-sm"
               >
                 <Sparkles className="mr-2 h-3.5 w-3.5" />
                 Precision Network
@@ -727,7 +728,7 @@ export function LandingPage() {
             >
               Orchestrate Your
               <br />
-              <span className="bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
                 Urban Reality
               </span>
             </motion.h1>
@@ -747,8 +748,8 @@ export function LandingPage() {
               variants={fadeInUp}
               className="mx-auto mb-8 w-full max-w-xl"
             >
-              <div className="group flex items-center gap-3 rounded-2xl border border-zinc-200/80 bg-white/90 p-2 shadow-[0_8px_32px_rgba(0,0,0,0.06)] backdrop-blur-xl transition-all duration-300 focus-within:border-emerald-300/50 focus-within:shadow-[0_8px_32px_rgba(16,185,129,0.12)]">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-100/80 text-zinc-400 transition-colors group-focus-within:bg-emerald-50 group-focus-within:text-emerald-500">
+              <div className="group flex items-center gap-3 rounded-2xl border border-zinc-200/80 bg-white/90 p-2 shadow-[0_8px_32px_rgba(0,0,0,0.06)] backdrop-blur-xl transition-all duration-300 focus-within:border-blue-300/50 focus-within:shadow-[0_8px_32px_rgba(59,130,246,0.12)]">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-100/80 text-zinc-400 transition-colors group-focus-within:bg-blue-50 group-focus-within:text-blue-500">
                   <Search className="h-5 w-5" />
                 </div>
                 <div className="relative flex-1">
@@ -757,7 +758,7 @@ export function LandingPage() {
                     <div className="pointer-events-none absolute inset-0 flex items-center">
                       <span className="text-base text-zinc-400">
                         Search for{" "}
-                        <span className="text-emerald-600 font-medium">
+                        <span className="text-blue-600 font-medium">
                           {typewriterText}
                         </span>
                         <motion.span
@@ -767,7 +768,7 @@ export function LandingPage() {
                             repeat: Infinity,
                             repeatType: "reverse",
                           }}
-                          className="inline-block ml-0.5 w-0.5 h-5 bg-emerald-500 align-middle"
+                          className="inline-block ml-0.5 w-0.5 h-5 bg-blue-500 align-middle"
                         />
                       </span>
                     </div>
@@ -795,12 +796,12 @@ export function LandingPage() {
               variants={fadeInUp}
               className="flex items-center justify-center gap-3"
             >
-              <div className="flex items-center gap-2 rounded-full border border-emerald-200/50 bg-emerald-50/50 px-4 py-2 backdrop-blur-sm">
+              <div className="flex items-center gap-2 rounded-full border border-blue-200/50 bg-blue-50/50 px-4 py-2 backdrop-blur-sm">
                 <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-500" />
                 </span>
-                <span className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
+                <span className="text-xs font-semibold uppercase tracking-wider text-blue-700">
                   System Optimal
                 </span>
               </div>
@@ -903,7 +904,7 @@ export function LandingPage() {
                       key={item}
                       className="flex items-center gap-2 text-sm text-zinc-600"
                     >
-                      <CheckCircle className="h-4 w-4 text-emerald-500" />
+                      <CheckCircle className="h-4 w-4 text-blue-500" />
                       {item}
                     </li>
                   ))}
@@ -933,7 +934,7 @@ export function LandingPage() {
                       key={item}
                       className="flex items-center gap-2 text-sm text-zinc-600"
                     >
-                      <CheckCircle className="h-4 w-4 text-emerald-500" />
+                      <CheckCircle className="h-4 w-4 text-blue-500" />
                       {item}
                     </li>
                   ))}
@@ -963,7 +964,7 @@ export function LandingPage() {
                       key={item}
                       className="flex items-center gap-2 text-sm text-zinc-600"
                     >
-                      <CheckCircle className="h-4 w-4 text-emerald-500" />
+                      <CheckCircle className="h-4 w-4 text-blue-500" />
                       {item}
                     </li>
                   ))}
@@ -986,7 +987,7 @@ export function LandingPage() {
               >
                 <Badge
                   variant="outline"
-                  className="mb-4 h-7 rounded-full border-emerald-200/50 bg-emerald-50/50 px-3 text-xs font-semibold uppercase tracking-wider text-emerald-600"
+                  className="mb-4 h-7 rounded-full border-blue-200/50 bg-blue-50/50 px-3 text-xs font-semibold uppercase tracking-wider text-blue-600"
                 >
                   System Architecture
                 </Badge>
@@ -1004,13 +1005,13 @@ export function LandingPage() {
                 </p>
                 <div className="flex flex-wrap gap-4">
                   <div className="flex items-center gap-2 rounded-lg border border-zinc-200/50 bg-white/50 px-4 py-2 backdrop-blur-sm">
-                    <MapPin className="h-4 w-4 text-emerald-500" />
+                    <MapPin className="h-4 w-4 text-blue-500" />
                     <span className="text-sm font-medium text-zinc-700">
                       Geospatial precision
                     </span>
                   </div>
                   <div className="flex items-center gap-2 rounded-lg border border-zinc-200/50 bg-white/50 px-4 py-2 backdrop-blur-sm">
-                    <Zap className="h-4 w-4 text-emerald-500" />
+                    <Zap className="h-4 w-4 text-blue-500" />
                     <span className="text-sm font-medium text-zinc-700">
                       &lt;50ms latency
                     </span>
@@ -1030,14 +1031,14 @@ export function LandingPage() {
                 }}
                 className="relative"
               >
-                <div className="relative aspect-square overflow-hidden rounded-3xl border border-white/50 bg-gradient-to-br from-emerald-50/80 to-white/60 p-8 shadow-[0_8px_32px_rgba(0,0,0,0.06)] backdrop-blur-xl">
+                <div className="relative aspect-square overflow-hidden rounded-3xl border border-white/50 bg-gradient-to-br from-blue-50/80 to-white/60 p-8 shadow-[0_8px_32px_rgba(0,0,0,0.06)] backdrop-blur-xl">
                   {/* Radar visualization */}
                   <div className="relative flex h-full items-center justify-center">
                     {/* Radar circles */}
                     {[200, 160, 120, 80, 40].map((size, i) => (
                       <div
                         key={i}
-                        className="absolute rounded-full border border-emerald-200/30"
+                        className="absolute rounded-full border border-blue-200/30"
                         style={{ width: size, height: size }}
                       />
                     ))}
@@ -1052,12 +1053,12 @@ export function LandingPage() {
                       className="absolute h-[200px] w-[200px]"
                       style={{
                         background:
-                          "conic-gradient(from 0deg, transparent 0deg, rgba(16, 185, 129, 0.1) 60deg, transparent 60deg)",
+                          "conic-gradient(from 0deg, transparent 0deg, rgba(59, 130, 246, 0.1) 60deg, transparent 60deg)",
                         borderRadius: "50%",
                       }}
                     />
                     {/* Center point */}
-                    <div className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/30">
+                    <div className="relative z-10 flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 shadow-lg shadow-blue-500/30">
                       <div className="h-2 w-2 rounded-full bg-white" />
                     </div>
                     {/* Satellite points */}
@@ -1086,10 +1087,10 @@ export function LandingPage() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.5, duration: 0.5 }}
-                    className="absolute bottom-4 left-4 flex items-center gap-2 rounded-lg border border-emerald-200/50 bg-white/80 px-3 py-2 backdrop-blur-sm"
+                    className="absolute bottom-4 left-4 flex items-center gap-2 rounded-lg border border-blue-200/50 bg-white/80 px-3 py-2 backdrop-blur-sm"
                   >
-                    <Radar className="h-4 w-4 text-emerald-500" />
-                    <span className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
+                    <Radar className="h-4 w-4 text-blue-500" />
+                    <span className="text-xs font-semibold uppercase tracking-wider text-blue-700">
                       4 Nodes Active
                     </span>
                   </motion.div>
@@ -1124,7 +1125,7 @@ export function LandingPage() {
         <section className="relative overflow-hidden px-6 py-24 lg:py-32">
           {/* Background glow */}
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <div className="h-[600px] w-[600px] rounded-full bg-emerald-400/10 blur-[150px]" />
+            <div className="h-[600px] w-[600px] rounded-full bg-blue-400/10 blur-[150px]" />
           </div>
 
           <div className="relative mx-auto max-w-4xl text-center">
@@ -1136,7 +1137,7 @@ export function LandingPage() {
             >
               <Badge
                 variant="outline"
-                className="mb-6 h-8 rounded-full border-emerald-200/50 bg-emerald-50/50 px-4 text-xs font-semibold uppercase tracking-wider text-emerald-700"
+                className="mb-6 h-8 rounded-full border-blue-200/50 bg-blue-50/50 px-4 text-xs font-semibold uppercase tracking-wider text-blue-700"
               >
                 Ready to Transform?
               </Badge>
@@ -1146,7 +1147,7 @@ export function LandingPage() {
               >
                 Start Orchestrating
                 <br />
-                <span className="text-emerald-600">Today</span>
+                <span className="text-blue-600">Today</span>
               </h2>
               <p className="mx-auto mb-10 max-w-xl text-lg text-zinc-500">
                 Join the network of optimized urban nodes. Secure your access to
@@ -1174,11 +1175,11 @@ export function LandingPage() {
                 className="mt-10 flex items-center justify-center gap-6 text-sm text-zinc-400"
               >
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-emerald-500" />
+                  <CheckCircle className="h-4 w-4 text-blue-500" />
                   <span>No credit card required</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-emerald-500" />
+                  <CheckCircle className="h-4 w-4 text-blue-500" />
                   <span>Free 14-day trial</span>
                 </div>
               </motion.div>

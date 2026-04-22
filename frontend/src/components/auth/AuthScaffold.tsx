@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { Route, ShieldCheck, Sparkles, Zap } from "lucide-react";
+import { HandHeart, Route, ShieldCheck, Sparkles } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { SiteFooter } from "../SiteFooter";
 
@@ -32,15 +32,15 @@ export function AuthScaffold({
           }}
         />
 
-        <div className="absolute -left-40 top-0 h-[520px] w-[520px] rounded-full bg-emerald-300/20 blur-[120px]" />
-        <div className="absolute -right-20 top-28 h-[640px] w-[640px] rounded-full bg-emerald-200/15 blur-[120px]" />
+        <div className="absolute -left-40 top-0 h-[520px] w-[520px] rounded-full bg-blue-300/20 blur-[120px]" />
+        <div className="absolute -right-20 top-28 h-[640px] w-[640px] rounded-full bg-blue-200/15 blur-[120px]" />
         <div className="absolute bottom-0 left-1/3 h-[460px] w-[460px] rounded-full bg-cyan-200/10 blur-[120px]" />
 
         <div
           className="absolute inset-0 opacity-[0.06]"
           style={{
             backgroundImage:
-              "linear-gradient(to right, #10b981 1px, transparent 1px), linear-gradient(to bottom, #10b981 1px, transparent 1px)",
+              "linear-gradient(to right, #3b82f6 1px, transparent 1px), linear-gradient(to bottom, #3b82f6 1px, transparent 1px)",
             backgroundSize: "64px 64px",
           }}
         />
@@ -53,8 +53,8 @@ export function AuthScaffold({
               to="/"
               className="flex items-center gap-2.5 text-lg font-semibold tracking-tight text-zinc-900 transition-opacity hover:opacity-80"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg shadow-emerald-500/25">
-                <Zap className="h-4 w-4 text-white" fill="currentColor" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg shadow-blue-500/25">
+                <HandHeart className="h-4 w-4 text-white" fill="none" />
               </div>
               <span className="hidden sm:inline">UrbanFix</span>
             </Link>
@@ -62,13 +62,13 @@ export function AuthScaffold({
             <div className="flex items-center gap-4">
               <Link
                 to="/login"
-                className="text-sm font-medium text-zinc-600 transition-colors hover:text-emerald-600"
+                className="text-sm font-medium text-zinc-600 transition-colors hover:text-blue-600"
               >
                 Log in
               </Link>
               <Link
                 to="/signup/user"
-                className="rounded-xl border border-emerald-300/30 bg-gradient-to-b from-emerald-400 to-emerald-500 px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-white shadow-lg shadow-emerald-500/25 transition-all hover:from-emerald-300 hover:to-emerald-400"
+                className="rounded-xl border border-blue-300/30 bg-gradient-to-b from-blue-400 to-blue-500 px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-white shadow-lg shadow-blue-500/25 transition-all hover:from-blue-300 hover:to-blue-400"
               >
                 Get Started
               </Link>
@@ -82,7 +82,7 @@ export function AuthScaffold({
           <section className="hidden flex-col justify-center space-y-8 lg:flex">
             <Badge
               variant="outline"
-              className="h-8 w-fit rounded-full border-emerald-200/50 bg-emerald-50/60 px-4 text-xs font-semibold uppercase tracking-wider text-emerald-700 backdrop-blur-sm"
+              className="h-8 w-fit rounded-full border-blue-200/50 bg-blue-50/60 px-4 text-xs font-semibold uppercase tracking-wider text-blue-700 backdrop-blur-sm"
             >
               <Sparkles className="mr-2 h-3.5 w-3.5" />
               Precision Network
@@ -95,7 +95,7 @@ export function AuthScaffold({
               >
                 Orchestrate Your
                 <br />
-                <span className="bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
                   Urban Reality
                 </span>
               </h1>
@@ -107,10 +107,10 @@ export function AuthScaffold({
 
             <div className="grid gap-4 sm:grid-cols-2">
               <article className="rounded-2xl border border-white/60 bg-white/70 p-6 shadow-[0_6px_30px_rgba(0,0,0,0.05)] backdrop-blur-xl">
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-200/50 bg-emerald-50/80 text-emerald-600">
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-blue-200/50 bg-blue-50/80 text-blue-600">
                   <ShieldCheck className="h-5 w-5" />
                 </div>
-                <p className="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">
+                <p className="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-blue-700">
                   Verified Access
                 </p>
                 <p className="text-sm leading-relaxed text-zinc-600">
@@ -119,10 +119,10 @@ export function AuthScaffold({
               </article>
 
               <article className="rounded-2xl border border-white/60 bg-white/70 p-6 shadow-[0_6px_30px_rgba(0,0,0,0.05)] backdrop-blur-xl">
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-200/50 bg-emerald-50/80 text-emerald-600">
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-blue-200/50 bg-blue-50/80 text-blue-600">
                   <Route className="h-5 w-5" />
                 </div>
-                <p className="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">
+                <p className="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-blue-700">
                   Guided Flow
                 </p>
                 <p className="text-sm leading-relaxed text-zinc-600">
@@ -133,8 +133,8 @@ export function AuthScaffold({
 
             <div className="flex items-center gap-3 rounded-2xl border border-zinc-200/70 bg-white/60 px-4 py-3 backdrop-blur-sm">
               <span className="relative flex h-2.5 w-2.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-70" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-70" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-blue-500" />
               </span>
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">
                 Authentication fabric active

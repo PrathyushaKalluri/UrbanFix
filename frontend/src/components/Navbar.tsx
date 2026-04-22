@@ -11,7 +11,7 @@ export function Navbar({ isAuthenticated, onLogout }: NavbarProps) {
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-4">
         <Link 
           to="/" 
-          className="font-mono text-lg font-bold tracking-tighter text-zinc-900 hover:text-emerald-600 transition-colors"
+          className="font-mono text-lg font-bold tracking-tighter text-zinc-900 hover:text-blue-600 transition-colors"
         >
           UrbanFix
         </Link>
@@ -19,7 +19,7 @@ export function Navbar({ isAuthenticated, onLogout }: NavbarProps) {
           {isAuthenticated ? (
             <button
               onClick={onLogout}
-              className="text-[11px] font-semibold tracking-[0.2em] text-zinc-500 uppercase transition-colors hover:text-emerald-500"
+              className="text-[11px] font-semibold tracking-[0.2em] text-zinc-500 uppercase transition-colors hover:text-blue-500"
             >
               Logout
             </button>
@@ -27,13 +27,13 @@ export function Navbar({ isAuthenticated, onLogout }: NavbarProps) {
             <>
               <Link 
                 to="/signup/user"
-                className="text-[11px] font-semibold tracking-[0.2em] text-emerald-600 uppercase hover:text-emerald-700 transition-colors"
+                className="text-[11px] font-semibold tracking-[0.2em] text-blue-600 uppercase hover:text-blue-700 transition-colors"
               >
                 Join ecosystem
               </Link>
               <Link 
                 to="/login"
-                className="text-[11px] font-semibold tracking-[0.2em] text-zinc-500 uppercase transition-colors hover:text-emerald-500"
+                className="text-[11px] font-semibold tracking-[0.2em] text-zinc-500 uppercase transition-colors hover:text-blue-500"
               >
                 Log In
               </Link>

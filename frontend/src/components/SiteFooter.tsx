@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Zap } from "lucide-react";
+import { HandHeart } from "lucide-react";
 
 type SiteFooterProps = {
   className?: string;
@@ -37,8 +37,8 @@ export function SiteFooter({ className = "" }: SiteFooterProps) {
               to="/"
               className="mb-4 flex items-center gap-2 text-lg font-semibold tracking-tight text-zinc-900"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg shadow-emerald-500/20">
-                <Zap className="h-4 w-4 text-white" fill="currentColor" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg shadow-blue-500/20">
+                <HandHeart className="h-4 w-4 text-white" fill="none" />
               </div>
               <span>UrbanFix</span>
             </Link>
@@ -46,12 +46,12 @@ export function SiteFooter({ className = "" }: SiteFooterProps) {
               High-precision service routing and intelligent telemetry for the
               modern metropolis.
             </p>
-            <div className="flex w-fit items-center gap-2 rounded-full border border-emerald-200/50 bg-emerald-50/50 px-4 py-2">
+            <div className="flex w-fit items-center gap-2 rounded-full border border-blue-200/50 bg-blue-50/50 px-4 py-2">
               <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-500" />
               </span>
-              <span className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
+              <span className="text-xs font-semibold uppercase tracking-wider text-blue-700">
                 All Systems Operational
               </span>
             </div>
@@ -66,7 +66,7 @@ export function SiteFooter({ className = "" }: SiteFooterProps) {
                 <li key={item}>
                   <a
                     href="#"
-                    className="text-sm text-zinc-500 transition-colors hover:text-emerald-600"
+                    className="text-sm text-zinc-500 transition-colors hover:text-blue-600"
                   >
                     {item}
                   </a>
@@ -84,7 +84,7 @@ export function SiteFooter({ className = "" }: SiteFooterProps) {
                 <li key={item}>
                   <a
                     href="#"
-                    className="text-sm text-zinc-500 transition-colors hover:text-emerald-600"
+                    className="text-sm text-zinc-500 transition-colors hover:text-blue-600"
                   >
                     {item}
                   </a>
@@ -102,7 +102,7 @@ export function SiteFooter({ className = "" }: SiteFooterProps) {
                 <li key={item}>
                   <a
                     href="#"
-                    className="text-sm text-zinc-500 transition-colors hover:text-emerald-600"
+                    className="text-sm text-zinc-500 transition-colors hover:text-blue-600"
                   >
                     {item}
                   </a>
@@ -121,7 +121,7 @@ export function SiteFooter({ className = "" }: SiteFooterProps) {
               <a
                 key={item}
                 href="#"
-                className="text-sm text-zinc-400 transition-colors hover:text-emerald-600"
+                className="text-sm text-zinc-400 transition-colors hover:text-blue-600"
               >
                 {item}
               </a>

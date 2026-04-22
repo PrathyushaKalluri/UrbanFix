@@ -66,14 +66,14 @@ export function ExpertDashboardView({ session }: ExpertDashboardViewProps) {
                 key={job.id}
                 type="button"
                 onClick={() => setSelectedJobId(job.id)}
-                className={`w-full border-b border-[#EBECEB] p-4 text-left transition-colors last:border-b-0 ${selectedJob?.id === job.id ? 'bg-[#E6FBF0]/50' : 'hover:bg-[#F5F7F5]'}`}
+                className={`w-full border-b border-[#EBECEB] p-4 text-left transition-colors last:border-b-0 ${selectedJob?.id === job.id ? 'bg-[#EFF6FF]/50' : 'hover:bg-[#F5F7F5]'}`}
               >
                 <div className="flex items-start gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded bg-[#090A0A] text-[11px] font-semibold text-white">{job.residentName.split(' ').pop()?.slice(-2)}</div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
                       <p className="truncate font-semibold text-[14px]">{job.residentName}</p>
-                      <span className="font-mono text-[10px] text-[#00D06B] uppercase">{job.stage === 'New request' ? 'NEW' : job.stage === 'In progress' ? 'LIVE' : 'DONE'}</span>
+                      <span className="font-mono text-[10px] text-[#2563EB] uppercase">{job.stage === 'New request' ? 'NEW' : job.stage === 'In progress' ? 'LIVE' : 'DONE'}</span>
                     </div>
                     <p className="truncate text-[13px] text-[#878D89]">{job.issue}</p>
                     <div className="mt-2 inline-flex rounded-sm border border-[#EBECEB] bg-white px-1.5 py-0.5 font-mono text-[10px] text-[#090A0A]">
@@ -93,7 +93,7 @@ export function ExpertDashboardView({ session }: ExpertDashboardViewProps) {
               <h2 className="mt-1 text-[20px] font-semibold tracking-[-0.02em]">{content.heroTitle}</h2>
             </div>
             <div className="flex items-center gap-3">
-              <Badge className={acceptingJobs ? 'border border-[#00D06B]/30 bg-[#E6FBF0] text-[#00A55A]' : 'border border-[#EBECEB] bg-white text-[#878D89]'}>
+              <Badge className={acceptingJobs ? 'border border-[#2563EB]/30 bg-[#EFF6FF] text-[#1D4ED8]' : 'border border-[#EBECEB] bg-white text-[#878D89]'}>
                 {acceptingJobs ? 'SYS SECURE' : 'SYS PAUSED'}
               </Badge>
               <Button type="button" variant="outline" size="sm" onClick={() => setAcceptingJobs((current) => !current)}>
@@ -111,7 +111,7 @@ export function ExpertDashboardView({ session }: ExpertDashboardViewProps) {
                 <p className="mt-2 text-sm text-[#5F6562]">{selectedJob ? `${selectedJob.residentName} · ${selectedJob.area}` : 'Open a request to view the stream and decide the next action.'}</p>
               </div>
               <div className="flex items-center gap-2 font-mono text-[11px] text-[#878D89] uppercase">
-                <Zap className="h-4 w-4 text-[#00D06B]" />
+                <Zap className="h-4 w-4 text-[#2563EB]" />
                 Live stream
               </div>
             </div>
@@ -122,7 +122,7 @@ export function ExpertDashboardView({ session }: ExpertDashboardViewProps) {
               </div>
 
               <div className="flex justify-start">
-                <div className="max-w-[72%] bg-[#E6FBF0] p-3 text-[15px] leading-[1.6] text-[#090A0A]">
+                <div className="max-w-[72%] bg-[#EFF6FF] p-3 text-[15px] leading-[1.6] text-[#090A0A]">
                   {selectedJob?.note ?? 'Choose a request to see a resident note and context.'}
                 </div>
               </div>
@@ -191,7 +191,7 @@ export function ExpertDashboardView({ session }: ExpertDashboardViewProps) {
             <div className="w-full border border-[#EBECEB] bg-[#FCFDFC] p-3">
               <div className="mb-3 flex items-center justify-between text-[13px] uppercase tracking-[0.05em] text-[#878D89]">
                 <span>Profile</span>
-                <span className="font-mono text-[#00D06B]">LIVE</span>
+                <span className="font-mono text-[#2563EB]">LIVE</span>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="border border-[#EBECEB] bg-white p-3">

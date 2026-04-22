@@ -57,7 +57,7 @@ export function ContactPage({ session }: ContactPageProps) {
 
         <CardContent>
           {submitted && (
-            <div className="mb-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-200">
+            <div className="mb-4 rounded-lg border border-blue-500/30 bg-blue-500/10 p-3 text-sm text-blue-200">
               Thanks! Your message has been captured successfully.
             </div>
           )}

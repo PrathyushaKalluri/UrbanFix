@@ -155,7 +155,7 @@ export function DashboardPage({ session }: DashboardPageProps) {
       query: 'cleaning',
       description: 'Deep cleaning, pest control, and upkeep',
       icon: Sparkles,
-      accent: 'from-emerald-50 to-white',
+      accent: 'from-blue-50 to-white',
     },
     {
       label: 'AC Repair',
@@ -169,7 +169,7 @@ export function DashboardPage({ session }: DashboardPageProps) {
     return (
       <main className="min-h-screen bg-[#FCFDFC] px-6 py-10 text-[#090A0A]">
         <section className="mx-auto max-w-3xl border border-zinc-200/70 bg-white/70 p-8 shadow-[0_8px_32px_rgba(9,10,10,0.04)] backdrop-blur-xl">
-          <p className="font-mono text-[10px] tracking-[0.22em] text-emerald-600 uppercase">Loading</p>
+          <p className="font-mono text-[10px] tracking-[0.22em] text-blue-600 uppercase">Loading</p>
           <h1 className="mt-3 text-3xl font-bold tracking-tight">Restoring your session…</h1>
           <p className="mt-2 text-sm text-[#878D89]">Checking your token and loading your role.</p>
         </section>
@@ -221,7 +221,7 @@ export function DashboardPage({ session }: DashboardPageProps) {
                 value={expertQuery}
                 onChange={(event) => setExpertQuery(event.target.value)}
                 placeholder="Type a service like electrical, plumbing, or cleaning"
-                className="h-12 rounded-2xl border-zinc-300 bg-white px-5 text-base shadow-sm focus-visible:ring-emerald-400"
+                className="h-12 rounded-2xl border-zinc-300 bg-white px-5 text-base shadow-sm focus-visible:ring-blue-400"
               />
               {hasExpertQuery && locationStatus === 'requesting' ? (
                 <p className="mt-2 text-xs text-[#5F6562]">Requesting your location to narrow nearby experts…</p>
@@ -235,7 +235,7 @@ export function DashboardPage({ session }: DashboardPageProps) {
 
               {hasExpertQuery ? (
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <span className={`rounded-full px-3 py-1 text-[10px] font-mono tracking-[0.16em] uppercase ${locationAttachedToRequest ? 'bg-emerald-50 text-emerald-700' : 'bg-zinc-100 text-zinc-600'}`}>
+                  <span className={`rounded-full px-3 py-1 text-[10px] font-mono tracking-[0.16em] uppercase ${locationAttachedToRequest ? 'bg-blue-50 text-blue-700' : 'bg-zinc-100 text-zinc-600'}`}>
                     Location attached: {locationAttachedToRequest ? 'Yes' : 'No'}
                   </span>
                   <span className="rounded-full bg-zinc-100 px-3 py-1 text-[10px] font-mono tracking-[0.16em] text-zinc-600 uppercase">
@@ -272,10 +272,10 @@ export function DashboardPage({ session }: DashboardPageProps) {
                       key={link.label}
                       type="button"
                       onClick={() => setExpertQuery(link.query)}
-                      className={`group flex min-w-[230px] flex-1 items-stretch rounded-2xl border border-zinc-200/70 bg-gradient-to-br ${link.accent} p-0 text-left shadow-[0_8px_32px_rgba(9,10,10,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-300 ${isActive ? 'ring-2 ring-emerald-300 ring-offset-2 ring-offset-[#FCFDFC]' : ''}`}
+                      className={`group flex min-w-[230px] flex-1 items-stretch rounded-2xl border border-zinc-200/70 bg-gradient-to-br ${link.accent} p-0 text-left shadow-[0_8px_32px_rgba(9,10,10,0.04)] transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-300 ${isActive ? 'ring-2 ring-blue-300 ring-offset-2 ring-offset-[#FCFDFC]' : ''}`}
                     >
                       <div className="flex w-full items-start gap-4 p-4">
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/80 text-[#090A0A] shadow-sm transition-colors group-hover:text-emerald-600">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/80 text-[#090A0A] shadow-sm transition-colors group-hover:text-blue-600">
                           <Icon className="h-5 w-5" />
                         </div>
                         <div className="min-w-0 flex-1">
@@ -338,7 +338,7 @@ export function DashboardPage({ session }: DashboardPageProps) {
                             navigate(`/messages/${expert.expertId}`)
                           }
                         }}
-                        className="group cursor-pointer rounded-2xl border border-zinc-200/70 bg-white/85 p-4 shadow-[0_8px_32px_rgba(9,10,10,0.04)] transition-transform duration-200 hover:-translate-y-1 hover:border-emerald-300"
+                        className="group cursor-pointer rounded-2xl border border-zinc-200/70 bg-white/85 p-4 shadow-[0_8px_32px_rgba(9,10,10,0.04)] transition-transform duration-200 hover:-translate-y-1 hover:border-blue-300"
                       >
                       <div className="flex h-full flex-col gap-4 md:flex-row md:items-start md:justify-between">
                         <div className="min-w-0 flex-1">
@@ -351,7 +351,7 @@ export function DashboardPage({ session }: DashboardPageProps) {
                             <Badge
                               className={
                                 expert.available
-                                  ? 'border border-emerald-200 bg-emerald-50 text-emerald-700'
+                                  ? 'border border-blue-200 bg-blue-50 text-blue-700'
                                   : 'border border-zinc-300 bg-zinc-100 text-zinc-600'
                               }
                             >
@@ -426,7 +426,7 @@ export function DashboardPage({ session }: DashboardPageProps) {
               <h2 className="mt-2 text-3xl font-bold tracking-tight">Welcome, {session.profile.fullName}</h2>
               <p className="mt-2 text-sm text-[#878D89]">{session.profile.email}</p>
             </div>
-            <span className="rounded border border-emerald-300 bg-emerald-50 px-3 py-2 font-mono text-[11px] tracking-wider text-emerald-700 uppercase">
+            <span className="rounded border border-blue-300 bg-blue-50 px-3 py-2 font-mono text-[11px] tracking-wider text-blue-700 uppercase">
               {roleLabel}
             </span>
           </div>
@@ -458,7 +458,7 @@ export function DashboardPage({ session }: DashboardPageProps) {
           </div>
 
           <button
-            className="mt-8 h-12 w-full border border-emerald-300/40 bg-emerald-100 text-sm font-bold tracking-[0.14em] text-emerald-700 uppercase transition-opacity hover:opacity-90"
+            className="mt-8 h-12 w-full border border-blue-300/40 bg-blue-100 text-sm font-bold tracking-[0.14em] text-blue-700 uppercase transition-opacity hover:opacity-90"
             type="button"
             onClick={session.logout}
           >

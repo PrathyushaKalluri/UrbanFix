@@ -179,7 +179,7 @@ export function SignupPage({ session, role }: SignupPageProps) {
 
   const getInputClasses = (hasError: boolean) => {
     const baseClasses =
-      'h-12 rounded-xl border border-zinc-200/80 bg-white/85 px-4 py-3 text-sm text-zinc-800 placeholder:text-zinc-400 shadow-sm transition-all duration-200 focus-visible:border-emerald-300/70 focus-visible:bg-white focus-visible:ring-0 focus-visible:shadow-[0_0_0_3px_rgba(16,185,129,0.12)]'
+      'h-12 rounded-xl border border-zinc-200/80 bg-white/85 px-4 py-3 text-sm text-zinc-800 placeholder:text-zinc-400 shadow-sm transition-all duration-200 focus-visible:border-blue-300/70 focus-visible:bg-white focus-visible:ring-0 focus-visible:shadow-[0_0_0_3px_rgba(59,130,246,0.12)]'
 
     if (hasError) {
       return `${baseClasses} border-red-300 bg-red-50/70 focus-visible:border-red-400 focus-visible:shadow-[0_0_0_3px_rgba(248,113,113,0.18)]`
@@ -189,7 +189,7 @@ export function SignupPage({ session, role }: SignupPageProps) {
   }
 
   const expertInputClasses =
-    'h-12 rounded-xl border border-zinc-200/80 bg-white/85 px-4 py-3 text-sm text-zinc-800 placeholder:text-zinc-400 shadow-sm transition-all duration-200 focus-visible:border-emerald-300/70 focus-visible:bg-white focus-visible:ring-0 focus-visible:shadow-[0_0_0_3px_rgba(16,185,129,0.12)]'
+    'h-12 rounded-xl border border-zinc-200/80 bg-white/85 px-4 py-3 text-sm text-zinc-800 placeholder:text-zinc-400 shadow-sm transition-all duration-200 focus-visible:border-blue-300/70 focus-visible:bg-white focus-visible:ring-0 focus-visible:shadow-[0_0_0_3px_rgba(59,130,246,0.12)]'
 
   // Check if form is valid for button styling
   const isFormValid = form.fullName && form.email && form.password && 
@@ -201,8 +201,8 @@ export function SignupPage({ session, role }: SignupPageProps) {
       description="Select your profile and complete onboarding to unlock your UrbanFix workspace."
       preForm={
         <>
-          <div className="mb-5 rounded-2xl border border-emerald-200/60 bg-emerald-50/55 px-4 py-4 backdrop-blur-sm">
-            <p className="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-emerald-700">
+          <div className="mb-5 rounded-2xl border border-blue-200/60 bg-blue-50/55 px-4 py-4 backdrop-blur-sm">
+            <p className="mb-1 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-blue-700">
               <ShieldCheck className="h-3.5 w-3.5" />
               Unified onboarding fabric
             </p>
@@ -216,11 +216,11 @@ export function SignupPage({ session, role }: SignupPageProps) {
               to="/signup/user"
               className={`group rounded-2xl border p-5 transition-all duration-300 ${
                 role === 'USER'
-                  ? 'border-emerald-300/70 bg-emerald-50/70 shadow-[0_8px_24px_rgba(16,185,129,0.12)]'
-                  : 'border-zinc-200/80 bg-white/65 hover:border-emerald-200/70 hover:bg-emerald-50/45'
+                  ? 'border-blue-300/70 bg-blue-50/70 shadow-[0_8px_24px_rgba(59,130,246,0.12)]'
+                  : 'border-zinc-200/80 bg-white/65 hover:border-blue-200/70 hover:bg-blue-50/45'
               }`}
             >
-              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-200/50 bg-white/80 text-emerald-600">
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-blue-200/50 bg-white/80 text-blue-600">
                 <Home className="h-5 w-5" />
               </div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-700">
@@ -235,11 +235,11 @@ export function SignupPage({ session, role }: SignupPageProps) {
               to="/signup/expert"
               className={`group rounded-2xl border p-5 transition-all duration-300 ${
                 role === 'EXPERT'
-                  ? 'border-emerald-300/70 bg-emerald-50/70 shadow-[0_8px_24px_rgba(16,185,129,0.12)]'
-                  : 'border-zinc-200/80 bg-white/65 hover:border-emerald-200/70 hover:bg-emerald-50/45'
+                  ? 'border-blue-300/70 bg-blue-50/70 shadow-[0_8px_24px_rgba(59,130,246,0.12)]'
+                  : 'border-zinc-200/80 bg-white/65 hover:border-blue-200/70 hover:bg-blue-50/45'
               }`}
             >
-              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-200/50 bg-white/80 text-emerald-600">
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-blue-200/50 bg-white/80 text-blue-600">
                 <Wrench className="h-5 w-5" />
               </div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-700">
@@ -256,7 +256,7 @@ export function SignupPage({ session, role }: SignupPageProps) {
         <div className="mt-8 flex justify-center border-t border-zinc-200/60 pt-6">
           <p className="text-xs text-zinc-500">
             Already in the system?{' '}
-            <Link className="font-semibold text-emerald-600 transition-colors hover:text-emerald-700" to="/login">
+            <Link className="font-semibold text-blue-600 transition-colors hover:text-blue-700" to="/login">
               Log In
             </Link>
           </p>
@@ -331,7 +331,7 @@ export function SignupPage({ session, role }: SignupPageProps) {
             </p>
           )}
           {!errors.password && touched.password && (
-            <p className="px-1 text-[10px] text-emerald-600">
+            <p className="px-1 text-[10px] text-blue-600">
               Password meets requirements
             </p>
           )}
@@ -405,7 +405,7 @@ export function SignupPage({ session, role }: SignupPageProps) {
 
             <label className="flex items-start gap-3 rounded-xl border border-zinc-200/80 bg-white/70 p-3.5 backdrop-blur-sm">
               <input
-                className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-emerald-600"
+                className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-blue-600"
                 type="checkbox"
                 checked={expertDetails.available}
                 onChange={updateExpertToggle('available')}
@@ -419,14 +419,14 @@ export function SignupPage({ session, role }: SignupPageProps) {
 
         <label className="flex items-start gap-3 rounded-xl border border-zinc-200/80 bg-white/70 px-3.5 py-3 backdrop-blur-sm">
           <input
-            className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-emerald-600"
+            className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-blue-600"
             type="checkbox"
             checked={acceptTerms}
             onChange={(event: ChangeEvent<HTMLInputElement>) => setAcceptTerms(event.target.checked)}
           />
           <span className="text-[11px] leading-relaxed text-zinc-600 uppercase tracking-[0.1em]">
             I accept the{' '}
-            <span className="font-semibold text-emerald-600 hover:underline">Terms of Service</span> and
+            <span className="font-semibold text-blue-600 hover:underline">Terms of Service</span> and
             acknowledge the Privacy Infrastructure.
           </span>
         </label>
@@ -444,7 +444,7 @@ export function SignupPage({ session, role }: SignupPageProps) {
           disabled={loading}
           className={`h-12 w-full rounded-xl border text-sm font-semibold tracking-[0.12em] uppercase transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-60 ${
             isFormValid
-              ? 'border-emerald-300/40 bg-gradient-to-b from-emerald-400 to-emerald-500 text-white shadow-lg shadow-emerald-500/25 hover:from-emerald-300 hover:to-emerald-400'
+              ? 'border-blue-300/40 bg-gradient-to-b from-blue-400 to-blue-500 text-white shadow-lg shadow-blue-500/25 hover:from-blue-300 hover:to-blue-400'
               : 'border-zinc-200 bg-white/70 text-zinc-500 hover:bg-zinc-50'
           }`}
         >
