@@ -3,6 +3,7 @@ import type { ChangeEvent, FormEvent, FocusEvent } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { Home, ShieldCheck, Wrench } from 'lucide-react'
 import { AuthScaffold } from '../../components/auth/AuthScaffold'
+import { Combobox } from '../../components/ui/combobox'
 import { HYDERABAD_AREAS } from '../../config/hyderabadAreas'
 import { signupRoutes } from '../../config/signupRoutes'
 import { Button } from '../../components/ui/button'
@@ -23,6 +24,11 @@ type ExpertDetails = {
   available: boolean
   serviceArea: string
 }
+
+const SERVICE_AREA_OPTIONS = HYDERABAD_AREAS.map((area) => ({
+  value: area.name,
+  label: area.name,
+}))
 
 export function SignupPage({ session, role }: SignupPageProps) {
   const navigate = useNavigate()
@@ -123,6 +129,14 @@ export function SignupPage({ session, role }: SignupPageProps) {
       setExpertDetails((current: ExpertDetails) => ({
         ...current,
         [field]: event.target.checked,
+      }))
+    }
+
+  const updateExpertSelect =
+    (field: 'serviceArea') => (value: string) => {
+      setExpertDetails((current: ExpertDetails) => ({
+        ...current,
+        [field]: value,
       }))
     }
 
@@ -381,26 +395,16 @@ export function SignupPage({ session, role }: SignupPageProps) {
             </div>
 
             <div className="space-y-2">
-              <div className="space-y-2">
-                <Label className="px-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
-                  Service Area (Hyderabad)
-                </Label>
-                <select
-                  value={expertDetails.serviceArea}
-                  onChange={updateExpertField('serviceArea')}
-                  className={expertInputClasses}
-                  required
-                >
-                  {HYDERABAD_AREAS.map((area) => (
-                    <option key={area.name} value={area.name}>
-                      {area.name}
-                    </option>
-                  ))}
-                </select>
-                <p className="px-1 text-[11px] text-zinc-500">
-                  We use this area to automatically determine your service coordinates.
-                </p>
-              </div>
+              <Combobox
+                label="Service Area (Hyderabad)"
+                helperText="We use this area to automatically determine your service coordinates."
+                placeholder="Select a service area"
+                searchPlaceholder="Search Hyderabad areas"
+                emptyText="No Hyderabad area matches that search"
+                options={SERVICE_AREA_OPTIONS}
+                value={expertDetails.serviceArea}
+                onValueChange={updateExpertSelect('serviceArea')}
+              />
             </div>
 
             <label className="flex items-start gap-3 rounded-xl border border-zinc-200/80 bg-white/70 p-3.5 backdrop-blur-sm">
