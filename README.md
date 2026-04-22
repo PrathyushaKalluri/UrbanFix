@@ -286,35 +286,120 @@ E2E Tests        (10s+) - Full workflows
 
 ### Prerequisites
 
-- Node.js 18+ or Python 3.10+
-- PostgreSQL 14+
-- Redis 7+
-- Docker (recommended)
+- **Node.js** 18+
+- **Python** 3.10+
+- **PostgreSQL** 14+ (with a database named `urbanfix_db`)
+- **Redis** 7+ (optional — falls back to in-memory cache)
+- **Java** 17+ & **Maven** (only if running the Spring Boot backend)
 
-### Quick Start
+### 1. Database Setup (PostgreSQL)
+
+Create the database and user:
 
 ```bash
-# 1. Clone & install
-git clone <repo>
+createdb urbanfix_db
+createuser -P urbanfix_user  # password: urbanfix_pass
+```
+
+The schema is auto-created on first run by both backends.
+
+### 2. Python Backend (FastAPI) — Primary API
+
+The Python backend is the main API consumed by the frontend. It handles auth, expert directory, matching, jobs, and notifications.
+
+```bash
+cd backend
+
+# Create virtual environment
+python3 -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the server
+uvicorn app.main:app --reload --port 8000
+```
+
+The API will be available at `http://localhost:8000`.
+
+**Environment variables** (optional, defaults are provided):
+
+```bash
+export POSTGRES_DSN="postgresql://urbanfix_user:urbanfix_pass@localhost:5432/urbanfix_db"
+export REDIS_URL="redis://localhost:6379/0"
+export CACHE_BACKEND="in-memory"  # or "redis"
+export JWT_SECRET="urbanfix-dev-secret-change-me"
+export SEED_DEMO_DATA="true"
+```
+
+**Auto-generated files** (do not commit):
+- `shard_db/` — SQLite geospatial shard cache (recreated on startup)
+
+### 3. Java/Spring Boot Backend (Optional)
+
+A Spring Boot backend exists at the project root `backend/` and runs on port `8080`. It is **not currently used** by the frontend (the Vite proxy routes all `/api` calls to the Python backend on port 8000).
+
+```bash
+cd backend
+
+# Run with Maven
+./mvnw spring-boot:run
+
+# Or build and run
+./mvnw clean package
+java -jar target/backend-*.jar
+```
+
+The Spring server will be available at `http://localhost:8080`.
+
+### 4. Frontend (React + Vite)
+
+```bash
+cd frontend
+
+# Install dependencies
 npm install
 
-# 2. Setup environment
-cp .env.example .env
-
-# 3. Start infrastructure
-docker-compose up
-
-# 4. Run migrations
-npm run db:migrate
-
-# 5. Seed sample data
-npm run db:seed
-
-# 6. Start server
+# Start dev server
 npm run dev
 ```
 
-Server runs on `http://localhost:3000`
+The frontend will be available at `http://localhost:5173`.
+
+The Vite dev server proxies API requests:
+- `/api/auth/*` → Python backend (`:8000`)
+- `/api/experts/*` → Python backend (`:8000`)
+- `/api/matching/*` → Python backend (`:8000`)
+
+### 5. Full Local Stack (Quick Start)
+
+With PostgreSQL running locally:
+
+```bash
+# Terminal 1 — Python API
+cd backend
+source venv/bin/activate
+uvicorn app.main:app --reload --port 8000
+
+# Terminal 2 — Frontend
+cd frontend
+npm run dev
+```
+
+Then open `http://localhost:5173` in your browser.
+
+### 6. Build for Production
+
+```bash
+# Frontend
+cd frontend
+npm run build
+# Output: frontend/dist/
+
+# Python backend (no build step required)
+# Just run: uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
 
 ---
 
