@@ -52,3 +52,6 @@ docs/
 node_modules/
 frontend/node_modules/
 backend/target/
+
+# testing
+frontend/.playwright-mcp
