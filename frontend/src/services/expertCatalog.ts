@@ -27,6 +27,25 @@ type MatchingResponse = {
     suggestions: MatchingSuggestion[];
 };
 
+function normalizeExpertListing(expert: Partial<ExpertListing> & Record<string, unknown>): ExpertListing {
+    return {
+        expertId: Number(expert.expertId ?? expert.expert_id ?? 0),
+        userId: Number(expert.userId ?? expert.user_id ?? 0),
+        fullName: String(expert.fullName ?? expert.full_name ?? ''),
+        primaryExpertise: String(expert.primaryExpertise ?? expert.primary_expertise ?? ''),
+        yearsOfExperience: Number(expert.yearsOfExperience ?? expert.years_of_experience ?? 0),
+        available: Boolean(expert.available ?? false),
+        serviceArea: (expert.serviceArea ?? expert.service_area ?? null) as string | null,
+        latitude: (expert.latitude ?? null) as number | null,
+        longitude: (expert.longitude ?? null) as number | null,
+        expertiseAreas: Array.isArray(expert.expertiseAreas)
+            ? expert.expertiseAreas.map((item) => String(item))
+            : Array.isArray(expert.expertise_areas)
+                ? expert.expertise_areas.map((item) => String(item))
+                : [],
+    };
+}
+
 function normalizeText(value: string) {
     return value.trim().toLowerCase();
 }
@@ -307,12 +326,22 @@ export async function fetchExpertCatalog({
         }
 
         const data = (await response.json()) as MatchingResponse;
-        return data.suggestions as unknown as ExpertListing[];
+        const suggestions = Array.isArray(data.suggestions)
+            ? data.suggestions.map((expert) => normalizeExpertListing(expert as unknown as Partial<ExpertListing>))
+            : [];
+
+        if (suggestions.length > 0) {
+            return suggestions;
+        }
     }
 
     const url = new URL(EXPERT_SEARCH_ENDPOINT, window.location.origin);
     const pageSize = limit ?? 20;
     url.searchParams.set("pageSize", pageSize.toString());
+    if (normalizedQuery) {
+        url.searchParams.set("search", normalizedQuery);
+        url.searchParams.set("availableOnly", "true");
+    }
     
     if (isValidCoordinate(latitude, longitude)) {
         url.searchParams.set("latitude", latitude!.toString());
@@ -335,7 +364,9 @@ export async function fetchExpertCatalog({
     }
 
     const data = await response.json();
-    const experts = data.items as ExpertListing[];
+    const experts = Array.isArray(data.items)
+        ? data.items.map((expert: Partial<ExpertListing> & Record<string, unknown>) => normalizeExpertListing(expert))
+        : [];
     
     return rankExperts(experts, normalizedQuery, limit, latitude, longitude);
 }

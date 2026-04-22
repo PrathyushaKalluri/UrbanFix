@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import hashlib
 import json
+from math import ceil
 from typing import Dict, List
 
 from ..core.cache import CacheProvider
 from ..core.config import settings
+from ..core.geo import haversine_km
 from ..core.sharding import SpatialShardRouter
 from ..core.shard_store import ShardExpertStore
 from ..db.repository import ExpertRow, Repository
@@ -68,10 +70,25 @@ class ExpertService:
         longitude: float | None = None,
         radius_km: float = 15.0,
     ) -> Dict[str, object]:
-        region_buckets = None
-        if latitude is not None and longitude is not None:
-            region_buckets = self.shard_router.buckets_for_radius(latitude, longitude, radius_km)
-        offset = max(page - 1, 0) * page_size
+        location_enabled = latitude is not None and longitude is not None
+        region_buckets = self.shard_router.buckets_for_radius(latitude, longitude, radius_km) if location_enabled else None
+
+        def within_radius(item_lat: float | None, item_lon: float | None) -> bool:
+            if not location_enabled:
+                return True
+            if item_lat is None or item_lon is None:
+                return False
+            return haversine_km(latitude, longitude, float(item_lat), float(item_lon)) <= radius_km
+
+        def sort_items(items: List[Dict[str, object]]) -> List[Dict[str, object]]:
+            return sorted(items, key=lambda item: (-int(item["years_of_experience"]), str(item["full_name"]).lower()))
+
+        def paginate(items: List[Dict[str, object]]) -> tuple[List[Dict[str, object]], int, int]:
+            total_items_local = len(items)
+            start = max(page - 1, 0) * page_size
+            end = start + page_size
+            return items[start:end], total_items_local, ceil(total_items_local / page_size) if total_items_local else 0
+
         if self.shard_store is not None:
             signature = self.shard_store.query_experts(
                 available_only=available_only,
@@ -83,7 +100,7 @@ class ExpertService:
                 max_years_experience=max_years_experience,
                 region_buckets=region_buckets,
                 page=1,
-                page_size=1,
+                page_size=100000,
             )["signature"]
         else:
             signature = self.repository.expert_catalog_signature(
@@ -129,17 +146,13 @@ class ExpertService:
                 min_years_experience=min_years_experience,
                 max_years_experience=max_years_experience,
                 region_buckets=region_buckets,
-                page=page,
-                page_size=page_size,
+                page_size=100000,
+                page=1,
             )
-            experts = fanout["items"]
-            total_items = int(fanout["total_items"])
-            items = [self._to_listing_dict(item) for item in experts]
+            items = [self._to_listing_dict(item) for item in fanout["items"] if within_radius(item.get("latitude"), item.get("longitude"))]
         else:
             experts = self.repository.expert_rows(
                 available_only=available_only,
-                limit=page_size,
-                offset=offset,
                 search=search,
                 primary_expertise=primary_expertise,
                 expertise_area=expertise_area,
@@ -148,23 +161,17 @@ class ExpertService:
                 max_years_experience=max_years_experience,
                 region_buckets=region_buckets,
             )
-            total_items = self.repository.expert_count(
-                available_only=available_only,
-                search=search,
-                primary_expertise=primary_expertise,
-                expertise_area=expertise_area,
-                serves_as_resident=serves_as_resident,
-                min_years_experience=min_years_experience,
-                max_years_experience=max_years_experience,
-                region_buckets=region_buckets,
-            )
-            items = [self._to_listing(expert) for expert in experts]
+            items = [self._to_listing(expert) for expert in experts if within_radius(expert.latitude, expert.longitude)]
+
+        items = sort_items(items)
+        items, total_items, total_pages = paginate(items)
+
         result = {
             "items": items,
             "page": page,
             "page_size": page_size,
             "total_items": total_items,
-            "total_pages": max((total_items + page_size - 1) // page_size, 1) if total_items else 0,
+            "total_pages": total_pages,
         }
         if self.cache is not None:
             self.cache.set(cache_key, result, ttl_seconds=settings.expert_list_cache_ttl_seconds)

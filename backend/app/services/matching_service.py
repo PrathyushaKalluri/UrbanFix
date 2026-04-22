@@ -59,9 +59,17 @@ class MatchingService:
         longitude: float | None = None,
         radius_km: float = 15.0,
     ) -> Dict[str, object]:
+        location_enabled = latitude is not None and longitude is not None
         region_buckets = None
-        if latitude is not None and longitude is not None and self.shard_router is not None:
+        if location_enabled and self.shard_router is not None:
             region_buckets = self.shard_router.buckets_for_radius(latitude, longitude, radius_km)
+
+        def within_radius(candidate) -> bool:
+            if not location_enabled:
+                return True
+            if candidate.latitude is None or candidate.longitude is None:
+                return False
+            return haversine_km(latitude, longitude, candidate.latitude, candidate.longitude) <= radius_km
 
         if self.shard_store is not None:
             shard_result = self.shard_store.query_experts(
@@ -112,6 +120,7 @@ class MatchingService:
             candidates = [self._candidate_from_dict(item) for item in shard_rows]
         else:
             candidates = self.repository.expert_rows(available_only=True, region_buckets=region_buckets)
+        candidates = [candidate for candidate in candidates if within_radius(candidate)]
         request_terms = self._infer_terms(problem_text)
         scored = [
             self._score_candidate(

@@ -5,7 +5,8 @@ import { Navbar } from '../../components/Navbar'
 import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
-import { useAvailableExperts } from '../../hooks/useAvailableExperts'
+import { fetchExpertCatalog } from '../../services/expertCatalog'
+import type { ExpertListing } from '../../types/expert'
 import type { AuthSession } from '../../types/auth'
 import { getDashboardContent } from './strategy/roleDashboardStrategy'
 import { ExpertDashboardView } from './views/ExpertDashboardView'
@@ -18,16 +19,65 @@ export function DashboardPage({ session }: DashboardPageProps) {
   const [expertQuery, setExpertQuery] = useState('')
   const [requesterCoords, setRequesterCoords] = useState<{ latitude: number; longitude: number } | null>(null)
   const [locationStatus, setLocationStatus] = useState<'idle' | 'requesting' | 'granted' | 'denied' | 'unavailable'>('idle')
+  const [experts, setExperts] = useState<ExpertListing[]>([])
+  const [expertsLoading, setExpertsLoading] = useState(false)
+  const [expertsError, setExpertsError] = useState<string | null>(null)
   const hasExpertQuery = expertQuery.trim().length > 0
   const locationReadyForSearch = hasExpertQuery && locationStatus === 'granted' && requesterCoords !== null
-  const searchableQuery = locationReadyForSearch ? expertQuery : ''
-
-  const { experts, loading: expertsLoading, error: expertsError } = useAvailableExperts(searchableQuery, {
-    limit: 9,
-    latitude: requesterCoords?.latitude,
-    longitude: requesterCoords?.longitude,
-  })
+  const locationAttachedToRequest = requesterCoords !== null
   const navigate = useNavigate()
+
+  useEffect(() => {
+    const normalizedQuery = expertQuery.trim()
+    const controller = new AbortController()
+    let active = true
+
+    const loadExperts = async () => {
+      if (!normalizedQuery) {
+        setExperts([])
+        setExpertsError(null)
+        setExpertsLoading(false)
+        return
+      }
+
+      setExpertsLoading(true)
+      setExpertsError(null)
+
+      try {
+        const data = await fetchExpertCatalog({
+          query: normalizedQuery,
+          limit: 9,
+          latitude: requesterCoords?.latitude,
+          longitude: requesterCoords?.longitude,
+          signal: controller.signal,
+        })
+
+        if (active) {
+          setExperts(data)
+          setExpertsError(null)
+        }
+      } catch (fetchError) {
+        if (active && !(fetchError instanceof DOMException && fetchError.name === 'AbortError')) {
+          setExperts([])
+          setExpertsError(fetchError instanceof Error ? fetchError.message : 'Unable to load experts')
+        }
+      } finally {
+        if (active) {
+          setExpertsLoading(false)
+        }
+      }
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      loadExperts()
+    }, 250)
+
+    return () => {
+      active = false
+      controller.abort()
+      window.clearTimeout(timeoutId)
+    }
+  }, [expertQuery, requesterCoords?.latitude, requesterCoords?.longitude])
 
   useEffect(() => {
     const shouldPromptLocation = expertQuery.trim().length > 0 && locationStatus === 'idle'
@@ -177,10 +227,26 @@ export function DashboardPage({ session }: DashboardPageProps) {
                 <p className="mt-2 text-xs text-[#5F6562]">Requesting your location to narrow nearby experts…</p>
               ) : null}
               {hasExpertQuery && locationStatus === 'denied' ? (
-                <p className="mt-2 text-xs text-[#5F6562]">Location access denied. Enable location to view experts in your area and nearby areas.</p>
+                <p className="mt-2 text-xs text-[#5F6562]">Location access denied. Showing general expert matches instead.</p>
               ) : null}
               {hasExpertQuery && locationStatus === 'unavailable' ? (
-                <p className="mt-2 text-xs text-[#5F6562]">Geolocation is unavailable in this browser. Location is required to show area-based experts.</p>
+                <p className="mt-2 text-xs text-[#5F6562]">Geolocation is unavailable in this browser. Showing general expert matches instead.</p>
+              ) : null}
+
+              {hasExpertQuery ? (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <span className={`rounded-full px-3 py-1 text-[10px] font-mono tracking-[0.16em] uppercase ${locationAttachedToRequest ? 'bg-emerald-50 text-emerald-700' : 'bg-zinc-100 text-zinc-600'}`}>
+                    Location attached: {locationAttachedToRequest ? 'Yes' : 'No'}
+                  </span>
+                  <span className="rounded-full bg-zinc-100 px-3 py-1 text-[10px] font-mono tracking-[0.16em] text-zinc-600 uppercase">
+                    Nearby experts: {experts.length}
+                  </span>
+                  {locationAttachedToRequest && requesterCoords ? (
+                    <span className="rounded-full bg-sky-50 px-3 py-1 text-[10px] font-mono tracking-[0.16em] text-sky-700 uppercase">
+                      {requesterCoords.latitude.toFixed(4)}, {requesterCoords.longitude.toFixed(4)}
+                    </span>
+                  ) : null}
+                </div>
               ) : null}
             </div>
 
@@ -244,11 +310,7 @@ export function DashboardPage({ session }: DashboardPageProps) {
                   ) : null}
                 </div>
 
-                {!locationReadyForSearch ? (
-                  <div className="mt-4 rounded-xl border border-dashed border-zinc-300 bg-zinc-50 px-5 py-6 text-sm text-[#5F6562]">
-                    Allow location access to show experts in your current and nearby Hyderabad areas.
-                  </div>
-                ) : expertsLoading ? (
+                {expertsLoading ? (
                   <div className="mt-4 flex gap-4 overflow-x-auto pb-2">
                     {Array.from({ length: 3 }).map((_, index) => (
                       <div key={index} className="h-48 min-w-[420px] animate-pulse rounded-2xl border border-zinc-200 bg-zinc-50" />
@@ -263,21 +325,21 @@ export function DashboardPage({ session }: DashboardPageProps) {
                     No matching experts were found for this query.
                   </div>
                 ) : (
-                  <div className="mt-4 flex snap-x gap-4 overflow-x-auto pb-3 pr-1">
+                  <div className="mt-4 grid gap-4 pb-3 pr-1">
                     {experts.map((expert) => (
-                  <article
-                    key={expert.expertId}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => navigate(`/messages/${expert.expertId}`)}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault()
-                        navigate(`/messages/${expert.expertId}`)
-                      }
-                    }}
-                    className="group min-w-[360px] snap-start cursor-pointer rounded-2xl border border-zinc-200/70 bg-white/85 p-4 shadow-[0_8px_32px_rgba(9,10,10,0.04)] transition-transform duration-200 hover:-translate-y-1 hover:border-emerald-300 md:min-w-[480px]"
-                  >
+                      <article
+                        key={expert.expertId}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => navigate(`/messages/${expert.expertId}`)}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault()
+                            navigate(`/messages/${expert.expertId}`)
+                          }
+                        }}
+                        className="group cursor-pointer rounded-2xl border border-zinc-200/70 bg-white/85 p-4 shadow-[0_8px_32px_rgba(9,10,10,0.04)] transition-transform duration-200 hover:-translate-y-1 hover:border-emerald-300"
+                      >
                       <div className="flex h-full flex-col gap-4 md:flex-row md:items-start md:justify-between">
                         <div className="min-w-0 flex-1">
                           <div className="flex items-start justify-between gap-3">
@@ -332,7 +394,7 @@ export function DashboardPage({ session }: DashboardPageProps) {
                           </Button>
                         </div>
                       </div>
-                  </article>
+                      </article>
                     ))}
                   </div>
                 )}
