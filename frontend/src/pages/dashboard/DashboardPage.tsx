@@ -166,7 +166,7 @@ export function DashboardPage({ session }: DashboardPageProps) {
               <p className="mt-2 text-base text-zinc-500">What are you looking for?</p>
             </div>
 
-            <div className="flex flex-col gap-4 lg:flex-row">
+            <div className="flex flex-col items-stretch gap-4 lg:flex-row lg:items-center">
               <div className="flex-1">
                 <Input
                   id="expert-query"

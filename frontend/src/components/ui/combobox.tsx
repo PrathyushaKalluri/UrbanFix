@@ -165,9 +165,11 @@ export function Combobox({
 
   return (
     <div ref={rootRef} className={cn("space-y-2", className)}>
-      <div id={labelId} className="px-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
-        {label}
-      </div>
+      {label ? (
+        <div id={labelId} className="px-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
+          {label}
+        </div>
+      ) : null}
 
       <div className="relative">
         <button
