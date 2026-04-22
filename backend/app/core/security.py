@@ -7,6 +7,7 @@ import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict
 
+import bcrypt
 from jose import JWTError, jwt
 
 from .config import settings
@@ -19,18 +20,28 @@ def hash_password(password: str) -> str:
 
 
 def verify_password(password: str, encoded_password: str) -> bool:
-    try:
-        scheme, encoded_salt, encoded_digest = encoded_password.split("$")
-    except ValueError:
-        return False
+    if encoded_password.startswith("pbkdf2_sha256$"):
+        try:
+            scheme, encoded_salt, encoded_digest = encoded_password.split("$")
+        except ValueError:
+            return False
 
-    if scheme != "pbkdf2_sha256":
-        return False
+        if scheme != "pbkdf2_sha256":
+            return False
 
-    salt = base64.b64decode(encoded_salt.encode())
-    expected = base64.b64decode(encoded_digest.encode())
-    digest = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, 120_000)
-    return hmac.compare_digest(digest, expected)
+        salt = base64.b64decode(encoded_salt.encode())
+        expected = base64.b64decode(encoded_digest.encode())
+        digest = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, 120_000)
+        return hmac.compare_digest(digest, expected)
+
+    # Support bcrypt hashes from legacy PostgreSQL data
+    if encoded_password.startswith(("$2a$", "$2b$", "$2y$")):
+        try:
+            return bcrypt.checkpw(password.encode("utf-8"), encoded_password.encode("utf-8"))
+        except ValueError:
+            return False
+
+    return False
 
 
 def create_access_token(subject: str, claims: Dict[str, Any]) -> str:

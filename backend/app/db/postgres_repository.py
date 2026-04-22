@@ -45,6 +45,15 @@ class PostgresRepository:
         cursor = self.connection.execute(self._prepare_sql(sql), tuple(parameters))
         return getattr(cursor, "rowcount", 0)
 
+    def execute_returning_id(self, sql: str, parameters: Iterable[Any] = ()):
+        """Execute INSERT with RETURNING id and return the generated primary key."""
+        sql = self._prepare_sql(sql)
+        if "RETURNING" not in sql.upper():
+            sql = sql.rstrip(";") + " RETURNING id"
+        cursor = self.connection.execute(sql, tuple(parameters))
+        row = cursor.fetchone()
+        return row["id"] if row else None
+
     def executemany(self, sql: str, parameters: Sequence[Sequence[Any]]) -> None:
         self.connection.executemany(self._prepare_sql(sql), parameters)
 
