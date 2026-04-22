@@ -77,9 +77,9 @@ export function AuthScaffold({
         </div>
       </header>
 
-      <main className="relative z-10 flex flex-1 items-center px-6 py-10">
-        <div className="mx-auto grid w-full max-w-6xl gap-8 lg:grid-cols-[1.05fr_1fr]">
-          <section className="hidden flex-col justify-center space-y-8 lg:flex">
+      <main className="relative z-10 flex flex-1 px-4 py-8 sm:px-6 sm:py-10">
+        <div className="mx-auto grid w-full max-w-6xl items-start gap-8 lg:grid-cols-[1.05fr_1fr]">
+          <section className="hidden lg:sticky lg:top-24 lg:flex lg:flex-col lg:space-y-8">
             <Badge
               variant="outline"
               className="h-8 w-fit rounded-full border-blue-200/50 bg-blue-50/60 px-4 text-xs font-semibold uppercase tracking-wider text-blue-700 backdrop-blur-sm"
