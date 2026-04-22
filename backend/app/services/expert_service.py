@@ -183,7 +183,7 @@ class ExpertService:
             [int(available), user_id],
         )
         if self.shard_store is not None:
-            expert = self.repository.expert_row_by_id(user_id)
+            expert = self.repository.expert_row_by_user_id(user_id)
             if expert is not None:
                 self.shard_store.upsert_expert(
                     {

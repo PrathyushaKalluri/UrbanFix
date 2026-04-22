@@ -8,6 +8,10 @@ from dataclasses import dataclass
 class Settings:
     app_name: str = os.getenv("APP_NAME", "UrbanFix API")
     database_url: str = os.getenv("DATABASE_URL", "sqlite:///./urbanfix.db")
+    postgres_dsn: str = os.getenv(
+        "POSTGRES_DSN",
+        "postgresql://urbanfix_user:urbanfix_pass@localhost:5432/urbanfix_db",
+    )
     cache_backend: str = os.getenv("CACHE_BACKEND", "in-memory")
     redis_url: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
     redis_key_prefix: str = os.getenv("REDIS_KEY_PREFIX", "urbanfix:")

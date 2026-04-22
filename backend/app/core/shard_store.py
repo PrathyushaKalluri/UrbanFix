@@ -151,10 +151,6 @@ class ShardExpertStore:
         if max_years_experience is not None:
             where_clauses.append("years_of_experience <= ?")
             params.append(max_years_experience)
-        if region_buckets:
-            placeholders = ",".join("?" for _ in region_buckets)
-            where_clauses.append(f"COALESCE(region_bucket, 'global') IN ({placeholders})")
-            params.extend(region_buckets)
         if expertise_area:
             where_clauses.append("LOWER(expertise_areas_json) LIKE ?")
             params.append(f"%{expertise_area.lower()}%")
@@ -201,12 +197,7 @@ class ShardExpertStore:
             self.upsert_expert(row)
 
     def _target_shards(self, region_buckets: Sequence[str] | None) -> List[int]:
-        if not region_buckets:
-            return list(range(self.shard_count))
-        shard_ids = set()
-        for bucket in region_buckets:
-            shard_ids.add(self._shard_for_bucket(bucket))
-        return sorted(shard_ids)
+        return list(range(self.shard_count))
 
     def _shard_for_bucket(self, bucket: str) -> int:
         digest = sha256(bucket.encode("utf-8")).hexdigest()

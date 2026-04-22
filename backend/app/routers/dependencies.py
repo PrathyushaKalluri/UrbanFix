@@ -13,6 +13,8 @@ from ..core.shard_store import ShardExpertStore
 from ..core.security import decode_token
 from ..db.connection import db_session
 from ..db.repository import Repository
+from ..db.postgres_connection import postgres_session
+from ..db.postgres_repository import PostgresRepository
 from ..models.entities import CurrentUser
 from ..core.cache import CacheProvider
 
@@ -20,6 +22,11 @@ from ..core.cache import CacheProvider
 def get_repository_dependency() -> Repository:
     with db_session() as connection:
         yield Repository(connection)
+
+
+def get_postgres_repository_dependency() -> PostgresRepository:
+    with postgres_session() as connection:
+        yield PostgresRepository(connection)
 
 
 def get_cache_dependency(request: Request) -> CacheProvider | None:

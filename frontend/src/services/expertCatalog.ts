@@ -303,8 +303,11 @@ export async function fetchExpertCatalog({
     if (normalizedQuery) {
         const payload: MatchingRequest = {
             problemText: normalizedQuery,
-            topN: limit ?? 20,
         };
+
+        if (typeof limit === "number") {
+            payload.topN = limit;
+        }
 
         if (isValidCoordinate(latitude, longitude)) {
             payload.latitude = latitude;

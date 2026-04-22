@@ -52,7 +52,7 @@ class MatchingService:
     def recommend(
         self,
         problem_text: str,
-        top_n: int = 5,
+        top_n: int | None = None,
         required_experience_years: int | None = None,
         *,
         latitude: float | None = None,
@@ -122,6 +122,7 @@ class MatchingService:
             candidates = self.repository.expert_rows(available_only=True, region_buckets=region_buckets)
         candidates = [candidate for candidate in candidates if within_radius(candidate)]
         request_terms = self._infer_terms(problem_text)
+        candidates = self._filter_candidates_by_terms(candidates, request_terms)
         scored = [
             self._score_candidate(
                 candidate,
@@ -133,7 +134,9 @@ class MatchingService:
             )
             for candidate in candidates
         ]
-        ranked = sorted(scored, key=lambda item: item.score, reverse=True)[:top_n]
+        ranked = sorted(scored, key=lambda item: item.score, reverse=True)
+        if top_n is not None:
+            ranked = ranked[:top_n]
         response = {
             "request_text": problem_text,
             "suggestions": [
@@ -273,3 +276,18 @@ class MatchingService:
             region_bucket=item.get("region_bucket"),
             shard_id=item.get("shard_id"),
         )
+
+    def _filter_candidates_by_terms(self, candidates, request_terms: List[str]):
+        if not request_terms:
+            return candidates
+
+        normalized_terms = {term.lower() for term in request_terms}
+        filtered = []
+
+        for candidate in candidates:
+            candidate_terms = {candidate.primary_expertise.lower(), *[skill.lower() for skill in candidate.expertise_areas]}
+            searchable = " ".join(candidate_terms)
+            if any(term in searchable for term in normalized_terms):
+                filtered.append(candidate)
+
+        return filtered or candidates

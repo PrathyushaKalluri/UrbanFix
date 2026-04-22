@@ -9,7 +9,7 @@ from ..services.matching_service import MatchingService
 from .dependencies import (
     build_rate_limit_dependency,
     get_cache_dependency,
-    get_repository_dependency,
+    get_postgres_repository_dependency,
     get_shard_router_dependency,
     get_shard_store_dependency,
 )
@@ -20,7 +20,7 @@ router = APIRouter(prefix="/api/matching", tags=["matching"])
 @router.post("/recommendations", response_model=MatchResponse, dependencies=[Depends(build_rate_limit_dependency("matching.recommendations", settings.match_rate_limit, settings.rate_limit_window_seconds))])
 def recommendations(
     payload: MatchRequest,
-    repository: Repository = Depends(get_repository_dependency),
+    repository: Repository = Depends(get_postgres_repository_dependency),
     cache=Depends(get_cache_dependency),
     shard_store=Depends(get_shard_store_dependency),
     shard_router=Depends(get_shard_router_dependency),
@@ -40,7 +40,7 @@ def recommendations(
 @router.post("/cached-recommendations", response_model=MatchResponse, dependencies=[Depends(build_rate_limit_dependency("matching.cached", settings.match_rate_limit, settings.rate_limit_window_seconds))])
 def cached_recommendations(
     payload: MatchRequest,
-    repository: Repository = Depends(get_repository_dependency),
+    repository: Repository = Depends(get_postgres_repository_dependency),
     cache=Depends(get_cache_dependency),
     shard_store=Depends(get_shard_store_dependency),
     shard_router=Depends(get_shard_router_dependency),

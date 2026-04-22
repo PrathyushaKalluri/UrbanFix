@@ -10,7 +10,7 @@ from .expert import ExpertListing
 
 class MatchRequest(CamelModel):
     problem_text: str = Field(..., min_length=1)
-    top_n: int = Field(default=5, ge=1, le=20)
+    top_n: int | None = Field(default=None, ge=1)
     required_experience_years: Optional[int] = Field(default=None, ge=0)
     latitude: Optional[float] = Field(default=None, ge=-90.0, le=90.0)
     longitude: Optional[float] = Field(default=None, ge=-180.0, le=180.0)

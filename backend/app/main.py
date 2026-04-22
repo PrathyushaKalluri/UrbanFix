@@ -13,7 +13,8 @@ from .core.sharding import SpatialShardRouter
 from .core.shard_store import ShardExpertStore
 from .db.connection import db_session, initialize_database
 from .db.repository import Repository
-from .db.seed import ensure_expert_geodata, seed_demo_data
+from .db.postgres_connection import postgres_session
+from .db.postgres_repository import PostgresRepository
 from .routers.auth import router as auth_router
 from .routers.experts import router as experts_router
 from .routers.health import router as health_router
@@ -90,15 +91,10 @@ def shutdown_runtime() -> None:
 
 def bootstrap_database() -> None:
     initialize_database()
-    with db_session() as connection:
-        if settings.seed_demo_data:
-            seed_demo_data(connection)
-        ensure_expert_geodata(connection, app.state.shard_router)
-
 
 def sync_shard_store() -> None:
-    with db_session() as connection:
-        repository = Repository(connection)
+    with postgres_session() as connection:
+        repository = PostgresRepository(connection)
         rows = repository.expert_rows(available_only=False)
     store_rows = []
     for row in rows:

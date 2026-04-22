@@ -10,7 +10,7 @@ from .dependencies import (
     build_rate_limit_dependency,
     get_cache_dependency,
     get_current_user_dependency,
-    get_repository_dependency,
+    get_postgres_repository_dependency,
     get_shard_store_dependency,
     get_shard_router_dependency,
 )
@@ -21,7 +21,7 @@ router = APIRouter(prefix="/api/experts", tags=["experts"])
 @router.get("/all", response_model=list[ExpertListing], dependencies=[Depends(build_rate_limit_dependency("experts.list", settings.search_rate_limit, settings.rate_limit_window_seconds))])
 def all_experts(
     available_only: bool = Query(default=False),
-    repository: Repository = Depends(get_repository_dependency),
+    repository: Repository = Depends(get_postgres_repository_dependency),
     shard_store=Depends(get_shard_store_dependency),
 ) -> list[ExpertListing]:
     service = ExpertService(repository, shard_store=shard_store)
@@ -42,7 +42,7 @@ def search_experts(
     latitude: float | None = Query(default=None, ge=-90.0, le=90.0, alias="latitude"),
     longitude: float | None = Query(default=None, ge=-180.0, le=180.0, alias="longitude"),
     radius_km: float = Query(default=15.0, ge=0.1, le=200.0, alias="radiusKm"),
-    repository: Repository = Depends(get_repository_dependency),
+    repository: Repository = Depends(get_postgres_repository_dependency),
     cache=Depends(get_cache_dependency),
     shard_store=Depends(get_shard_store_dependency),
     shard_router=Depends(get_shard_router_dependency),
@@ -70,7 +70,7 @@ def search_experts(
 @router.get("/{expert_id}", response_model=ExpertDetail)
 def expert_detail(
     expert_id: int,
-    repository: Repository = Depends(get_repository_dependency),
+    repository: Repository = Depends(get_postgres_repository_dependency),
     shard_store=Depends(get_shard_store_dependency),
 ) -> ExpertDetail:
     service = ExpertService(repository, shard_store=shard_store)
@@ -84,7 +84,7 @@ def expert_detail(
 def update_availability(
     payload: ExpertAvailabilityUpdate,
     current_user=Depends(get_current_user_dependency),
-    repository: Repository = Depends(get_repository_dependency),
+    repository: Repository = Depends(get_postgres_repository_dependency),
     shard_store=Depends(get_shard_store_dependency),
 ) -> ExpertDetail:
     if current_user.role != "EXPERT":

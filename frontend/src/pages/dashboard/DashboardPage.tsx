@@ -1,12 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { Droplets, Hammer, Paintbrush, Sparkles, Zap, Wrench } from 'lucide-react'
 import { Navbar } from '../../components/Navbar'
 import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
-import { fetchExpertCatalog } from '../../services/expertCatalog'
-import type { ExpertListing } from '../../types/expert'
+
+import { HYDERABAD_AREAS } from '../../config/hyderabadAreas'
+import { useAvailableExperts } from '../../hooks/useAvailableExperts'
 import type { AuthSession } from '../../types/auth'
 import { getDashboardContent } from './strategy/roleDashboardStrategy'
 import { ExpertDashboardView } from './views/ExpertDashboardView'
@@ -17,100 +18,20 @@ type DashboardPageProps = {
 
 export function DashboardPage({ session }: DashboardPageProps) {
   const [expertQuery, setExpertQuery] = useState('')
-  const [requesterCoords, setRequesterCoords] = useState<{ latitude: number; longitude: number } | null>(null)
-  const [locationStatus, setLocationStatus] = useState<'idle' | 'requesting' | 'granted' | 'denied' | 'unavailable'>('idle')
-  const [experts, setExperts] = useState<ExpertListing[]>([])
-  const [expertsLoading, setExpertsLoading] = useState(false)
-  const [expertsError, setExpertsError] = useState<string | null>(null)
+  const [selectedAreaName, setSelectedAreaName] = useState('')
   const hasExpertQuery = expertQuery.trim().length > 0
-  const locationReadyForSearch = hasExpertQuery && locationStatus === 'granted' && requesterCoords !== null
-  const locationAttachedToRequest = requesterCoords !== null
+  const selectedArea = useMemo(
+    () => HYDERABAD_AREAS.find((area) => area.name === selectedAreaName) ?? null,
+    [selectedAreaName],
+  )
+  const areaReadyForSearch = hasExpertQuery && selectedArea !== null
+  const searchableQuery = areaReadyForSearch ? expertQuery : ''
+
+  const { experts, loading: expertsLoading, error: expertsError } = useAvailableExperts(searchableQuery, {
+    latitude: selectedArea?.latitude,
+    longitude: selectedArea?.longitude,
+  })
   const navigate = useNavigate()
-
-  useEffect(() => {
-    const normalizedQuery = expertQuery.trim()
-    const controller = new AbortController()
-    let active = true
-
-    const loadExperts = async () => {
-      if (!normalizedQuery) {
-        setExperts([])
-        setExpertsError(null)
-        setExpertsLoading(false)
-        return
-      }
-
-      setExpertsLoading(true)
-      setExpertsError(null)
-
-      try {
-        const data = await fetchExpertCatalog({
-          query: normalizedQuery,
-          limit: 9,
-          latitude: requesterCoords?.latitude,
-          longitude: requesterCoords?.longitude,
-          signal: controller.signal,
-        })
-
-        if (active) {
-          setExperts(data)
-          setExpertsError(null)
-        }
-      } catch (fetchError) {
-        if (active && !(fetchError instanceof DOMException && fetchError.name === 'AbortError')) {
-          setExperts([])
-          setExpertsError(fetchError instanceof Error ? fetchError.message : 'Unable to load experts')
-        }
-      } finally {
-        if (active) {
-          setExpertsLoading(false)
-        }
-      }
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      loadExperts()
-    }, 250)
-
-    return () => {
-      active = false
-      controller.abort()
-      window.clearTimeout(timeoutId)
-    }
-  }, [expertQuery, requesterCoords?.latitude, requesterCoords?.longitude])
-
-  useEffect(() => {
-    const shouldPromptLocation = expertQuery.trim().length > 0 && locationStatus === 'idle'
-
-    if (!shouldPromptLocation) {
-      return
-    }
-
-    if (!navigator.geolocation) {
-      setLocationStatus('unavailable')
-      return
-    }
-
-    setLocationStatus('requesting')
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setRequesterCoords({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        })
-        setLocationStatus('granted')
-      },
-      () => {
-        setRequesterCoords(null)
-        setLocationStatus('denied')
-      },
-      {
-        enableHighAccuracy: false,
-        timeout: 5000,
-      },
-    )
-  }, [expertQuery, locationStatus])
 
   useEffect(() => {
     if (session.profile?.role === 'EXPERT') {
@@ -223,30 +144,30 @@ export function DashboardPage({ session }: DashboardPageProps) {
                 placeholder="Type a service like electrical, plumbing, or cleaning"
                 className="h-12 rounded-2xl border-zinc-300 bg-white px-5 text-base shadow-sm focus-visible:ring-blue-400"
               />
-              {hasExpertQuery && locationStatus === 'requesting' ? (
-                <p className="mt-2 text-xs text-[#5F6562]">Requesting your location to narrow nearby experts…</p>
-              ) : null}
-              {hasExpertQuery && locationStatus === 'denied' ? (
-                <p className="mt-2 text-xs text-[#5F6562]">Location access denied. Showing general expert matches instead.</p>
-              ) : null}
-              {hasExpertQuery && locationStatus === 'unavailable' ? (
-                <p className="mt-2 text-xs text-[#5F6562]">Geolocation is unavailable in this browser. Showing general expert matches instead.</p>
+              <label className="mt-4 mb-2 block text-xs font-mono tracking-[0.2em] text-[#878D89] uppercase" htmlFor="service-area">
+                Service area
+              </label>
+              <select
+                id="service-area"
+                value={selectedAreaName}
+                onChange={(event) => setSelectedAreaName(event.target.value)}
+                className="h-12 w-full rounded-2xl border border-zinc-300 bg-white px-5 text-base text-[#090A0A] shadow-sm focus-visible:border-emerald-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200"
+              >
+                <option value="">Select a Hyderabad area</option>
+                {HYDERABAD_AREAS.map((area) => (
+                  <option key={area.name} value={area.name}>
+                    {area.name}
+                  </option>
+                ))}
+              </select>
+              {hasExpertQuery && !selectedArea ? (
+                <p className="mt-2 text-xs text-[#5F6562]">Choose the Hyderabad area where you want the service before matching experts.</p>
               ) : null}
 
-              {hasExpertQuery ? (
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <span className={`rounded-full px-3 py-1 text-[10px] font-mono tracking-[0.16em] uppercase ${locationAttachedToRequest ? 'bg-blue-50 text-blue-700' : 'bg-zinc-100 text-zinc-600'}`}>
-                    Location attached: {locationAttachedToRequest ? 'Yes' : 'No'}
-                  </span>
-                  <span className="rounded-full bg-zinc-100 px-3 py-1 text-[10px] font-mono tracking-[0.16em] text-zinc-600 uppercase">
-                    Nearby experts: {experts.length}
-                  </span>
-                  {locationAttachedToRequest && requesterCoords ? (
-                    <span className="rounded-full bg-sky-50 px-3 py-1 text-[10px] font-mono tracking-[0.16em] text-sky-700 uppercase">
-                      {requesterCoords.latitude.toFixed(4)}, {requesterCoords.longitude.toFixed(4)}
-                    </span>
-                  ) : null}
-                </div>
+              {selectedArea ? (
+                <p className="mt-2 text-xs text-[#5F6562]">
+                  Showing experts for {selectedArea.name} and nearby Hyderabad areas.
+                </p>
               ) : null}
             </div>
 
@@ -305,12 +226,17 @@ export function DashboardPage({ session }: DashboardPageProps) {
               <>
                 <div className="mt-7 flex items-center justify-between gap-3">
                   <p className="text-xs font-mono tracking-[0.2em] text-[#878D89] uppercase">Matched experts</p>
-                  {locationReadyForSearch && !expertsLoading && !expertsError && experts.length > 0 ? (
+                  {areaReadyForSearch && !expertsLoading && !expertsError && experts.length > 0 ? (
                     <p className="text-sm text-[#5F6562]">{experts.length} experts found</p>
                   ) : null}
                 </div>
 
-                {expertsLoading ? (
+
+                {!areaReadyForSearch ? (
+                  <div className="mt-4 rounded-xl border border-dashed border-zinc-300 bg-zinc-50 px-5 py-6 text-sm text-[#5F6562]">
+                    Select a Hyderabad area to show experts in that area and nearby locations.
+                  </div>
+                ) : expertsLoading ? (
                   <div className="mt-4 flex gap-4 overflow-x-auto pb-2">
                     {Array.from({ length: 3 }).map((_, index) => (
                       <div key={index} className="h-48 min-w-[420px] animate-pulse rounded-2xl border border-zinc-200 bg-zinc-50" />
@@ -338,62 +264,63 @@ export function DashboardPage({ session }: DashboardPageProps) {
                             navigate(`/messages/${expert.expertId}`)
                           }
                         }}
-                        className="group cursor-pointer rounded-2xl border border-zinc-200/70 bg-white/85 p-4 shadow-[0_8px_32px_rgba(9,10,10,0.04)] transition-transform duration-200 hover:-translate-y-1 hover:border-blue-300"
+                        className="group min-w-[360px] snap-start cursor-pointer rounded-2xl border border-zinc-200/70 bg-white/85 p-4 shadow-[0_8px_32px_rgba(9,10,10,0.04)] transition-transform duration-200 hover:-translate-y-1 hover:border-emerald-300 md:min-w-[480px]"
                       >
-                      <div className="flex h-full flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
-                              <p className="font-mono text-[10px] tracking-[0.2em] text-[#878D89] uppercase">Expert</p>
-                              <h4 className="mt-1 truncate text-xl font-semibold">{expert.fullName}</h4>
-                              <p className="mt-1 text-sm text-[#5F6562]">{expert.primaryExpertise}</p>
+                        <div className="flex h-full flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <p className="font-mono text-[10px] tracking-[0.2em] text-[#878D89] uppercase">Expert</p>
+                                <h4 className="mt-1 truncate text-xl font-semibold">{expert.fullName}</h4>
+                                <p className="mt-1 text-sm text-[#5F6562]">{expert.primaryExpertise}</p>
+                              </div>
+                              <Badge
+                                className={
+                                  expert.available
+                                    ? 'border border-emerald-200 bg-emerald-50 text-emerald-700'
+                                    : 'border border-zinc-300 bg-zinc-100 text-zinc-600'
+                                }
+                              >
+                                {expert.available ? 'Accepting jobs' : 'Not accepting jobs'}
+                              </Badge>
                             </div>
-                            <Badge
-                              className={
-                                expert.available
-                                  ? 'border border-blue-200 bg-blue-50 text-blue-700'
-                                  : 'border border-zinc-300 bg-zinc-100 text-zinc-600'
-                              }
+
+                            <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                              <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3">
+                                <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-[#878D89]">Experience</p>
+                                <p className="mt-2 font-semibold">{expert.yearsOfExperience} years</p>
+                              </div>
+                              <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3">
+                                <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-[#878D89]">Status</p>
+                                <p className="mt-2 font-semibold">{expert.available ? 'Accepting' : 'Paused'}</p>
+                              </div>
+                            </div>
+
+                            {expert.expertiseAreas.length > 0 ? (
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                {expert.expertiseAreas.slice(0, 4).map((area) => (
+                                  <Badge key={area} variant="outline" className="border-zinc-200 bg-white text-[#5F6562]">
+                                    {area}
+                                  </Badge>
+                                ))}
+                              </div>
+                            ) : null}
+                          </div>
+
+                          <div className="md:w-[170px] md:shrink-0">
+                            <Button
+                              type="button"
+                              className="mt-4 w-full bg-black text-white hover:bg-zinc-800"
+                              onClick={(event) => {
+                                event.stopPropagation()
+                                navigate(`/messages/${expert.expertId}`)
+                              }}
                             >
-                              {expert.available ? 'Accepting jobs' : 'Not accepting jobs'}
-                            </Badge>
+                              Chat now
+                            </Button>
                           </div>
-
-                          <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                            <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3">
-                              <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-[#878D89]">Experience</p>
-                              <p className="mt-2 font-semibold">{expert.yearsOfExperience} years</p>
-                            </div>
-                            <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3">
-                              <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-[#878D89]">Status</p>
-                              <p className="mt-2 font-semibold">{expert.available ? 'Accepting' : 'Paused'}</p>
-                            </div>
-                          </div>
-
-                          {expert.expertiseAreas.length > 0 ? (
-                            <div className="mt-3 flex flex-wrap gap-2">
-                              {expert.expertiseAreas.slice(0, 4).map((area) => (
-                                <Badge key={area} variant="outline" className="border-zinc-200 bg-white text-[#5F6562]">
-                                  {area}
-                                </Badge>
-                              ))}
-                            </div>
-                          ) : null}
                         </div>
 
-                        <div className="md:w-[170px] md:shrink-0">
-                          <Button
-                            type="button"
-                            className="mt-4 w-full bg-black text-white hover:bg-zinc-800"
-                            onClick={(event) => {
-                              event.stopPropagation()
-                              navigate(`/messages/${expert.expertId}`)
-                            }}
-                          >
-                            Chat now
-                          </Button>
-                        </div>
-                      </div>
                       </article>
                     ))}
                   </div>
