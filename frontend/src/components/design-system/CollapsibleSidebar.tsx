@@ -8,6 +8,7 @@ import {
   Settings,
   LogOut,
   Menu,
+  LayoutDashboard,
 } from "lucide-react";
 import {
   Sheet,
@@ -27,9 +28,10 @@ type CollapsibleSidebarProps = {
   userName?: string;
   userRole?: string;
   onLogout?: () => void;
+  items?: NavItem[];
 };
 
-const navItems: NavItem[] = [
+const defaultNavItems: NavItem[] = [
   { label: "Find Experts", icon: Search, href: "/dashboard" },
   { label: "Messages", icon: MessageSquare, href: "/messages/1" },
   { label: "Settings", icon: Settings, href: "/profile" },
@@ -41,14 +43,17 @@ function SidebarContent({
   onLogout,
   isMobile = false,
   onNavigate,
+  items,
 }: {
   userName: string;
   userRole: string;
   onLogout?: () => void;
   isMobile?: boolean;
   onNavigate?: () => void;
+  items?: NavItem[];
 }) {
   const location = useLocation();
+  const navItemsToRender = items ?? defaultNavItems;
 
   return (
     <div className={`flex h-full flex-col ${isMobile ? "" : "w-[240px]"}`}>
@@ -68,7 +73,7 @@ function SidebarContent({
       {/* Nav Items */}
       <nav className="flex-1 overflow-y-auto px-3 py-4">
         <ul className="flex flex-col gap-1">
-          {navItems.map((item) => {
+          {navItemsToRender.map((item) => {
             const isActive = location.pathname === item.href;
             const Icon = item.icon;
 
@@ -128,6 +133,7 @@ export function CollapsibleSidebar({
   userName = "User",
   userRole = "Resident",
   onLogout,
+  items,
 }: CollapsibleSidebarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -144,6 +150,7 @@ export function CollapsibleSidebar({
           userName={userName}
           userRole={userRole}
           onLogout={onLogout}
+          items={items}
         />
       </motion.aside>
 
@@ -168,6 +175,7 @@ export function CollapsibleSidebar({
               }}
               isMobile
               onNavigate={() => setMobileOpen(false)}
+              items={items}
             />
           </SheetContent>
         </Sheet>
