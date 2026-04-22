@@ -57,10 +57,22 @@ export function ExpertDashboardView({ session }: ExpertDashboardViewProps) {
   const [selectedJobId, setSelectedJobId] = useState(
     content.newRequests[0]?.id ?? content.activeJobs[0]?.id ?? content.completedJobs[0]?.id ?? '',
   )
+  const [currentTime, setCurrentTime] = useState(() => {
+    const now = new Date()
+    return now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+  })
 
   useEffect(() => {
     setAcceptingJobs(profile.available)
   }, [profile.available])
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date()
+      setCurrentTime(now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }))
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [])
 
   const allJobs = [...content.newRequests, ...content.activeJobs, ...content.completedJobs]
   const selectedJob = allJobs.find((job) => job.id === selectedJobId) ?? allJobs[0]
@@ -185,7 +197,7 @@ export function ExpertDashboardView({ session }: ExpertDashboardViewProps) {
               <div className="min-h-0 flex-1 overflow-y-auto space-y-5 px-6 pt-6">
                 <div className="flex justify-center">
                   <span className="bg-white px-2 font-mono text-[11px] tracking-[0.18em] text-zinc-400 uppercase">
-                    [SYSTEM] ROUTE READY : 10:15 AM
+                    [SYSTEM] ROUTE READY : {currentTime}
                   </span>
                 </div>
 

@@ -728,7 +728,7 @@ export function LandingPage() {
             >
               Orchestrate Your
               <br />
-              <span className="bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
+              <span className="inline-block bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text pb-1 text-transparent">
                 Urban Reality
               </span>
             </motion.h1>
