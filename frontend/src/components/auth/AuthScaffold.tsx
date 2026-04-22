@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { HandHeart, Route, ShieldCheck, Sparkles } from "lucide-react";
 import { Badge } from "../ui/badge";
+import { GradientButton } from "../design-system/GradientButton";
 import { SiteFooter } from "../SiteFooter";
 
 type AuthScaffoldProps = {
@@ -66,12 +67,9 @@ export function AuthScaffold({
               >
                 Log in
               </Link>
-              <Link
-                to="/signup/user"
-                className="rounded-xl border border-blue-300/30 bg-gradient-to-b from-blue-400 to-blue-500 px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-white shadow-lg shadow-blue-500/25 transition-all hover:from-blue-300 hover:to-blue-400"
-              >
+              <GradientButton to="/signup/user" size="sm">
                 Get Started
-              </Link>
+              </GradientButton>
             </div>
           </div>
         </div>

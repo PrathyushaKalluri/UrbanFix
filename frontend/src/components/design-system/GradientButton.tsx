@@ -92,14 +92,12 @@ export function GradientButton({
 
         <span className="relative z-10 flex items-center gap-1.5">
           {children}
-          {isHovered && !disabled && (
-            <motion.span
-              animate={{ x: [0, 3, 0] }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <ArrowRight className="h-4 w-4" />
-            </motion.span>
-          )}
+          <motion.span
+            animate={isHovered && !disabled ? { x: [0, 3, 0] } : { x: 0 }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <ArrowRight className="h-4 w-4" />
+          </motion.span>
         </span>
       </button>
 
