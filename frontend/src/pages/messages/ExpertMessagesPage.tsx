@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
+import { Input } from '../../components/ui/input'
 import type { AuthSession } from '../../types/auth'
 import type { ExpertProfileView } from '../dashboard/strategy/expertDashboardStrategy'
 import { getExpertDashboardContent } from '../dashboard/strategy/expertDashboardStrategy'
@@ -185,7 +186,7 @@ export function ExpertMessagesPage({ session }: ExpertMessagesPageProps) {
     }
   }
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault()
       handleSend()
@@ -325,41 +326,26 @@ export function ExpertMessagesPage({ session }: ExpertMessagesPageProps) {
               </div>
 
               <div className="shrink-0 border-t border-zinc-100/60 px-6 pb-6 pt-5">
-                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <SectionLabel variant="mono">Reply</SectionLabel>
-                    <p className="mt-1 text-sm text-zinc-500">
-                      {selectedConversation
-                        ? `Reply to ${selectedConversation.otherParticipantName}`
-                        : 'Pick up a resident thread and reply inline.'}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="rounded-xl border border-zinc-200/70 bg-white p-4">
-                  <textarea
-                    className="min-h-28 w-full resize-none border-none bg-transparent text-[15px] outline-none placeholder:text-zinc-400"
-                    placeholder={conversationId ? 'Transmit update…' : 'Select a thread to reply…'}
-                    rows={4}
+                <SectionLabel variant="mono" className="mb-2">Reply</SectionLabel>
+                <div className="flex items-center gap-3">
+                  <Input
+                    id="message-draft"
                     value={draft}
-                    onChange={(e) => setDraft(e.target.value)}
+                    onChange={(event) => setDraft(event.target.value)}
                     onKeyDown={handleKeyDown}
+                    placeholder={conversationId ? 'Type your response, update, or instructions…' : 'Select a thread to reply…'}
                     disabled={!conversationId || sending}
+                    className="h-10 flex-1 rounded-xl border-zinc-200/80 bg-white/85 px-4 text-sm shadow-sm transition-colors focus-visible:border-zinc-400/70 focus-visible:bg-white focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:shadow-none"
                   />
-                  <div className="mt-2 flex items-center justify-between">
-                    <span className="font-mono text-[10px] tracking-[0.18em] text-zinc-400 uppercase">
-                      Encrypted P2P
-                    </span>
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={handleSend}
-                      disabled={!conversationId || sending || !draft.trim()}
-                    >
-                      <Send className="mr-1 h-3.5 w-3.5" />
-                      {sending ? 'Sending…' : 'Send'}
-                    </Button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={handleSend}
+                    disabled={!conversationId || sending || !draft.trim()}
+                    className="flex h-10 shrink-0 items-center gap-2 rounded-xl bg-zinc-900 px-5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Send className="h-4 w-4" />
+                    {sending ? 'Sending…' : 'Send'}
+                  </button>
                 </div>
               </div>
             </div>
