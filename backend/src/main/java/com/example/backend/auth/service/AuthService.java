@@ -117,6 +117,7 @@ public class AuthService {
 
   public Map<String, Object> getCurrentUserProfile(UserAccount user) {
     Map<String, Object> response = new LinkedHashMap<>();
+    response.put("id", user.getId());
     response.put("fullName", user.getFullName());
     response.put("email", user.getEmail());
     response.put("role", user.getRole().name());
