@@ -1,33 +1,32 @@
 # UrbanFix
 
-UrbanFix is an expert matching platform that connects users with qualified service providers. It features real-time messaging, semantic expert search, and intelligent matching algorithms.
+UrbanFix is an expert matching platform that connects users with qualified service providers. It features real-time messaging, intelligent expert search, and multi-criteria matching algorithms.
 
 ---
 
 ## Architecture
 
-UrbanFix runs a **dual-backend** architecture:
+UrbanFix uses a **single-backend** architecture:
 
 ```
-Frontend (React + Vite)
+Frontend (React + Vite + TypeScript)
     │
     ▼
-Vite Dev Proxy
-    │
-    ├──▶ Spring Boot (Port 8080)
-    │       Auth, Messaging REST API, WebSocket, Basic Expert List
-    │
-    └──▶ Python/FastAPI (Port 8000)
-            Expert Search, Matching Engine, Expert Detail
+Traefik (Reverse Proxy)
     │
     ▼
-PostgreSQL (Port 5432)  ←── Shared database
+Spring Boot (Port 8080)
+    Auth, Messaging REST API, WebSocket, Expert Search, Matching
+    │
+    ▼
+PostgreSQL (Port 5432)  ←── Primary database
     │
     ▼
 Redis (Port 6379)       ←── Caching, Presence, Offline Queue
+    │
+    ▼
+MinIO (Port 9000)       ←── Chat attachments
 ```
-
-Both backends connect to the **same** PostgreSQL database. The Spring Boot backend auto-creates the JPA schema, and the Python backend auto-creates its SQLAlchemy schema on startup.
 
 ---
 
@@ -35,9 +34,8 @@ Both backends connect to the **same** PostgreSQL database. The Spring Boot backe
 
 ### Prerequisites
 
-- **Docker Desktop** (for PostgreSQL + Redis)
-- **Node.js** 18+
-- **Python** 3.10+
+- **Docker Desktop** (for PostgreSQL, Redis, MinIO, Traefik, Prometheus, Grafana)
+- **Node.js** 20+
 - **Java** 21+ & **Maven** 3.8+
 
 ### 1. Start Infrastructure
@@ -46,7 +44,7 @@ Both backends connect to the **same** PostgreSQL database. The Spring Boot backe
 docker compose up -d
 ```
 
-This starts PostgreSQL 16 and Redis 7. The database **auto-seeds** on first startup from `database_migration/init/01_seed_data.sql`.
+This starts PostgreSQL 16, Redis 7, MinIO, Traefik, Prometheus, Grafana, and the OpenTelemetry Collector. The database **auto-seeds** on first startup from `database_migration/init/01_seed_data.sql`.
 
 > If you have a local PostgreSQL running, stop it first to avoid port conflicts: `brew services stop postgresql@16`
 
@@ -68,56 +66,18 @@ cd backend
 ./mvnw spring-boot:run
 ```
 
-Runs on `http://localhost:8080`. Handles authentication, messaging, and WebSocket.
+Runs on `http://localhost:8080`. Handles authentication, messaging, WebSocket, expert search, and matching.
 
-### 4. Install Python Dependencies
-
-The FastAPI backend requires a virtual environment. All Python packages are listed in `backend/requirements.txt`:
-
-```bash
-cd backend
-
-# Create virtual environment (first time only)
-python3 -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
-> **Required**: Do not skip the venv step. The Python backend will fail without its dependencies.
-
-**Key Python dependencies** (`backend/requirements.txt`):
-
-- `fastapi` — Web framework
-- `uvicorn` — ASGI server
-- `psycopg[binary]` — PostgreSQL driver
-- `redis` — Redis client
-- `python-jose` — JWT handling
-- `bcrypt` — Password hashing
-
-### 5. Start Python Backend
-
-```bash
-cd backend
-source .venv/bin/activate
-uvicorn app.main:app --reload --port 8000
-```
-
-Runs on `http://localhost:8000`. Handles expert search and matching.
-
-### 6. Install Frontend Dependencies
+### 4. Install Frontend Dependencies
 
 ```bash
 cd frontend
-
-# Install Node.js dependencies (first time only)
 npm install
 ```
 
-> **Prerequisites**: Node.js 18+ must be installed.
+> **Prerequisites**: Node.js 20+ must be installed.
 
-### 7. Start Frontend
+### 5. Start Frontend
 
 ```bash
 cd frontend
@@ -126,18 +86,19 @@ npm run dev
 
 Open `http://localhost:5173` in your browser.
 
+---
+
 ## Backend Routing
 
-The Vite dev server proxies API requests to the appropriate backend:
+The Vite dev server proxies all API requests to Spring Boot:
 
-| Path                  | Backend        | Port |
-| --------------------- | -------------- | ---- |
-| `/api/auth/*`         | Spring Boot    | 8080 |
-| `/api/messages/*`     | Spring Boot    | 8080 |
-| `/ws/*`               | Spring Boot    | 8080 |
-| `/api/experts/all`    | Spring Boot    | 8080 |
-| `/api/experts/search` | Python/FastAPI | 8000 |
-| `/api/matching/*`     | Python/FastAPI | 8000 |
+| Path              | Backend     | Port |
+| ----------------- | ----------- | ---- |
+| `/api/auth/*`     | Spring Boot | 8080 |
+| `/api/messages/*` | Spring Boot | 8080 |
+| `/api/experts/*`  | Spring Boot | 8080 |
+| `/api/matching/*` | Spring Boot | 8080 |
+| `/ws/*`           | Spring Boot | 8080 |
 
 ---
 
@@ -145,21 +106,21 @@ The Vite dev server proxies API requests to the appropriate backend:
 
 ```
 UrbanFix/
-├── backend/                  # Spring Boot + Python backends
-│   ├── src/main/java/        # Java source (Spring Boot)
-│   ├── app/                  # Python FastAPI source
+├── backend/                  # Spring Boot backend
+│   ├── src/main/java/        # Java source
+│   ├── src/test/java/        # Java tests
 │   ├── pom.xml               # Maven config
-│   └── requirements.txt      # Python deps
+│   └── src/main/resources/application.properties
 ├── frontend/                 # React + Vite + TypeScript
 │   ├── src/
-│   └── vite.config.ts
-├── src/                      # Python matching engine core
-│   ├── matching_engine/
-│   ├── routing_engine/
-│   └── event_bus/
+│   ├── e2e/                  # Playwright E2E tests
+│   ├── vitest.config.ts
+│   └── playwright.config.ts
 ├── database_migration/       # DB migration scripts
 │   └── init/                 # Docker auto-seed scripts
-├── docker-compose.yml        # PostgreSQL + Redis
+├── observability/            # Prometheus, Grafana, OTel configs
+├── docker-compose.yml        # Full infrastructure stack
+└── .github/workflows/ci.yml  # GitHub Actions CI
 ```
 
 ---
@@ -167,7 +128,39 @@ UrbanFix/
 ## Key Features
 
 - **Real-time Messaging**: WebSocket/STOMP with read receipts, delivery tracking, and presence indicators
-- **Expert Search**: Semantic search across expert skills, locations, and availability
-- **Matching Engine**: Intelligent expert-job matching with multi-criteria scoring
-- **Dual Backend**: Spring Boot for auth/messaging, Python/FastAPI for search/matching
+- **Expert Search**: Full-text search across expert skills, locations, and availability with pagination
+- **Matching Engine**: Intelligent expert-job matching with multi-criteria scoring (skill, experience, availability, location)
+- **Single Backend**: Spring Boot handles auth, messaging, search, and matching
 - **Dockerized Infrastructure**: One-command setup with auto-seeded database
+- **Observability**: Prometheus metrics, Grafana dashboards, and OpenTelemetry tracing
+- **Object Storage**: MinIO for chat message attachments
+
+---
+
+## Testing
+
+### Backend
+
+```bash
+cd backend
+./mvnw test
+```
+
+Uses JUnit 5, Mockito, and Testcontainers for integration tests.
+
+### Frontend
+
+```bash
+cd frontend
+npm run test       # Vitest unit tests
+npm run test:e2e   # Playwright E2E tests
+```
+
+---
+
+## Observability
+
+- **Prometheus**: `http://localhost:9090`
+- **Grafana**: `http://localhost:3000` (admin / admin)
+- **Traefik Dashboard**: `http://traefik.localhost:8080`
+- **MinIO Console**: `http://minio.localhost:9001`

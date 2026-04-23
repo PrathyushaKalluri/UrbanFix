@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 public interface ExpertProfileRepository extends JpaRepository<ExpertProfile, Long> {
 
@@ -12,4 +13,8 @@ public interface ExpertProfileRepository extends JpaRepository<ExpertProfile, Lo
 
   @EntityGraph(attributePaths = "user")
   List<ExpertProfile> findAllByAvailableTrue();
+
+  @EntityGraph(attributePaths = "user")
+  @Query("SELECT e FROM ExpertProfile e")
+  List<ExpertProfile> findAllWithUser();
 }
