@@ -78,3 +78,12 @@ export async function markConversationRead(payload: MarkReadPayload): Promise<{ 
   })
   return handleResponse<{ status: string }>(response)
 }
+
+export async function fetchUserPresence(userId: number): Promise<{ userId: number; online: boolean }> {
+  const response = await fetch(`/api/messages/presence/${userId}`, {
+    headers: {
+      ...getAuthHeaders(),
+    },
+  })
+  return handleResponse<{ userId: number; online: boolean }>(response)
+}

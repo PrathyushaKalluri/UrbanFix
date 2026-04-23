@@ -16,6 +16,7 @@ import com.example.backend.auth.service.CustomUserDetailsService;
 import com.example.backend.auth.service.JwtService;
 import com.example.backend.messaging.service.MessageAuthorizationService;
 import com.example.backend.messaging.service.MessageService;
+import com.example.backend.messaging.service.PresenceService;
 import java.time.Instant;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -49,6 +50,9 @@ class ConversationControllerTest {
 
   @MockitoBean
   private CustomUserDetailsService customUserDetailsService;
+
+  @MockitoBean
+  private PresenceService presenceService;
 
   private UserAccount mockUser() {
     UserAccount user = new UserAccount("User", "user@test.com", "pass", UserRole.USER);

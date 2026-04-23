@@ -29,4 +29,9 @@ public class MessagingEventPublisher {
     String destination = "/topic/conversations/" + conversationId + "/read";
     messagingTemplate.convertAndSend(destination, event);
   }
+
+  public void publishPresence(Long userId, boolean online) {
+    String destination = "/topic/presence/" + userId;
+    messagingTemplate.convertAndSend(destination, new com.example.backend.messaging.dto.SocketPresenceEvent(userId, online));
+  }
 }

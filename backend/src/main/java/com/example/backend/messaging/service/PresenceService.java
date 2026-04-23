@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 public class PresenceService {
 
   private static final String PRESENCE_PREFIX = "presence:";
-  private static final Duration PRESENCE_TTL = Duration.ofSeconds(30);
+  private static final Duration PRESENCE_TTL = Duration.ofMinutes(5);
 
   private final StringRedisTemplate redisTemplate;
 

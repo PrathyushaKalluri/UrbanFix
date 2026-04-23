@@ -6,6 +6,8 @@ import { Input } from '../../components/ui/input'
 import type { AuthSession } from '../../types/auth'
 import { useConversations } from '../../hooks/useConversations'
 import { useMessages } from '../../hooks/useMessages'
+import { subscribeToUserPresence } from '../../services/webSocketService'
+import { fetchUserPresence } from '../../services/messagingApi'
 import {
   AmbientBackground,
   GlassCard,
@@ -69,6 +71,23 @@ export function MessagesPage({ session }: MessagesPageProps) {
     () => conversations.find((c) => c.id === conversationId) ?? null,
     [conversations, conversationId]
   )
+
+  const [otherUserOnline, setOtherUserOnline] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    if (!selectedConversation?.otherParticipantUserId) return
+    const otherUserId = selectedConversation.otherParticipantUserId
+
+    fetchUserPresence(otherUserId)
+      .then((data) => setOtherUserOnline(data.online))
+      .catch(() => setOtherUserOnline(null))
+
+    const unsubscribe = subscribeToUserPresence(otherUserId, (event) => {
+      setOtherUserOnline(event.online)
+    })
+
+    return unsubscribe
+  }, [selectedConversation?.otherParticipantUserId])
 
   if (session.loading) {
     return (
@@ -193,17 +212,39 @@ export function MessagesPage({ session }: MessagesPageProps) {
           {/* Center — Chat */}
           <GlassCard className="flex min-h-0 flex-col overflow-hidden p-0" hover={false}>
             <div className="shrink-0 border-b border-zinc-100/60 px-6 py-5">
-              <SectionLabel>Direct chat</SectionLabel>
-              <h2 className="mt-2 text-2xl font-bold tracking-tight text-zinc-900">
-                {selectedConversation
-                  ? `Chat with ${selectedConversation.otherParticipantName}`
-                  : 'Select a conversation'}
-              </h2>
-              <p className="mt-2 text-sm text-zinc-500">
-                {selectedConversation
-                  ? 'Messages stay in the selected thread so the conversation feels immediate and continuous.'
-                  : 'Choose a chat from the sidebar to view messages.'}
-              </p>
+              <div className="flex items-start justify-between">
+                <div>
+                  <SectionLabel>Direct chat</SectionLabel>
+                  <h2 className="mt-2 text-2xl font-bold tracking-tight text-zinc-900">
+                    {selectedConversation
+                      ? `Chat with ${selectedConversation.otherParticipantName}`
+                      : 'Select a conversation'}
+                  </h2>
+                  <p className="mt-2 text-sm text-zinc-500">
+                    {selectedConversation
+                      ? 'Messages stay in the selected thread so the conversation feels immediate and continuous.'
+                      : 'Choose a chat from the sidebar to view messages.'}
+                  </p>
+                </div>
+                {selectedConversation && (
+                  <div className="flex items-center gap-2 font-mono text-[11px] text-zinc-500 uppercase">
+                    <span
+                      className={`inline-block h-2.5 w-2.5 rounded-full ${
+                        otherUserOnline === true
+                          ? 'bg-emerald-500'
+                          : otherUserOnline === false
+                            ? 'bg-zinc-300'
+                            : 'bg-zinc-200'
+                      }`}
+                    />
+                    {otherUserOnline === true
+                      ? 'Active'
+                      : otherUserOnline === false
+                        ? 'Offline'
+                        : 'Connecting…'}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -302,7 +343,25 @@ export function MessagesPage({ session }: MessagesPageProps) {
                 <h3 className="text-lg font-semibold tracking-tight text-zinc-900">
                   {selectedConversation?.otherParticipantName ?? 'No expert selected'}
                 </h3>
-                <p className="mt-1 text-sm text-zinc-500">
+                <div className="mt-1 flex items-center gap-2">
+                  <span
+                    className={`inline-block h-2 w-2 rounded-full ${
+                      otherUserOnline === true
+                        ? 'bg-emerald-500'
+                        : otherUserOnline === false
+                          ? 'bg-zinc-300'
+                          : 'bg-zinc-200'
+                    }`}
+                  />
+                  <span className="text-xs text-zinc-500">
+                    {otherUserOnline === true
+                      ? 'Active now'
+                      : otherUserOnline === false
+                        ? 'Offline'
+                        : 'Checking status…'}
+                  </span>
+                </div>
+                <p className="mt-2 text-sm text-zinc-500">
                   {selectedConversation
                     ? 'Expert participant'
                     : 'Pick a conversation from the thread list.'}

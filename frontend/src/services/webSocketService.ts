@@ -15,6 +15,7 @@ let client: Client | null = null
 let disconnectTimer: ReturnType<typeof setTimeout> | null = null
 const topicSubscriptions = new Map<string, StompSubscription>()
 const handlerRegistry = new Map<string, Set<ConversationHandlers>>()
+const presenceHandlerRegistry = new Map<string, Set<PresenceHandler>>()
 
 const DISCONNECT_DELAY_MS = 3000
 
@@ -30,14 +31,21 @@ function getTopicKey(conversationId: number, suffix?: string): string {
 
 function dispatchMessage(topic: string, body: unknown) {
   const handlers = handlerRegistry.get(topic)
-  if (!handlers) return
-  for (const h of handlers) {
-    if (topic.endsWith('/delivery') && h.onDelivery) {
-      h.onDelivery(body as { messageId: number; recipientUserId: number; conversationId: number })
-    } else if (topic.endsWith('/read') && h.onRead) {
-      h.onRead(body as { messageId: number; recipientUserId: number; conversationId: number })
-    } else if (h.onMessage) {
-      h.onMessage(body as MessageItem)
+  if (handlers) {
+    for (const h of handlers) {
+      if (topic.endsWith('/delivery') && h.onDelivery) {
+        h.onDelivery(body as { messageId: number; recipientUserId: number; conversationId: number })
+      } else if (topic.endsWith('/read') && h.onRead) {
+        h.onRead(body as { messageId: number; recipientUserId: number; conversationId: number })
+      } else if (h.onMessage) {
+        h.onMessage(body as MessageItem)
+      }
+    }
+  }
+  const presenceHandlers = presenceHandlerRegistry.get(topic)
+  if (presenceHandlers) {
+    for (const h of presenceHandlers) {
+      h(body as { userId: number; online: boolean })
     }
   }
 }
@@ -55,8 +63,11 @@ function ensureTopicSubscribed(topic: string): void {
 
 function cleanupTopicIfEmpty(topic: string): void {
   const handlers = handlerRegistry.get(topic)
-  if (!handlers || handlers.size === 0) {
+  const presenceHandlers = presenceHandlerRegistry.get(topic)
+  const hasHandlers = (handlers && handlers.size > 0) || (presenceHandlers && presenceHandlers.size > 0)
+  if (!hasHandlers) {
     handlerRegistry.delete(topic)
+    presenceHandlerRegistry.delete(topic)
     const sub = topicSubscriptions.get(topic)
     if (sub) {
       sub.unsubscribe()
@@ -90,6 +101,9 @@ function ensureConnected(): void {
       for (const topic of handlerRegistry.keys()) {
         ensureTopicSubscribed(topic)
       }
+      for (const topic of presenceHandlerRegistry.keys()) {
+        ensureTopicSubscribed(topic)
+      }
     },
     onStompError: (frame: IFrame) => {
       console.error('Broker reported error:', frame.headers.message)
@@ -108,7 +122,7 @@ function scheduleDisconnect(): void {
     clearTimeout(disconnectTimer)
   }
   disconnectTimer = setTimeout(() => {
-    if (handlerRegistry.size === 0) {
+    if (handlerRegistry.size === 0 && presenceHandlerRegistry.size === 0) {
       for (const sub of topicSubscriptions.values()) {
         sub.unsubscribe()
       }
@@ -125,6 +139,8 @@ export function getConnectionState(): 'CONNECTED' | 'CONNECTING' | 'DISCONNECTED
   if (client.active) return 'CONNECTING'
   return 'DISCONNECTED'
 }
+
+export type PresenceHandler = (event: { userId: number; online: boolean }) => void
 
 export function subscribeToConversation(
   conversationId: number,
@@ -151,6 +167,26 @@ export function subscribeToConversation(
       handlerRegistry.get(topic)?.delete(handlers)
       cleanupTopicIfEmpty(topic)
     }
+    scheduleDisconnect()
+  }
+}
+
+export function subscribeToUserPresence(
+  userId: number,
+  handler: PresenceHandler
+): () => void {
+  ensureConnected()
+
+  const topic = `/topic/presence/${userId}`
+  if (!presenceHandlerRegistry.has(topic)) {
+    presenceHandlerRegistry.set(topic, new Set())
+  }
+  presenceHandlerRegistry.get(topic)!.add(handler)
+  ensureTopicSubscribed(topic)
+
+  return () => {
+    presenceHandlerRegistry.get(topic)?.delete(handler)
+    cleanupTopicIfEmpty(topic)
     scheduleDisconnect()
   }
 }

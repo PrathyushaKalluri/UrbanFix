@@ -20,6 +20,7 @@ import com.example.backend.messaging.dto.SendMessageRequest;
 import com.example.backend.messaging.service.ConversationService;
 import com.example.backend.messaging.service.MessageAuthorizationService;
 import com.example.backend.messaging.service.MessageService;
+import com.example.backend.messaging.service.PresenceService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Instant;
 import java.util.List;
@@ -59,6 +60,9 @@ class MessageControllerTest {
   @MockitoBean
   private CustomUserDetailsService customUserDetailsService;
 
+  @MockitoBean
+  private PresenceService presenceService;
+
   private UserAccount mockUser() {
     UserAccount user = new UserAccount("User", "user@test.com", "pass", UserRole.USER);
     try {
@@ -71,7 +75,7 @@ class MessageControllerTest {
 
   @Test
   void getHistory_shouldReturnMessages_whenAuthorized() throws Exception {
-    when(messageService.getHistory(1L))
+    when(messageService.getHistory(1L, 1L))
         .thenReturn(List.of(new MessageResponse(1L, 1L, 1L, "User", "Hello",
             MessageType.TEXT, MessageDeliveryState.READ, "c1",
             Instant.now(), Instant.now(), Instant.now())));

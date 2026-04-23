@@ -13,7 +13,6 @@ import {
   ShieldCheck,
   Star,
   UserRound,
-  Zap,
 } from 'lucide-react'
 import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
@@ -29,6 +28,8 @@ import {
   GlassCard,
   SectionLabel,
 } from '../../components/design-system'
+import { subscribeToUserPresence } from '../../services/webSocketService'
+import { fetchUserPresence } from '../../services/messagingApi'
 
 const expertNavItems = [
   { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
@@ -88,6 +89,25 @@ export function ExpertMessagesPage({ session }: ExpertMessagesPageProps) {
     () => conversations.find((c) => c.id === conversationId) ?? null,
     [conversations, conversationId]
   )
+
+  const [otherUserOnline, setOtherUserOnline] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    if (!selectedConversation?.otherParticipantUserId) return
+    const otherUserId = selectedConversation.otherParticipantUserId
+
+    // fetch initial presence
+    fetchUserPresence(otherUserId)
+      .then((data) => setOtherUserOnline(data.online))
+      .catch(() => setOtherUserOnline(null))
+
+    // subscribe to real-time presence updates
+    const unsubscribe = subscribeToUserPresence(otherUserId, (event) => {
+      setOtherUserOnline(event.online)
+    })
+
+    return unsubscribe
+  }, [selectedConversation?.otherParticipantUserId])
 
   useEffect(() => {
     setAcceptingJobs(profile.available)
@@ -259,8 +279,20 @@ export function ExpertMessagesPage({ session }: ExpertMessagesPageProps) {
                   </p>
                 </div>
                 <div className="flex items-center gap-2 font-mono text-[11px] text-zinc-500 uppercase">
-                  <Zap className="h-4 w-4 text-blue-500" />
-                  Live stream
+                  <span
+                    className={`inline-block h-2.5 w-2.5 rounded-full ${
+                      otherUserOnline === true
+                        ? 'bg-emerald-500'
+                        : otherUserOnline === false
+                          ? 'bg-zinc-300'
+                          : 'bg-zinc-200'
+                    }`}
+                  />
+                  {otherUserOnline === true
+                    ? 'Active'
+                    : otherUserOnline === false
+                      ? 'Offline'
+                      : 'Connecting…'}
                 </div>
               </div>
             </div>

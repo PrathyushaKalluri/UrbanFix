@@ -6,6 +6,7 @@ import com.example.backend.messaging.dto.MessageResponse;
 import com.example.backend.messaging.dto.SendMessageRequest;
 import com.example.backend.messaging.service.MessageAuthorizationService;
 import com.example.backend.messaging.service.MessageService;
+import com.example.backend.messaging.service.PresenceService;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
@@ -24,12 +25,15 @@ public class MessageController {
 
   private final MessageService messageService;
   private final MessageAuthorizationService messageAuthorizationService;
+  private final PresenceService presenceService;
 
   public MessageController(
       MessageService messageService,
-      MessageAuthorizationService messageAuthorizationService) {
+      MessageAuthorizationService messageAuthorizationService,
+      PresenceService presenceService) {
     this.messageService = messageService;
     this.messageAuthorizationService = messageAuthorizationService;
+    this.presenceService = presenceService;
   }
 
   @GetMapping("/messages")
@@ -40,6 +44,7 @@ public class MessageController {
     UserAccount user = (UserAccount) authentication.getPrincipal();
     messageAuthorizationService.requireParticipant(conversationId, user.getId());
 
+    presenceService.refreshHeartbeat(user.getId());
     List<MessageResponse> history = messageService.getHistory(conversationId, user.getId());
     return ResponseEntity.ok(history);
   }
@@ -58,6 +63,7 @@ public class MessageController {
       return ResponseEntity.badRequest().build();
     }
 
+    presenceService.refreshHeartbeat(user.getId());
     MessageResponse response = messageService.sendMessage(user, request);
     return ResponseEntity.ok(response);
   }
@@ -75,6 +81,7 @@ public class MessageController {
       return ResponseEntity.badRequest().build();
     }
 
+    presenceService.refreshHeartbeat(user.getId());
     messageService.markConversationRead(conversationId, user.getId(), request.lastReadMessageId());
     return ResponseEntity.ok(Map.of("status", "read"));
   }

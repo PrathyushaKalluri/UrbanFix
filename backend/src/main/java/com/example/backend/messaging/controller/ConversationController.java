@@ -6,6 +6,7 @@ import com.example.backend.messaging.dto.CreateConversationRequest;
 import com.example.backend.messaging.entity.Conversation;
 import com.example.backend.messaging.service.ConversationService;
 import com.example.backend.messaging.service.MessageAuthorizationService;
+import com.example.backend.messaging.service.PresenceService;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
@@ -25,12 +26,15 @@ public class ConversationController {
 
   private final ConversationService conversationService;
   private final MessageAuthorizationService messageAuthorizationService;
+  private final PresenceService presenceService;
 
   public ConversationController(
       ConversationService conversationService,
-      MessageAuthorizationService messageAuthorizationService) {
+      MessageAuthorizationService messageAuthorizationService,
+      PresenceService presenceService) {
     this.conversationService = conversationService;
     this.messageAuthorizationService = messageAuthorizationService;
+    this.presenceService = presenceService;
   }
 
   @GetMapping("/{conversationId}")
@@ -40,6 +44,7 @@ public class ConversationController {
 
     UserAccount user = (UserAccount) authentication.getPrincipal();
     messageAuthorizationService.requireParticipant(conversationId, user.getId());
+    presenceService.refreshHeartbeat(user.getId());
 
     return conversationService.findById(conversationId)
         .map(ResponseEntity::ok)
@@ -67,6 +72,7 @@ public class ConversationController {
       Authentication authentication) {
 
     UserAccount user = (UserAccount) authentication.getPrincipal();
+    presenceService.refreshHeartbeat(user.getId());
     List<ConversationSummaryResponse> conversations = conversationService.listConversationsForUser(user.getId());
     return ResponseEntity.ok(conversations);
   }
