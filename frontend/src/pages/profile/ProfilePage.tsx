@@ -162,17 +162,17 @@ export function ProfilePage({ session }: ProfilePageProps) {
         <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(320px,0.9fr)]">
           <GlassCard className="p-6 md:p-8">
             <SectionLabel>Profile</SectionLabel>
-            <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div>
+            <div className="mt-3 flex flex-col gap-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
                 <h1 className="text-3xl font-bold tracking-tight">Edit your details</h1>
-                <p className="mt-2 max-w-2xl text-sm text-zinc-500">
+                <div className="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-200/70 bg-emerald-50/70 px-4 py-2 text-sm font-medium text-emerald-700">
+                  <CheckCircle2 className="h-4 w-4" />
+                  Authenticated
+                </div>
+              </div>
+              <p className="max-w-2xl text-sm text-zinc-500">
                   Keep your profile current so the app can route work and conversations accurately.
                 </p>
-              </div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200/70 bg-emerald-50/70 px-4 py-2 text-sm font-medium text-emerald-700">
-                <CheckCircle2 className="h-4 w-4" />
-                Authenticated
-              </div>
             </div>
 
             <form className="mt-8 space-y-8" onSubmit={handleSubmit}>
@@ -255,18 +255,25 @@ export function ProfilePage({ session }: ProfilePageProps) {
                         searchPlaceholder="Search area"
                       />
                     </div>
-                    <label className="flex items-center gap-3 rounded-2xl border border-zinc-200/80 bg-white/85 px-4 py-4 shadow-sm md:mt-7">
-                      <input
-                        type="checkbox"
-                        checked={form.available}
-                        onChange={(event) => updateField('available', event.target.checked)}
-                        className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span>
-                        <span className="block text-sm font-medium text-zinc-800">Available for jobs</span>
-                        <span className="block text-xs text-zinc-500">Show your availability to matching requests.</span>
-                      </span>
-                    </label>
+                    <div className="space-y-2">
+                      <Label className="px-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
+                        Available for jobs
+                      </Label>
+                      <div className="flex h-12 items-center justify-between rounded-xl border border-zinc-200/80 bg-white/85 px-4 shadow-sm">
+                        <label className="flex items-center gap-3">
+                          <input
+                            type="checkbox"
+                            checked={form.available}
+                            onChange={(event) => updateField('available', event.target.checked)}
+                            className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
+                          />
+                        </label>
+                        <span className={`text-sm font-medium ${form.available ? 'text-zinc-800' : 'text-zinc-400'}`}>
+                          {form.available ? 'Available' : 'Unavailable'}
+                        </span>
+                      </div>
+                      <p className="px-1 text-xs text-zinc-500">Show your availability to matching requests.</p>
+                    </div>
                   </div>
                 </section>
               ) : null}
