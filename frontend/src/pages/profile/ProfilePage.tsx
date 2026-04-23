@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Navigate } from 'react-router-dom'
+import { LayoutDashboard, MessageSquare, Settings } from 'lucide-react'
 import { GlassCard, SectionLabel, CollapsibleSidebar } from '../../components/design-system'
 import type { AuthSession } from '../../types/auth'
 
@@ -30,12 +31,21 @@ export function ProfilePage({ session }: ProfilePageProps) {
     return <Navigate to="/login" replace />
   }
 
+  const isExpert = session.profile.role === 'EXPERT'
+
+  const expertNavItems = [
+    { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
+    { label: 'Messages', icon: MessageSquare, href: '/messages' },
+    { label: 'Settings', icon: Settings, href: '/profile' },
+  ]
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#fafafa] text-zinc-900">
       <CollapsibleSidebar
         userName={session.profile.fullName}
-        userRole={session.profile.role === 'EXPERT' ? 'Specialist' : 'Resident'}
+        userRole={isExpert ? 'Specialist' : 'Resident'}
         onLogout={session.logout}
+        items={isExpert ? expertNavItems : undefined}
       />
 
       <main className="relative z-10 min-h-screen px-4 py-6 md:ml-[240px] md:px-8 md:py-8">
