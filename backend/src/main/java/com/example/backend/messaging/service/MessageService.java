@@ -24,18 +24,21 @@ public class MessageService {
   private final ConversationParticipantRepository participantRepository;
   private final ConversationRepository conversationRepository;
   private final MessageMapper messageMapper;
+  private final com.example.backend.messaging.websocket.MessagingEventPublisher eventPublisher;
 
   public MessageService(
       MessageRepository messageRepository,
       MessageReadReceiptRepository readReceiptRepository,
       ConversationParticipantRepository participantRepository,
       ConversationRepository conversationRepository,
-      MessageMapper messageMapper) {
+      MessageMapper messageMapper,
+      com.example.backend.messaging.websocket.MessagingEventPublisher eventPublisher) {
     this.messageRepository = messageRepository;
     this.readReceiptRepository = readReceiptRepository;
     this.participantRepository = participantRepository;
     this.conversationRepository = conversationRepository;
     this.messageMapper = messageMapper;
+    this.eventPublisher = eventPublisher;
   }
 
   @Transactional
@@ -59,7 +62,9 @@ public class MessageService {
     conversation.setUpdatedAt(saved.getCreatedAt());
     conversationRepository.save(conversation);
 
-    return messageMapper.toResponse(saved, sender.getFullName());
+    MessageResponse response = messageMapper.toResponse(saved, sender.getFullName());
+    eventPublisher.publishMessage(request.conversationId(), response);
+    return response;
   }
 
   @Transactional(readOnly = true)
@@ -77,6 +82,11 @@ public class MessageService {
           if (receipt.getDeliveredAt() == null) {
             receipt.setDeliveredAt(Instant.now());
             readReceiptRepository.save(receipt);
+            Long conversationId = receipt.getMessage().getConversation().getId();
+            eventPublisher.publishDelivery(
+                conversationId,
+                new com.example.backend.messaging.dto.SocketDeliveryEvent(
+                    messageId, recipientUserId, conversationId));
           }
         });
   }
@@ -86,11 +96,23 @@ public class MessageService {
     readReceiptRepository.findByMessageIdAndRecipientUserId(messageId, recipientUserId)
         .ifPresent(receipt -> {
           Instant now = Instant.now();
+          boolean wasUpdated = false;
           if (receipt.getDeliveredAt() == null) {
             receipt.setDeliveredAt(now);
+            wasUpdated = true;
           }
-          receipt.setReadAt(now);
-          readReceiptRepository.save(receipt);
+          if (receipt.getReadAt() == null) {
+            receipt.setReadAt(now);
+            wasUpdated = true;
+          }
+          if (wasUpdated) {
+            readReceiptRepository.save(receipt);
+            Long conversationId = receipt.getMessage().getConversation().getId();
+            eventPublisher.publishRead(
+                conversationId,
+                new com.example.backend.messaging.dto.SocketReadEvent(
+                    messageId, recipientUserId, conversationId));
+          }
         });
   }
 

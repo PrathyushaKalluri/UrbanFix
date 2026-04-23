@@ -1,12 +1,22 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { MessageItem } from '../types/messaging'
 import { fetchMessages, markConversationRead, sendMessage } from '../services/messagingApi'
+import {
+  getConnectionState,
+  subscribeToConversation,
+} from '../services/webSocketService'
 
-export function useMessages(conversationId: number | undefined, currentUserId: number | undefined, pollIntervalMs = 3000) {
+export function useMessages(
+  conversationId: number | undefined,
+  currentUserId: number | undefined,
+  pollIntervalMs = 3000
+) {
   const [messages, setMessages] = useState<MessageItem[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [sending, setSending] = useState(false)
+  const [wsConnected, setWsConnected] = useState(false)
+  const tokenRef = useRef<string>(localStorage.getItem('authToken') ?? '')
 
   const load = useCallback(async () => {
     if (!conversationId) {
@@ -17,17 +27,18 @@ export function useMessages(conversationId: number | undefined, currentUserId: n
       setError(null)
       const data = await fetchMessages(conversationId)
       setMessages((prev) => {
-        // Merge to avoid flicker: keep existing messages that might not be in the response yet
-        // (e.g. optimistically added), then overwrite with server state
-        const map = new Map<number, MessageItem>()
-        for (const m of prev) {
-          if (m.id > 0) map.set(m.id, m)
-        }
+        const map = new Map<string | number, MessageItem>()
         for (const m of data) {
           map.set(m.id, m)
         }
-        return Array.from(map.values()).sort((a, b) =>
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        for (const m of prev) {
+          if (m.id < 0 && !map.has(m.clientMessageId ?? '')) {
+            map.set(m.clientMessageId ?? m.id, m)
+          }
+        }
+        return Array.from(map.values()).sort(
+          (a, b) =>
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
         )
       })
     } catch (err) {
@@ -37,12 +48,80 @@ export function useMessages(conversationId: number | undefined, currentUserId: n
     }
   }, [conversationId])
 
+  // REST bootstrap + polling fallback
   useEffect(() => {
     setLoading(true)
     load()
-    const interval = setInterval(load, pollIntervalMs)
+    const effectivePoll = wsConnected ? Math.max(pollIntervalMs * 3, 10000) : pollIntervalMs
+    const interval = setInterval(load, effectivePoll)
     return () => clearInterval(interval)
-  }, [load, pollIntervalMs])
+  }, [load, pollIntervalMs, wsConnected])
+
+  // WebSocket subscription
+  useEffect(() => {
+    if (!conversationId || !currentUserId) return
+
+    const token = localStorage.getItem('authToken')
+    if (!token) return
+    tokenRef.current = token
+
+    const checkInterval = setInterval(() => {
+      setWsConnected(getConnectionState() === 'CONNECTED')
+    }, 1000)
+
+    const unsubscribe = subscribeToConversation(conversationId, {
+      onMessage: (msg) => {
+        setMessages((prev) => {
+          if (msg.senderUserId === currentUserId && msg.clientMessageId) {
+            const existing = prev.find((m) => m.clientMessageId === msg.clientMessageId)
+            if (existing) {
+              return prev
+                .map((m) => (m.clientMessageId === msg.clientMessageId ? msg : m))
+                .sort(
+                  (a, b) =>
+                    new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+                )
+            }
+          }
+          if (prev.some((m) => m.id === msg.id)) {
+            return prev.map((m) => (m.id === msg.id ? msg : m))
+          }
+          return [...prev, msg].sort(
+            (a, b) =>
+              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          )
+        })
+      },
+      onDelivery: (event) => {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === event.messageId
+              ? { ...m, deliveryState: 'DELIVERED' as const, deliveredAt: new Date().toISOString() }
+              : m
+          )
+        )
+      },
+      onRead: (event) => {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === event.messageId
+              ? {
+                  ...m,
+                  deliveryState: 'READ' as const,
+                  deliveredAt: m.deliveredAt ?? new Date().toISOString(),
+                  readAt: new Date().toISOString(),
+                }
+              : m
+          )
+        )
+      },
+    })
+
+    return () => {
+      clearInterval(checkInterval)
+      unsubscribe()
+    }
+  }, [conversationId, currentUserId])
 
   const postMessage = useCallback(
     async (body: string) => {
@@ -72,7 +151,10 @@ export function useMessages(conversationId: number | undefined, currentUserId: n
         setMessages((prev) =>
           prev
             .map((m) => (m.clientMessageId === clientMessageId ? sent : m))
-            .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+            .sort(
+              (a, b) =>
+                new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+            )
         )
       } catch (err) {
         setMessages((prev) =>
@@ -98,5 +180,5 @@ export function useMessages(conversationId: number | undefined, currentUserId: n
     [conversationId]
   )
 
-  return { messages, loading, error, sending, postMessage, markRead, refresh: load }
+  return { messages, loading, error, sending, wsConnected, postMessage, markRead, refresh: load }
 }
