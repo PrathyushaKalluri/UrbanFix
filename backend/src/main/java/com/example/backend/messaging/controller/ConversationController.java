@@ -7,6 +7,7 @@ import com.example.backend.messaging.entity.Conversation;
 import com.example.backend.messaging.service.ConversationService;
 import com.example.backend.messaging.service.MessageAuthorizationService;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.http.ResponseEntity;
@@ -59,5 +60,14 @@ public class ConversationController {
         "conversationKey", conversation.getConversationKey(),
         "createdAt", conversation.getCreatedAt()
     ));
+  }
+
+  @GetMapping
+  public ResponseEntity<List<ConversationSummaryResponse>> listMyConversations(
+      Authentication authentication) {
+
+    UserAccount user = (UserAccount) authentication.getPrincipal();
+    List<ConversationSummaryResponse> conversations = conversationService.listConversationsForUser(user.getId());
+    return ResponseEntity.ok(conversations);
   }
 }

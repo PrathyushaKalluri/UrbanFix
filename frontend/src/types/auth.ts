@@ -12,6 +12,7 @@ export type SignupRouteConfig = {
 export type SignupRoutes = Record<Role, SignupRouteConfig>
 
 export type AuthProfile = {
+  id: number
   fullName: string
   email: string
   role: Role

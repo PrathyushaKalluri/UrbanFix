@@ -22,7 +22,7 @@ export function AppRoutes() {
       <Route path="/signup/user" element={<UserSignupPage session={session} />} />
       <Route path="/signup/expert" element={<ExpertSignupPage session={session} />} />
       <Route path="/dashboard" element={<DashboardPage session={session} />} />
-      <Route path="/messages/:expertId?" element={session.profile?.role === 'EXPERT' ? <ExpertMessagesPage session={session} /> : <MessagesPage session={session} />} />
+      <Route path="/messages/:conversationId?" element={session.profile?.role === 'EXPERT' ? <ExpertMessagesPage session={session} /> : <MessagesPage session={session} />} />
       <Route path="/profile" element={<ProfilePage session={session} />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

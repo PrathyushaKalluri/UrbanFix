@@ -1,10 +1,14 @@
 package com.example.backend.messaging.service;
 
 import com.example.backend.auth.entity.UserAccount;
+import com.example.backend.auth.repository.UserRepository;
+import com.example.backend.messaging.dto.ConversationSummaryResponse;
 import com.example.backend.messaging.entity.Conversation;
 import com.example.backend.messaging.entity.ConversationParticipant;
+import com.example.backend.messaging.entity.Message;
 import com.example.backend.messaging.repository.ConversationParticipantRepository;
 import com.example.backend.messaging.repository.ConversationRepository;
+import com.example.backend.messaging.repository.MessageRepository;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -16,12 +20,18 @@ public class ConversationService {
 
   private final ConversationRepository conversationRepository;
   private final ConversationParticipantRepository participantRepository;
+  private final MessageRepository messageRepository;
+  private final UserRepository userRepository;
 
   public ConversationService(
       ConversationRepository conversationRepository,
-      ConversationParticipantRepository participantRepository) {
+      ConversationParticipantRepository participantRepository,
+      MessageRepository messageRepository,
+      UserRepository userRepository) {
     this.conversationRepository = conversationRepository;
     this.participantRepository = participantRepository;
+    this.messageRepository = messageRepository;
+    this.userRepository = userRepository;
   }
 
   @Transactional(readOnly = true)
@@ -65,6 +75,48 @@ public class ConversationService {
         .filter(p -> !p.getUserId().equals(currentUserId))
         .map(ConversationParticipant::getUserId)
         .findFirst();
+  }
+
+  @Transactional(readOnly = true)
+  public List<ConversationSummaryResponse> listConversationsForUser(Long userId) {
+    List<ConversationParticipant> participants = participantRepository.findByUserId(userId);
+
+    return participants.stream()
+        .filter(ConversationParticipant::getIsActive)
+        .map(ConversationParticipant::getConversation)
+        .distinct()
+        .sorted(Comparator.comparing(Conversation::getUpdatedAt).reversed())
+        .map(conversation -> toSummary(conversation, userId))
+        .toList();
+  }
+
+  private ConversationSummaryResponse toSummary(Conversation conversation, Long currentUserId) {
+    Long otherUserId = getOtherParticipantUserId(conversation.getId(), currentUserId)
+        .orElse(null);
+
+    String otherParticipantName = userRepository.findById(otherUserId)
+        .map(UserAccount::getFullName)
+        .orElse("Unknown");
+
+    Optional<Message> lastMessage = messageRepository
+        .findTopByConversationIdOrderByCreatedAtDesc(conversation.getId());
+
+    long unreadCount = otherUserId != null
+        ? messageRepository.countUnreadByConversationAndUser(conversation.getId(), currentUserId)
+        : 0L;
+
+    return new ConversationSummaryResponse(
+        conversation.getId(),
+        conversation.getConversationKey(),
+        conversation.getCreatedByUserId(),
+        conversation.getCreatedAt(),
+        conversation.getUpdatedAt(),
+        lastMessage.map(Message::getCreatedAt).orElse(null),
+        otherUserId,
+        otherParticipantName,
+        lastMessage.map(Message::getBody).orElse(null),
+        (int) unreadCount
+    );
   }
 
   private Conversation createConversation(Long userId1, Long userId2, String key) {

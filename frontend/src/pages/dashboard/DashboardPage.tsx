@@ -19,6 +19,7 @@ import { Badge } from '../../components/ui/badge'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Combobox } from '../../components/ui/combobox'
+import { fetchOrCreateConversationWithExpert } from '../../services/messagingApi'
 
 import {
   AmbientBackground,
@@ -356,7 +357,15 @@ export function DashboardPage({ session }: DashboardPageProps) {
                             <Button
                               size="sm"
                               className="h-10 rounded-xl bg-zinc-900 px-5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-zinc-800"
-                              onClick={() => navigate(`/messages/${expert.expertId}`)}
+                              onClick={async () => {
+                                try {
+                                  const result = await fetchOrCreateConversationWithExpert(expert.expertId)
+                                  navigate(`/messages/${result.conversationId}`)
+                                } catch {
+                                  // fallback: navigate without conversation id
+                                  navigate('/messages')
+                                }
+                              }}
                             >
                               <MessageCircle className="mr-1.5 h-4 w-4" />
                               Chat now

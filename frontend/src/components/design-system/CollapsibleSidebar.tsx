@@ -33,7 +33,7 @@ type CollapsibleSidebarProps = {
 
 const defaultNavItems: NavItem[] = [
   { label: "Find Experts", icon: Search, href: "/dashboard" },
-  { label: "Messages", icon: MessageSquare, href: "/messages/1" },
+  { label: "Messages", icon: MessageSquare, href: "/messages" },
   { label: "Settings", icon: Settings, href: "/profile" },
 ];
 
