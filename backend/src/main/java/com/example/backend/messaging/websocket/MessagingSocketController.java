@@ -29,7 +29,7 @@ public class MessagingSocketController {
       @Payload SocketMessagePayload payload,
       SimpMessageHeaderAccessor headerAccessor) {
 
-    UserAccount user = (UserAccount) headerAccessor.getUser();
+    UserAccount user = extractUser(headerAccessor);
     if (user == null) {
       throw new IllegalStateException("Unauthenticated");
     }
@@ -43,5 +43,16 @@ public class MessagingSocketController {
     );
 
     messageService.sendMessage(user, request);
+  }
+
+  private UserAccount extractUser(SimpMessageHeaderAccessor headerAccessor) {
+    Object principal = headerAccessor.getUser();
+    if (principal instanceof org.springframework.security.core.Authentication auth) {
+      Object userPrincipal = auth.getPrincipal();
+      if (userPrincipal instanceof UserAccount user) {
+        return user;
+      }
+    }
+    return null;
   }
 }

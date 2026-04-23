@@ -25,6 +25,8 @@ public class MessageService {
   private final ConversationRepository conversationRepository;
   private final MessageMapper messageMapper;
   private final com.example.backend.messaging.websocket.MessagingEventPublisher eventPublisher;
+  private final PresenceService presenceService;
+  private final OfflineDeliveryService offlineDeliveryService;
 
   public MessageService(
       MessageRepository messageRepository,
@@ -32,13 +34,17 @@ public class MessageService {
       ConversationParticipantRepository participantRepository,
       ConversationRepository conversationRepository,
       MessageMapper messageMapper,
-      com.example.backend.messaging.websocket.MessagingEventPublisher eventPublisher) {
+      com.example.backend.messaging.websocket.MessagingEventPublisher eventPublisher,
+      PresenceService presenceService,
+      OfflineDeliveryService offlineDeliveryService) {
     this.messageRepository = messageRepository;
     this.readReceiptRepository = readReceiptRepository;
     this.participantRepository = participantRepository;
     this.conversationRepository = conversationRepository;
     this.messageMapper = messageMapper;
     this.eventPublisher = eventPublisher;
+    this.presenceService = presenceService;
+    this.offlineDeliveryService = offlineDeliveryService;
   }
 
   @Transactional
@@ -50,12 +56,15 @@ public class MessageService {
     Message saved = messageRepository.save(message);
 
     // Initialize read receipts for all other participants
-    participantRepository.findByConversationId(request.conversationId()).stream()
+    List<Long> otherParticipantIds = participantRepository.findByConversationId(request.conversationId()).stream()
         .filter(p -> !p.getUserId().equals(sender.getId()))
-        .forEach(p -> {
-          MessageReadReceipt receipt = new MessageReadReceipt(saved, p.getUserId());
-          readReceiptRepository.save(receipt);
-        });
+        .map(com.example.backend.messaging.entity.ConversationParticipant::getUserId)
+        .toList();
+
+    for (Long recipientId : otherParticipantIds) {
+      MessageReadReceipt receipt = new MessageReadReceipt(saved, recipientId);
+      readReceiptRepository.save(receipt);
+    }
 
     // Update conversation lastMessageAt
     conversation.setLastMessageAt(saved.getCreatedAt());
@@ -64,6 +73,14 @@ public class MessageService {
 
     MessageResponse response = messageMapper.toResponse(saved, sender.getFullName());
     eventPublisher.publishMessage(request.conversationId(), response);
+
+    // Queue for offline recipients
+    for (Long recipientId : otherParticipantIds) {
+      if (!presenceService.isOnline(recipientId)) {
+        offlineDeliveryService.queueForOfflineUser(saved.getId(), recipientId);
+      }
+    }
+
     return response;
   }
 
