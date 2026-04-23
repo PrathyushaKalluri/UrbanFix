@@ -31,6 +31,11 @@ const areaOptions = HYDERABAD_AREAS.map((area) => ({
 }))
 
 export function ProfilePage({ session }: ProfilePageProps) {
+  const cleanedExpertiseAreas = session.profile.expertiseAreas?.filter((area) => {
+    const normalized = area.trim().toLowerCase()
+    return normalized.length > 0 && normalized !== 'true' && normalized !== 'false'
+  }) ?? []
+
   const [form, setForm] = useState<ProfileFormState>({
     fullName: '',
     email: '',
@@ -58,7 +63,7 @@ export function ProfilePage({ session }: ProfilePageProps) {
       email: session.profile.email ?? '',
       primaryExpertise: session.profile.primaryExpertise ?? '',
       yearsOfExperience: session.profile.yearsOfExperience?.toString() ?? '',
-      expertiseAreas: session.profile.expertiseAreas?.join(', ') ?? '',
+      expertiseAreas: cleanedExpertiseAreas.join(', '),
       available: session.profile.available ?? true,
       serviceArea: session.profile.serviceArea ?? HYDERABAD_AREAS[0]?.name ?? 'Madhapur',
     })
@@ -89,7 +94,7 @@ export function ProfilePage({ session }: ProfilePageProps) {
     (isExpert && (
       form.primaryExpertise !== (session.profile.primaryExpertise ?? '') ||
       form.yearsOfExperience !== (session.profile.yearsOfExperience?.toString() ?? '') ||
-      form.expertiseAreas !== (session.profile.expertiseAreas?.join(', ') ?? '') ||
+      form.expertiseAreas !== cleanedExpertiseAreas.join(', ') ||
       form.available !== (session.profile.available ?? true) ||
       form.serviceArea !== (session.profile.serviceArea ?? HYDERABAD_AREAS[0]?.name ?? 'Madhapur')
     ))
@@ -131,7 +136,7 @@ export function ProfilePage({ session }: ProfilePageProps) {
           ? form.expertiseAreas
               .split(',')
               .map((item) => item.trim())
-              .filter(Boolean)
+              .filter((item) => item.length > 0 && item.toLowerCase() !== 'true' && item.toLowerCase() !== 'false')
           : undefined,
         available: isExpert ? form.available : undefined,
         serviceArea: isExpert ? form.serviceArea : undefined,
@@ -335,7 +340,7 @@ export function ProfilePage({ session }: ProfilePageProps) {
                   <div className="rounded-xl border border-zinc-200/70 bg-zinc-50/60 p-4 sm:col-span-2">
                     <p className="text-xs uppercase tracking-[0.14em] text-zinc-500">Expertise areas</p>
                     <p className="mt-1 font-semibold text-zinc-800">
-                      {session.profile.expertiseAreas?.length ? session.profile.expertiseAreas.join(', ') : 'Not set'}
+                      {cleanedExpertiseAreas.length ? cleanedExpertiseAreas.join(', ') : 'Not set'}
                     </p>
                   </div>
                   <div className="rounded-xl border border-zinc-200/70 bg-zinc-50/60 p-4">

@@ -52,7 +52,10 @@ const normalizeProfile = (data: unknown): AuthProfile => {
     primaryExpertise: typeof profile.primaryExpertise === 'string' ? profile.primaryExpertise : undefined,
     yearsOfExperience: typeof profile.yearsOfExperience === 'number' ? profile.yearsOfExperience : undefined,
     expertiseAreas: Array.isArray(profile.expertiseAreas)
-      ? profile.expertiseAreas.filter((item): item is string => typeof item === 'string')
+      ? profile.expertiseAreas
+          .filter((item): item is string => typeof item === 'string')
+          .map((item) => item.trim())
+          .filter((item) => item.length > 0 && item.toLowerCase() !== 'true' && item.toLowerCase() !== 'false')
       : undefined,
     available: typeof profile.available === 'boolean' ? profile.available : undefined,
     serviceArea: typeof profile.serviceArea === 'string' ? profile.serviceArea : undefined,
