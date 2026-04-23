@@ -359,7 +359,7 @@ export function DashboardPage({ session }: DashboardPageProps) {
                               className="h-10 rounded-xl bg-zinc-900 px-5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-zinc-800"
                               onClick={async () => {
                                 try {
-                                  const result = await fetchOrCreateConversationWithExpert(expert.expertId)
+                                  const result = await fetchOrCreateConversationWithExpert(expert.userId)
                                   navigate(`/messages/${result.conversationId}`)
                                 } catch {
                                   // fallback: navigate without conversation id

@@ -3,8 +3,8 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 
 export default defineConfig(() => {
-    const springApiTarget =
-        process.env.VITE_SPRING_API_PROXY_TARGET ?? "http://localhost:8000";
+        const springApiTarget =
+            process.env.VITE_SPRING_API_PROXY_TARGET ?? "http://localhost:8080";
     const matchingApiTarget =
         process.env.VITE_MATCHING_API_PROXY_TARGET ?? "http://localhost:8000";
 
@@ -32,6 +32,10 @@ export default defineConfig(() => {
                 },
                 "/api/matching": {
                     target: matchingApiTarget,
+                    changeOrigin: true,
+                },
+                "/api/messages": {
+                    target: springApiTarget,
                     changeOrigin: true,
                 },
             },
