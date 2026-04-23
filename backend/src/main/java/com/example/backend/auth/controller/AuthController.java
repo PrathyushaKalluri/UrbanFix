@@ -4,6 +4,7 @@ import com.example.backend.auth.dto.AuthResponse;
 import com.example.backend.auth.dto.ExpertRegisterRequest;
 import com.example.backend.auth.dto.LoginRequest;
 import com.example.backend.auth.dto.RegisterRequest;
+import com.example.backend.auth.dto.UpdateProfileRequest;
 import com.example.backend.auth.dto.UpdateAvailabilityRequest;
 import com.example.backend.auth.entity.UserAccount;
 import com.example.backend.auth.entity.UserRole;
@@ -47,6 +48,14 @@ public class AuthController {
   public Map<String, Object> me(Authentication authentication) {
     UserAccount user = (UserAccount) authentication.getPrincipal();
     return authService.getCurrentUserProfile(user);
+  }
+
+  @PatchMapping("/me")
+  public Map<String, Object> updateProfile(
+      Authentication authentication,
+      @Valid @RequestBody UpdateProfileRequest request) {
+    UserAccount user = (UserAccount) authentication.getPrincipal();
+    return authService.updateCurrentUserProfile(user, request);
   }
 
   @PatchMapping("/me/availability")

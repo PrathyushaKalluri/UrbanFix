@@ -84,8 +84,16 @@ public class ExpertProfile {
     return yearsOfExperience;
   }
 
+  public void setYearsOfExperience(Integer yearsOfExperience) {
+    this.yearsOfExperience = yearsOfExperience;
+  }
+
   public String getPrimaryExpertise() {
     return primaryExpertise;
+  }
+
+  public void setPrimaryExpertise(String primaryExpertise) {
+    this.primaryExpertise = primaryExpertise;
   }
 
   public Boolean getAvailable() {
@@ -104,12 +112,28 @@ public class ExpertProfile {
     return serviceArea;
   }
 
+  public void setServiceArea(String serviceArea) {
+    this.serviceArea = serviceArea;
+  }
+
   public Double getLatitude() {
     return latitude;
   }
 
+  public void setLatitude(Double latitude) {
+    this.latitude = latitude;
+  }
+
   public Double getLongitude() {
     return longitude;
+  }
+
+  public void setLongitude(Double longitude) {
+    this.longitude = longitude;
+  }
+
+  public void setExpertiseAreas(Set<String> expertiseAreas) {
+    this.expertiseAreas = new LinkedHashSet<>(expertiseAreas);
   }
 
   @Override

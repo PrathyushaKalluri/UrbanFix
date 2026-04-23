@@ -12,6 +12,61 @@ type ErrorResponse = {
   message?: string
 }
 
+type ProfileResponse = AuthProfile & {
+  token?: string
+}
+
+const readResponseData = async (response: Response): Promise<unknown> => {
+  const contentType = response.headers.get('content-type') ?? ''
+
+  if (!contentType.includes('application/json')) {
+    const text = await response.text()
+    return text ? { message: text } : null
+  }
+
+  const text = await response.text()
+
+  if (!text) {
+    return null
+  }
+
+  try {
+    return JSON.parse(text) as unknown
+  } catch {
+    return { message: text }
+  }
+}
+
+const normalizeProfile = (data: unknown): AuthProfile => {
+  if (typeof data !== 'object' || data === null) {
+    throw new Error('Invalid profile payload')
+  }
+
+  const profile = data as Record<string, unknown>
+
+  return {
+    id: Number(profile.id ?? 0),
+    fullName: String(profile.fullName ?? ''),
+    email: String(profile.email ?? ''),
+    role: profile.role === 'EXPERT' ? 'EXPERT' : 'USER',
+    primaryExpertise: typeof profile.primaryExpertise === 'string' ? profile.primaryExpertise : undefined,
+    yearsOfExperience: typeof profile.yearsOfExperience === 'number' ? profile.yearsOfExperience : undefined,
+    expertiseAreas: Array.isArray(profile.expertiseAreas)
+      ? profile.expertiseAreas.filter((item): item is string => typeof item === 'string')
+      : undefined,
+    available: typeof profile.available === 'boolean' ? profile.available : undefined,
+    serviceArea: typeof profile.serviceArea === 'string' ? profile.serviceArea : undefined,
+    latitude: typeof profile.latitude === 'number' ? profile.latitude : profile.latitude === null ? null : undefined,
+    longitude: typeof profile.longitude === 'number' ? profile.longitude : profile.longitude === null ? null : undefined,
+    avgRating: typeof profile.avgRating === 'number' ? profile.avgRating : undefined,
+    totalJobs: typeof profile.totalJobs === 'number' ? profile.totalJobs : undefined,
+    acceptanceRate: typeof profile.acceptanceRate === 'number' ? profile.acceptanceRate : undefined,
+    completionRate: typeof profile.completionRate === 'number' ? profile.completionRate : undefined,
+    cancellationRate: typeof profile.cancellationRate === 'number' ? profile.cancellationRate : undefined,
+    avgResponseTimeSec: typeof profile.avgResponseTimeSec === 'number' ? profile.avgResponseTimeSec : undefined,
+  }
+}
+
 export function useAuthSession(): AuthSession {
   const [token, setToken] = useState(() => localStorage.getItem('authToken') ?? '')
   const [profile, setProfile] = useState<AuthProfile | null>(null)
@@ -28,7 +83,8 @@ export function useAuthSession(): AuthSession {
       throw new Error('Session expired')
     }
 
-    return response.json() as Promise<AuthProfile>
+    const data: unknown = await response.json()
+    return normalizeProfile(data)
   }
 
   useEffect(() => {
@@ -77,7 +133,7 @@ export function useAuthSession(): AuthSession {
       body: JSON.stringify(payload),
     })
 
-    const data: unknown = await response.json()
+    const data: unknown = await readResponseData(response)
 
     if (!response.ok) {
       const message =
@@ -91,13 +147,48 @@ export function useAuthSession(): AuthSession {
 
     localStorage.setItem('authToken', authData.token)
     setToken(authData.token)
-    setProfile({
-      fullName: authData.fullName,
-      email: authData.email,
-      role: authData.role,
-    })
+    setProfile(await loadProfile(authData.token))
 
     return authData
+  }
+
+  const updateProfile: AuthSession['updateProfile'] = async (payload) => {
+    if (!token) {
+      throw new Error('Session expired')
+    }
+
+    const response = await fetch('/api/auth/me', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    })
+
+    const data: unknown = await readResponseData(response)
+
+    if (!response.ok) {
+      const message =
+        typeof data === 'object' && data !== null && 'message' in data
+          ? (data as ErrorResponse).message ?? 'Profile update failed'
+          : response.status === 403
+            ? 'Profile update is forbidden. Make sure the Spring Boot backend was restarted after the PATCH endpoint change.'
+            : 'Profile update failed'
+      throw new Error(message)
+    }
+
+    const profileResponse = data as ProfileResponse
+    const nextToken = profileResponse.token ?? token
+
+    if (profileResponse.token) {
+      localStorage.setItem('authToken', profileResponse.token)
+      setToken(profileResponse.token)
+    }
+
+    const nextProfile = await loadProfile(nextToken)
+    setProfile(nextProfile)
+    return nextProfile
   }
 
   const refreshProfile: AuthSession['refreshProfile'] = async () => {
@@ -119,6 +210,7 @@ export function useAuthSession(): AuthSession {
     profile,
     loading,
     submitAuth,
+    updateProfile,
     refreshProfile,
     logout,
   }

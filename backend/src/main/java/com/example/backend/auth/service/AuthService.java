@@ -5,6 +5,7 @@ import com.example.backend.auth.dto.ExpertListingResponse;
 import com.example.backend.auth.dto.ExpertRegisterRequest;
 import com.example.backend.auth.dto.LoginRequest;
 import com.example.backend.auth.dto.RegisterRequest;
+import com.example.backend.auth.dto.UpdateProfileRequest;
 import com.example.backend.auth.entity.ExpertProfile;
 import com.example.backend.auth.entity.UserAccount;
 import com.example.backend.auth.entity.UserRole;
@@ -115,6 +116,7 @@ public class AuthService {
     return buildAuthResponse(user);
   }
 
+  @Transactional(readOnly = true)
   public Map<String, Object> getCurrentUserProfile(UserAccount user) {
     Map<String, Object> response = new LinkedHashMap<>();
     response.put("id", user.getId());
@@ -134,6 +136,53 @@ public class AuthService {
       });
     }
 
+    return response;
+  }
+
+  @Transactional
+  public Map<String, Object> updateCurrentUserProfile(UserAccount user, UpdateProfileRequest request) {
+    UserAccount persistedUser = userRepository.findById(user.getId())
+        .orElseThrow(() -> new IllegalStateException("User not found"));
+
+    String normalizedEmail = request.email().trim().toLowerCase();
+    userRepository.findByEmail(normalizedEmail)
+        .filter(existing -> !existing.getId().equals(persistedUser.getId()))
+        .ifPresent(existing -> {
+          throw new IllegalArgumentException("Email is already registered");
+        });
+
+    persistedUser.setFullName(request.fullName().trim());
+    persistedUser.setEmail(normalizedEmail);
+    userRepository.saveAndFlush(persistedUser);
+
+    if (persistedUser.getRole() == UserRole.EXPERT) {
+      ExpertProfile expertProfile = expertProfileRepository.findByUserId(persistedUser.getId())
+          .orElseThrow(() -> new IllegalStateException("Expert profile not found"));
+
+      String normalizedPrimary = normalizePrimaryExpertise(request.primaryExpertise(), expertProfile.getPrimaryExpertise());
+      expertProfile.setPrimaryExpertise(normalizedPrimary);
+      expertProfile.setYearsOfExperience(normalizeYearsOfExperience(request.yearsOfExperience(), expertProfile.getYearsOfExperience()));
+      expertProfile.setAvailable(request.available() == null ? expertProfile.getAvailable() : request.available());
+
+      if (request.serviceArea() != null && !request.serviceArea().isBlank()) {
+        ResolvedAreaCoordinate resolvedArea = areaCoordinateResolver.resolve(request.serviceArea());
+        expertProfile.setServiceArea(resolvedArea.areaName());
+        expertProfile.setLatitude(resolvedArea.latitude());
+        expertProfile.setLongitude(resolvedArea.longitude());
+      }
+
+      if (request.latitude() != null || request.longitude() != null) {
+        expertProfile.setLatitude(request.latitude() != null ? request.latitude() : expertProfile.getLatitude());
+        expertProfile.setLongitude(request.longitude() != null ? request.longitude() : expertProfile.getLongitude());
+      }
+
+      Set<String> expertiseAreas = normalizeValues(request.expertiseAreas(), normalizedPrimary);
+      expertProfile.setExpertiseAreas(expertiseAreas);
+      expertProfileRepository.saveAndFlush(expertProfile);
+    }
+
+    Map<String, Object> response = getCurrentUserProfile(persistedUser);
+    response.put("token", jwtService.generateToken(persistedUser, Map.of("role", persistedUser.getRole().name())));
     return response;
   }
 
@@ -177,16 +226,16 @@ public class AuthService {
     return new AuthResponse(token, user.getFullName(), user.getEmail(), user.getRole());
   }
 
-  private String normalizePrimaryExpertise(String primaryExpertise) {
+  private String normalizePrimaryExpertise(String primaryExpertise, String fallback) {
     if (primaryExpertise == null || primaryExpertise.isBlank()) {
-      return "General Services";
+      return fallback;
     }
     return primaryExpertise.trim();
   }
 
-  private int normalizeYearsOfExperience(Integer yearsOfExperience) {
+  private int normalizeYearsOfExperience(Integer yearsOfExperience, Integer fallback) {
     if (yearsOfExperience == null) {
-      return 0;
+      return fallback == null ? 0 : fallback;
     }
     return Math.max(0, yearsOfExperience);
   }
@@ -207,4 +256,19 @@ public class AuthService {
 
     return normalized;
   }
+
+  private String normalizePrimaryExpertise(String primaryExpertise) {
+    if (primaryExpertise == null || primaryExpertise.isBlank()) {
+      return "General Services";
+    }
+    return primaryExpertise.trim();
+  }
+
+  private int normalizeYearsOfExperience(Integer yearsOfExperience) {
+    if (yearsOfExperience == null) {
+      return 0;
+    }
+    return Math.max(0, yearsOfExperience);
+  }
+
 }
