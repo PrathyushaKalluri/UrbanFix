@@ -278,22 +278,24 @@ export function ExpertMessagesPage({ session }: ExpertMessagesPageProps) {
                       : 'Open a conversation to view the stream and reply inline.'}
                   </p>
                 </div>
-                <div className="flex items-center gap-2 font-mono text-[11px] text-zinc-500 uppercase">
-                  <span
-                    className={`inline-block h-2.5 w-2.5 rounded-full ${
-                      otherUserOnline === true
-                        ? 'bg-emerald-500'
-                        : otherUserOnline === false
-                          ? 'bg-zinc-300'
-                          : 'bg-zinc-200'
-                    }`}
-                  />
-                  {otherUserOnline === true
-                    ? 'Active'
-                    : otherUserOnline === false
-                      ? 'Offline'
-                      : 'Connecting…'}
-                </div>
+                {conversationId && (
+                  <div className="flex items-center gap-2 font-mono text-[11px] text-zinc-500 uppercase">
+                    <span
+                      className={`inline-block h-2.5 w-2.5 rounded-full ${
+                        otherUserOnline === true
+                          ? 'bg-emerald-500'
+                          : otherUserOnline === false
+                            ? 'bg-zinc-300'
+                            : 'bg-zinc-200'
+                      }`}
+                    />
+                    {otherUserOnline === true
+                      ? 'Active'
+                      : otherUserOnline === false
+                        ? 'Offline'
+                        : 'Connecting…'}
+                  </div>
+                )}
               </div>
             </div>
 
