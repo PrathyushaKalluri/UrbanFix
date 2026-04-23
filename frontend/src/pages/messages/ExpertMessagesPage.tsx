@@ -75,7 +75,7 @@ export function ExpertMessagesPage({ session }: ExpertMessagesPageProps) {
   const [availabilityError, setAvailabilityError] = useState('')
 
   const { conversations, loading: convLoading, error: convError } = useConversations()
-  const { messages, loading: msgLoading, error: msgError, sending, postMessage } = useMessages(
+  const { messages, loading: msgLoading, error: msgError, sending, postMessage, markRead } = useMessages(
     conversationId,
     currentUserId
   )
@@ -97,6 +97,15 @@ export function ExpertMessagesPage({ session }: ExpertMessagesPageProps) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
     }
   }, [messages])
+
+  useEffect(() => {
+    if (conversationId && messages.length > 0) {
+      const lastMessage = messages[messages.length - 1]
+      if (lastMessage.senderUserId !== currentUserId) {
+        markRead(lastMessage.id).catch(() => {})
+      }
+    }
+  }, [conversationId, messages, currentUserId, markRead])
 
   if (session.loading) {
     return (

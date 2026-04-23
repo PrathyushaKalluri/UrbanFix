@@ -84,9 +84,17 @@ public class MessageService {
     return response;
   }
 
-  @Transactional(readOnly = true)
-  public List<MessageResponse> getHistory(Long conversationId) {
+  @Transactional
+  public List<MessageResponse> getHistory(Long conversationId, Long currentUserId) {
     List<Message> messages = messageRepository.findByConversationIdOrderByCreatedAtAscIdAsc(conversationId);
+
+    // Auto-mark messages from others as delivered for the current user
+    for (Message message : messages) {
+      if (!message.getSenderUserId().equals(currentUserId)) {
+        markDelivered(message.getId(), currentUserId);
+      }
+    }
+
     return messages.stream()
         .map(m -> messageMapper.toResponse(m, null))
         .toList();

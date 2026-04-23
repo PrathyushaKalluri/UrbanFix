@@ -38,6 +38,11 @@ export default defineConfig(() => {
                     target: springApiTarget,
                     changeOrigin: true,
                 },
+                "/ws": {
+                    target: springApiTarget,
+                    changeOrigin: true,
+                    ws: true,
+                },
             },
         },
     };

@@ -40,7 +40,7 @@ public class MessageController {
     UserAccount user = (UserAccount) authentication.getPrincipal();
     messageAuthorizationService.requireParticipant(conversationId, user.getId());
 
-    List<MessageResponse> history = messageService.getHistory(conversationId);
+    List<MessageResponse> history = messageService.getHistory(conversationId, user.getId());
     return ResponseEntity.ok(history);
   }
 
