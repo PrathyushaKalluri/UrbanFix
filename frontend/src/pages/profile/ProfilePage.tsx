@@ -300,19 +300,17 @@ export function ProfilePage({ session }: ProfilePageProps) {
                   <p className="mt-1 font-semibold text-zinc-800">{isExpert ? 'Specialist' : 'Resident'}</p>
                 </div>
                 <div className="rounded-xl border border-zinc-200/70 bg-zinc-50/60 p-4">
-                  <p className="text-xs uppercase tracking-[0.14em] text-zinc-500">Service status</p>
-                  <p className="mt-1 font-semibold text-zinc-800">
-                    {isExpert
-                      ? session.profile.available
-                        ? 'Available'
-                        : 'Unavailable'
-                      : 'Not applicable'}
-                  </p>
-                </div>
-                <div className="rounded-xl border border-zinc-200/70 bg-zinc-50/60 p-4">
                   <p className="text-xs uppercase tracking-[0.14em] text-zinc-500">Email</p>
                   <p className="mt-1 break-words font-semibold text-zinc-800">{session.profile.email}</p>
                 </div>
+                {isExpert ? (
+                  <div className="rounded-xl border border-zinc-200/70 bg-zinc-50/60 p-4">
+                    <p className="text-xs uppercase tracking-[0.14em] text-zinc-500">Service status</p>
+                    <p className="mt-1 font-semibold text-zinc-800">
+                      {session.profile.available ? 'Available' : 'Unavailable'}
+                    </p>
+                  </div>
+                ) : null}
                 {isExpert ? (
                   <div className="rounded-xl border border-zinc-200/70 bg-zinc-50/60 p-4">
                     <p className="text-xs uppercase tracking-[0.14em] text-zinc-500">Location</p>
